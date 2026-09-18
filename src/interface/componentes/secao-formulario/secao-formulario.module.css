@@ -1,0 +1,34 @@
+.secao {
+  margin: 0 0 var(--espaco-5);
+  padding: var(--espaco-4);
+  border: var(--largura-borda) solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.legenda,
+.resumo {
+  font-size: var(--texto-md);
+  font-weight: var(--peso-forte);
+  padding: 0 var(--espaco-2);
+}
+
+.resumo {
+  cursor: pointer;
+  padding: 0;
+}
+
+.explicacao {
+  display: block;
+  margin-top: var(--espaco-1);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-secundario);
+}
+
+.campos {
+  display: grid;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-4);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}

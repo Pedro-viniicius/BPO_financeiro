@@ -1,0 +1,33 @@
+# Dependencias
+node_modules/
+
+# Saida de build do Next.js
+.next/
+out/
+
+# Variaveis de ambiente com segredos reais (NUNCA versionar)
+.env
+.env.local
+.env.*.local
+.env.producao
+.env.homologacao
+
+# Backups locais do banco
+backups/
+
+# Relatorios gerados
+relatorios/
+docs/arquitetura/grafo-dependencias.dot
+
+# Sistema operacional / editores
+.DS_Store
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Cobertura de testes
+coverage/
+
+# Cache incremental do TypeScript
+tsconfig.tsbuildinfo

@@ -1,0 +1,169 @@
+/*
+ * Tokens de design — a unica fonte de valores visuais do produto.
+ *
+ * Regra: nenhum componente escreve cor, espaco, raio, sombra ou tamanho de
+ * fonte literal. Tudo vem daqui. Ver docs/ux/design-tokens.md.
+ *
+ * Nomes em portugues, sem acento (mesma regra dos Gates 2 e 3).
+ */
+
+:root {
+  /* ---------------------------------------------------------------- *
+   * 1. Espacamento — escala de 4px                                    *
+   * ---------------------------------------------------------------- */
+  --espaco-0: 0;
+  --espaco-1: 0.25rem;  /*  4px */
+  --espaco-2: 0.5rem;   /*  8px */
+  --espaco-3: 0.75rem;  /* 12px */
+  --espaco-4: 1rem;     /* 16px */
+  --espaco-5: 1.5rem;   /* 24px */
+  --espaco-6: 2rem;     /* 32px */
+  --espaco-7: 3rem;     /* 48px */
+  --espaco-8: 4rem;     /* 64px */
+
+  /* ---------------------------------------------------------------- *
+   * 2. Tipografia                                                     *
+   * ---------------------------------------------------------------- */
+  --fonte-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --texto-xs: 0.6875rem;  /* 11px — rotulo de tabela, legenda */
+  --texto-sm: 0.8125rem;  /* 13px — texto de apoio */
+  --texto-base: 0.875rem; /* 14px — corpo (interface densa) */
+  --texto-md: 1rem;       /* 16px — corpo em leitura longa e campos */
+  --texto-lg: 1.125rem;   /* 18px — titulo de secao */
+  --texto-xl: 1.375rem;   /* 22px — titulo de pagina */
+  --texto-2xl: 1.75rem;   /* 28px — valor de destaque */
+  --texto-3xl: 2.5rem;    /* 40px — valor principal do Inicio */
+
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-forte: 600;
+
+  --altura-linha-apertada: 1.25;
+  --altura-linha-base: 1.5;
+  --altura-linha-solta: 1.65;
+
+  /* ---------------------------------------------------------------- *
+   * 3. Raio e borda                                                   *
+   * ---------------------------------------------------------------- */
+  --raio-1: 4px;
+  --raio-2: 6px;
+  --raio-3: 10px;
+  --raio-completo: 999px;
+
+  --largura-borda: 1px;
+  --largura-borda-forte: 2px;
+
+  /* ---------------------------------------------------------------- *
+   * 4. Superficies e texto                                            *
+   * ---------------------------------------------------------------- */
+  --superficie-fundo: #f4f6f8;
+  --superficie-cartao: #ffffff;
+  --superficie-elevada: #ffffff;
+  --superficie-afundada: #eef1f4;
+  --superficie-barra: #ffffff;
+  --superficie-realce: #f0f4f9;
+
+  --cor-texto-primario: #16191d;
+  --cor-texto-secundario: #565e6b;
+  --cor-texto-fraco: #656c79;
+  --cor-texto-invertido: #ffffff;
+
+  --cor-borda: #dce1e7;
+  --cor-borda-forte: #757d89;
+
+  /* ---------------------------------------------------------------- *
+   * 5. Cores semanticas                                               *
+   *    Cada familia tem: -forte (texto/icone), -suave (fundo),        *
+   *    -borda. Cor NUNCA e o unico portador de significado.           *
+   * ---------------------------------------------------------------- */
+  --cor-marca-forte: #17548c;
+  --cor-marca-suave: #e8f0f8;
+  --cor-marca-borda: #a9c6e0;
+
+  --cor-neutro-forte: #4b5563;
+  --cor-neutro-suave: #eef1f4;
+  --cor-neutro-borda: #d3d9e0;
+
+  --cor-informacao-forte: #17548c;
+  --cor-informacao-suave: #e8f0f8;
+  --cor-informacao-borda: #a9c6e0;
+
+  --cor-sucesso-forte: #1a6647;
+  --cor-sucesso-suave: #e4f2eb;
+  --cor-sucesso-borda: #a3cdb9;
+
+  --cor-atencao-forte: #7a5200;
+  --cor-atencao-suave: #fcf2dc;
+  --cor-atencao-borda: #ddc188;
+
+  --cor-perigo-forte: #9c241d;
+  --cor-perigo-suave: #fbe9e7;
+  --cor-perigo-borda: #e2aba6;
+
+  /* Valores financeiros: o sinal e o rotulo vem sempre junto da cor. */
+  --cor-valor-positivo: #1a6647;
+  --cor-valor-negativo: #9c241d;
+  --cor-valor-neutro: #16191d;
+  --cor-valor-previsto: #565e6b;
+
+  /* ---------------------------------------------------------------- *
+   * 6. Estados                                                        *
+   * ---------------------------------------------------------------- */
+  --opacidade-desabilitado: 0.55;
+  --opacidade-carregando: 0.6;
+  --cor-foco: #17548c;
+  --anel-foco: 0 0 0 3px rgba(23, 84, 140, 0.35);
+  --cor-sobreposicao: rgba(22, 25, 29, 0.45);
+  --cor-selecao: #e8f0f8;
+
+  /* ---------------------------------------------------------------- *
+   * 7. Sombras                                                        *
+   * ---------------------------------------------------------------- */
+  --sombra-1: 0 1px 2px rgba(22, 25, 29, 0.06);
+  --sombra-2: 0 2px 8px rgba(22, 25, 29, 0.09);
+  --sombra-3: 0 12px 32px rgba(22, 25, 29, 0.16);
+
+  /* ---------------------------------------------------------------- *
+   * 8. Movimento                                                      *
+   * ---------------------------------------------------------------- */
+  --transicao-rapida: 120ms ease;
+  --transicao-base: 200ms ease;
+
+  /* ---------------------------------------------------------------- *
+   * 9. Camadas (z-index)                                              *
+   * ---------------------------------------------------------------- */
+  --camada-conteudo: 1;
+  --camada-barra: 100;
+  --camada-gaveta: 200;
+  --camada-dialogo: 300;
+  --camada-aviso: 400;
+
+  /* ---------------------------------------------------------------- *
+   * 10. Layout da casca                                               *
+   * ---------------------------------------------------------------- */
+  --largura-barra-lateral: 240px;
+  --largura-barra-lateral-compacta: 64px;
+  --altura-cabecalho: 56px;
+  --largura-gaveta: 480px;
+  --largura-maxima-conteudo: 1440px;
+  --alvo-toque-minimo: 44px;
+}
+
+/*
+ * Pontos de quebra (documentados aqui, usados literalmente nas media queries
+ * porque custom properties nao funcionam dentro de @media):
+ *   celular   ate 767px
+ *   tablet    768px a 1023px
+ *   desktop   1024px a 1439px
+ *   largo     1440px ou mais
+ * Os mesmos valores estao em src/interface/tokens/pontos-de-quebra.ts.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transicao-rapida: 0ms;
+    --transicao-base: 0ms;
+  }
+}

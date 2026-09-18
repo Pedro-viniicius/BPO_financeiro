@@ -1,0 +1,33 @@
+.cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--espaco-5);
+}
+
+.identificacao { min-width: 0; }
+
+.titulo {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-forte);
+}
+
+.empresa {
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-secundario);
+}
+
+.descricao {
+  margin-top: var(--espaco-1);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  flex-wrap: wrap;
+}

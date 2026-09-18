@@ -1,0 +1,75 @@
+.gaveta {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(var(--largura-gaveta), 100vw);
+  max-width: 100vw;
+  max-height: 100vh;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-left: var(--largura-borda) solid var(--cor-borda);
+  background: var(--superficie-elevada);
+  color: var(--cor-texto-primario);
+  box-shadow: var(--sombra-3);
+  display: flex;
+  flex-direction: column;
+}
+
+.gaveta::backdrop {
+  background: var(--cor-sobreposicao);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border-bottom: var(--largura-borda) solid var(--cor-borda);
+}
+
+.titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+}
+
+.fechar {
+  min-width: 32px;
+  min-height: 32px;
+  background: none;
+  border: none;
+  border-radius: var(--raio-2);
+  cursor: pointer;
+  color: var(--cor-texto-secundario);
+}
+
+.fechar:hover {
+  background: var(--superficie-realce);
+}
+
+.corpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--espaco-4);
+}
+
+.rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border-top: var(--largura-borda) solid var(--cor-borda);
+  background: var(--superficie-afundada);
+}
+
+@media (max-width: 767px) {
+  .gaveta {
+    inset: auto 0 0 0;
+    width: 100vw;
+    height: 85vh;
+    border-left: none;
+    border-top: var(--largura-borda) solid var(--cor-borda);
+    border-radius: var(--raio-3) var(--raio-3) 0 0;
+  }
+}

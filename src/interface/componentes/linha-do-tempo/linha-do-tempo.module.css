@@ -1,0 +1,52 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: flex;
+  gap: var(--espaco-3);
+  padding-bottom: var(--espaco-4);
+  position: relative;
+}
+
+.item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: 0;
+  width: 2px;
+  background: var(--cor-borda);
+}
+
+.marca {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: var(--raio-completo);
+  background: var(--superficie-cartao);
+  border: 2px solid var(--cor-borda-forte);
+  position: relative;
+  z-index: var(--camada-conteudo);
+}
+
+.conteudo { min-width: 0; }
+
+.quando {
+  display: block;
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-fraco);
+  font-variant-numeric: tabular-nums;
+}
+
+.descricao {
+  font-size: var(--texto-base);
+}
+
+.detalhe {
+  margin-top: var(--espaco-1);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}

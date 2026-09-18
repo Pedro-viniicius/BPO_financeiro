@@ -1,0 +1,50 @@
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.rotulo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-primario);
+}
+
+.obrigatorio {
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-secundario);
+}
+
+.dica {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-fraco);
+}
+
+.erro {
+  font-size: var(--texto-sm);
+  color: var(--cor-perigo-forte);
+  font-weight: var(--peso-medio);
+}
+
+.aviso {
+  font-size: var(--texto-sm);
+  color: var(--cor-atencao-forte);
+}
+
+.campo :global(input),
+.campo :global(select),
+.campo :global(textarea) {
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-3);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  font-size: var(--texto-md);
+}
+
+.campo :global(input[aria-invalid="true"]),
+.campo :global(select[aria-invalid="true"]),
+.campo :global(textarea[aria-invalid="true"]) {
+  border-color: var(--cor-perigo-forte);
+  border-width: var(--largura-borda-forte);
+}

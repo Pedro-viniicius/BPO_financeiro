@@ -1,0 +1,58 @@
+.moldura {
+  position: relative;
+}
+
+.campo {
+  width: 100%;
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-3);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  font-size: var(--texto-md);
+}
+
+.lista {
+  position: absolute;
+  z-index: var(--camada-gaveta);
+  top: calc(100% + var(--espaco-1));
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--superficie-elevada);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  box-shadow: var(--sombra-2);
+}
+
+.opcao {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-2) var(--espaco-3);
+  cursor: pointer;
+  font-size: var(--texto-base);
+}
+
+.ativa {
+  background: var(--cor-selecao);
+}
+
+.complemento {
+  color: var(--cor-texto-fraco);
+  font-size: var(--texto-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.criar {
+  color: var(--cor-marca-forte);
+  font-weight: var(--peso-medio);
+  border-top: var(--largura-borda) solid var(--cor-borda);
+}
+
+.semResultado {
+  padding: var(--espaco-3);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}

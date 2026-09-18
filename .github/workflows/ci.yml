@@ -1,0 +1,97 @@
+# Integracao continua (CI): roda a cada push e pull request.
+# Cada etapa para o fluxo se falhar. A ordem vai do mais rapido ao mais lento.
+#
+# Um PostgreSQL real e criado para cada execucao (servico abaixo). Os testes
+# de integracao (src/banco-dados/testes/ e *.teste.ts com BANCO_URL_TESTE)
+# rodam com o usuario da APLICACAO, provando restricoes, privilegios,
+# transacoes e concorrencia no banco de verdade. O ambiente e descartado ao fim.
+name: verificacoes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    name: lint, tipos, arquitetura, testes (com PostgreSQL), licencas, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: financeiro
+          POSTGRES_USER: financeiro_admin
+          POSTGRES_PASSWORD: senha-admin-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U financeiro_admin -d financeiro"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      # Usuarios criados por scripts/banco/criar-usuarios.sql (senha padrao do script; apenas na CI).
+      BANCO_URL_ADMIN: postgres://financeiro_admin:senha-admin-ci@localhost:5432/financeiro
+      BANCO_URL_MIGRACAO: postgres://financeiro_migracao:troque-esta-senha@localhost:5432/financeiro
+      BANCO_URL_TESTE: postgres://financeiro_aplicacao:troque-esta-senha@localhost:5432/financeiro
+      BANCO_URL: postgres://financeiro_aplicacao:troque-esta-senha@localhost:5432/financeiro
+      APLICACAO_URL: http://localhost:3000
+      APLICACAO_SEGREDO: segredo-apenas-para-ci-0123456789abcdefghij
+
+    steps:
+      - name: Obter codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias (respeitando o lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Verificar estilo e erros comuns (ESLint)
+        run: pnpm lint
+
+      - name: Verificar tipos (TypeScript)
+        run: pnpm verificar:tipos
+
+      - name: Verificar fronteiras de arquitetura (dependency-cruiser)
+        run: pnpm verificar:arquitetura
+
+      - name: Verificar se as migracoes estao sincronizadas com o esquema
+        run: |
+          pnpm banco:gerar --name verificacao_ci
+          if git status --porcelain src/banco-dados/migracoes | grep -q .; then
+            echo "ERRO: o esquema Drizzle mudou sem migracao versionada. Rode 'pnpm banco:gerar --name <descricao>' e versione o resultado."
+            git status --porcelain src/banco-dados/migracoes
+            exit 1
+          fi
+
+      - name: Criar usuarios do banco com menor privilegio
+        run: psql "$BANCO_URL_ADMIN" -v ON_ERROR_STOP=1 -f scripts/banco/criar-usuarios.sql
+
+      - name: Aplicar migracoes do zero (usuario de migracao)
+        run: pnpm banco:migrar
+
+      - name: Aplicar migracoes de novo (deve ser idempotente: nada pendente)
+        run: pnpm banco:migrar
+
+      - name: Executar testes (unitarios + integracao com PostgreSQL)
+        run: pnpm testar
+
+      - name: Verificar licencas das dependencias
+        run: pnpm verificar:licencas
+
+      - name: Build da aplicacao
+        run: pnpm build

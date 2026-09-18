@@ -1,0 +1,21 @@
+.valor {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  white-space: nowrap;
+  font-weight: var(--peso-medio);
+}
+
+.pequeno { font-size: var(--texto-sm); }
+.normal { font-size: var(--texto-base); }
+.grande { font-size: var(--texto-2xl); font-weight: var(--peso-forte); }
+.destaque {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-forte);
+  line-height: var(--altura-linha-apertada);
+  letter-spacing: -0.02em;
+}
+
+.positivo { color: var(--cor-valor-positivo); }
+.negativo { color: var(--cor-valor-negativo); }
+.neutro { color: var(--cor-valor-neutro); }
+.semCor { color: inherit; }

@@ -1,0 +1,84 @@
+# ============================================================================
+# Modelo B (nuvem do cliente) e Modelo C (servidor local).
+#
+# Servicos:
+#   banco    PostgreSQL 17 com volume persistente
+#   migracao aplica migracoes e encerra (roda antes da aplicacao)
+#   aplicacao Next.js na porta 3000
+#   tarefas  executor de tarefas em segundo plano
+#   backup   copia diaria do banco para ./backups (ver scripts/backup.sh)
+#
+# Uso:
+#   cp .env.exemplo .env   (preencha)
+#   docker compose up -d
+# Um proxy reverso com HTTPS (Caddy, Nginx, Traefik) deve ficar na frente da
+# porta 3000. Ver docs/arquitetura/modelos-deploy.md.
+# ============================================================================
+services:
+  banco:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: financeiro
+      POSTGRES_USER: financeiro_admin
+      POSTGRES_PASSWORD: ${BANCO_SENHA_ADMIN:?defina BANCO_SENHA_ADMIN no .env}
+    volumes:
+      - dados-banco:/var/lib/postgresql/data
+      # Cria os usuarios de aplicacao/migracao/backup na primeira inicializacao.
+      - ./scripts/banco/criar-usuarios.sql:/docker-entrypoint-initdb.d/10-criar-usuarios.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financeiro_admin -d financeiro"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # Nao exponha a porta 5432 publicamente. Para acesso administrativo use tunel SSH.
+
+  migracao:
+    build: .
+    command: ["npx", "tsx", "src/banco-dados/migrar.ts"]
+    env_file: .env
+    depends_on:
+      banco:
+        condition: service_healthy
+    restart: "no"
+
+  aplicacao:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      migracao:
+        condition: service_completed_successfully
+    volumes:
+      - arquivos:/aplicacao/arquivos
+
+  tarefas:
+    build: .
+    command: ["npx", "tsx", "src/nucleo/tarefas/executor-linha-comando.ts"]
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      migracao:
+        condition: service_completed_successfully
+    volumes:
+      - arquivos:/aplicacao/arquivos
+
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${BANCO_SENHA_BACKUP:?defina BANCO_SENHA_BACKUP no .env}
+      BACKUP_RETENCAO_DIAS: ${BACKUP_RETENCAO_DIAS:-30}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    entrypoint: ["/bin/sh", "-c", "while true; do /backup.sh; sleep 86400; done"]
+    depends_on:
+      banco:
+        condition: service_healthy
+
+volumes:
+  dados-banco:
+  arquivos:

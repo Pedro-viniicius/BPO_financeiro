@@ -1,0 +1,46 @@
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--raio-2);
+  border: var(--largura-borda) solid transparent;
+  font-size: var(--texto-base);
+}
+
+.simbolo {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--raio-completo);
+  border: var(--largura-borda) solid currentColor;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+}
+
+.corpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.titulo {
+  font-weight: var(--peso-medio);
+}
+
+.texto {
+  margin-top: var(--espaco-1);
+  color: var(--cor-texto-primario);
+}
+
+.acao {
+  flex: none;
+}
+
+.neutro { background: var(--cor-neutro-suave); border-color: var(--cor-neutro-borda); color: var(--cor-neutro-forte); }
+.informacao { background: var(--cor-informacao-suave); border-color: var(--cor-informacao-borda); color: var(--cor-informacao-forte); }
+.sucesso { background: var(--cor-sucesso-suave); border-color: var(--cor-sucesso-borda); color: var(--cor-sucesso-forte); }
+.atencao { background: var(--cor-atencao-suave); border-color: var(--cor-atencao-borda); color: var(--cor-atencao-forte); }
+.perigo { background: var(--cor-perigo-suave); border-color: var(--cor-perigo-borda); color: var(--cor-perigo-forte); }

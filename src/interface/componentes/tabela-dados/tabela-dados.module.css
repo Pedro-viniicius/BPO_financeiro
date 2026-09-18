@@ -1,0 +1,68 @@
+.moldura {
+  overflow-x: auto;
+  background: var(--superficie-cartao);
+  border: var(--largura-borda) solid var(--cor-borda);
+  border-radius: var(--raio-2);
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-base);
+}
+
+.tabela th {
+  position: sticky;
+  top: 0;
+  z-index: var(--camada-conteudo);
+  background: var(--superficie-afundada);
+  text-align: left;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cor-texto-secundario);
+  padding: var(--espaco-2) var(--espaco-3);
+  white-space: nowrap;
+  border-bottom: var(--largura-borda) solid var(--cor-borda);
+}
+
+.tabela td {
+  padding: var(--espaco-3);
+  border-bottom: var(--largura-borda) solid var(--cor-borda);
+  vertical-align: middle;
+}
+
+.tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.direita {
+  text-align: right;
+}
+
+.linhaClicavel {
+  cursor: pointer;
+}
+
+.linhaClicavel:hover {
+  background: var(--superficie-realce);
+}
+
+.botaoOrdenar {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.tabela tfoot td,
+.tabela tfoot th {
+  background: var(--superficie-afundada);
+  font-weight: var(--peso-forte);
+  border-top: var(--largura-borda-forte) solid var(--cor-borda-forte);
+}

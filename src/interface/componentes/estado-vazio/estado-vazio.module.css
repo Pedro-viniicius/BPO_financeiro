@@ -1,0 +1,25 @@
+.area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--espaco-2);
+  padding: var(--espaco-7) var(--espaco-4);
+  background: var(--superficie-cartao);
+  border: var(--largura-borda) dashed var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+}
+
+.titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+}
+
+.explicacao {
+  max-width: 46ch;
+  color: var(--cor-texto-secundario);
+}
+
+.acao { margin-top: var(--espaco-2); }
+
+.ajuda { font-size: var(--texto-sm); }

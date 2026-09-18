@@ -1,0 +1,7 @@
+# Configuracao do pnpm (gerenciador de pacotes).
+# Dependencias abaixo tem permissao para executar scripts de instalacao.
+# Qualquer outra dependencia com script de instalacao e bloqueada por seguranca
+# (protecao contra ataques de cadeia de suprimentos - "supply chain").
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true

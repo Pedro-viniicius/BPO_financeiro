@@ -1,0 +1,89 @@
+/**
+ * Catalogo de permissoes do sistema.
+ *
+ * Uma permissao e a menor unidade de autorizacao: "<modulo>.<acao>".
+ * Papeis (ver `papeis.ts`) sao apenas conjuntos de permissoes; a verificacao
+ * real e SEMPRE por permissao, nunca por nome de papel.
+ *
+ * Regras:
+ * - Nomes em portugues, sem acento, snake_case.
+ * - Adicionar permissao aqui NAO concede a ninguem: e preciso incluir em um papel.
+ * - Politica: negar por padrao. O que nao esta concedido, esta negado.
+ */
+export const PERMISSOES = [
+  // Operacao financeira
+  "contas_pagar.visualizar",
+  "contas_pagar.criar",
+  "contas_pagar.editar",
+  "contas_pagar.aprovar",
+  "contas_pagar.pagar",
+  "contas_pagar.cancelar",
+  "contas_pagar.excluir",
+
+  "contas_receber.visualizar",
+  "contas_receber.criar",
+  "contas_receber.editar",
+  "contas_receber.baixar",
+  "contas_receber.cancelar",
+  "contas_receber.excluir",
+
+  "cobranca.visualizar",
+  "cobranca.registrar_contato",
+  "cobranca.renegociar",
+
+  "faturamento.visualizar",
+  "faturamento.emitir",
+  "faturamento.cancelar",
+
+  "cadastros.visualizar",
+  "cadastros.editar",
+
+  // Tesouraria
+  "bancos.visualizar",
+  "bancos.editar",
+  "bancos.importar_extrato",
+  "bancos.conciliar",
+  "caixa.visualizar",
+  "caixa.movimentar",
+  "fluxo_caixa.visualizar",
+  "previsao.visualizar",
+  "previsao.editar_premissas",
+  "dividas.visualizar",
+  "dividas.editar",
+
+  // Controle gerencial
+  "plano_contas.visualizar",
+  "plano_contas.editar",
+  "centros_custo.visualizar",
+  "centros_custo.editar",
+  "dre.visualizar",
+  "dre.exportar",
+  "orcamento.visualizar",
+  "orcamento.editar",
+  "indicadores.visualizar",
+
+  // Plataforma
+  "importacao.executar",
+  "exportacao.executar",
+  "relatorios.visualizar",
+  "analises_ia.visualizar",
+  "analises_ia.perguntar",
+  "integracoes.gerenciar",
+
+  // Administracao
+  "empresas.visualizar",
+  "empresas.gerenciar",
+  "usuarios.visualizar",
+  "usuarios.gerenciar",
+  "configuracao.gerenciar",
+  "auditoria.visualizar",
+  "lixeira.restaurar",
+] as const;
+
+export type Permissao = (typeof PERMISSOES)[number];
+
+const conjuntoPermissoes: ReadonlySet<string> = new Set(PERMISSOES);
+
+export function ehPermissaoConhecida(texto: string): texto is Permissao {
+  return conjuntoPermissoes.has(texto);
+}

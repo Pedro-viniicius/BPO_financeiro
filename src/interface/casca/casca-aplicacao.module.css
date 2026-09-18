@@ -1,0 +1,38 @@
+.casca {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.corpo {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.conteudo {
+  flex: 1;
+  min-width: 0;
+  padding: var(--espaco-5) var(--espaco-6);
+  /* Altura estavel: o conteudo rola, a casca nao (principio 12). */
+  max-height: calc(100dvh - var(--altura-cabecalho));
+  overflow-y: auto;
+}
+
+.conteudo:focus {
+  outline: none;
+}
+
+@media (max-width: 1023px) {
+  .conteudo {
+    padding: var(--espaco-4) var(--espaco-5);
+  }
+}
+
+@media (max-width: 767px) {
+  .conteudo {
+    padding: var(--espaco-4);
+    /* Espaco para a barra inferior fixa. */
+    padding-bottom: calc(var(--espaco-8) + env(safe-area-inset-bottom));
+  }
+}

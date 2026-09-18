@@ -1,0 +1,55 @@
+.cartao {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--espaco-4);
+  background: var(--superficie-cartao);
+  border: var(--largura-borda) solid var(--cor-borda);
+  border-left-width: 3px;
+  border-radius: var(--raio-2);
+  box-shadow: var(--sombra-1);
+}
+
+.clicavel {
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: background var(--transicao-rapida);
+}
+
+.clicavel:hover {
+  background: var(--superficie-realce);
+}
+
+.titulo {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+  font-weight: var(--peso-medio);
+}
+
+.valor {
+  margin-top: var(--espaco-1);
+}
+
+.contagem {
+  margin-top: var(--espaco-1);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+.explicacao {
+  margin-top: var(--espaco-2);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-fraco);
+  line-height: var(--altura-linha-base);
+}
+
+.rodape {
+  margin-top: var(--espaco-3);
+}
+
+.neutro { border-left-color: var(--cor-borda-forte); }
+.informacao { border-left-color: var(--cor-informacao-forte); }
+.sucesso { border-left-color: var(--cor-sucesso-forte); }
+.atencao { border-left-color: var(--cor-atencao-forte); }
+.perigo { border-left-color: var(--cor-perigo-forte); }

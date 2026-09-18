@@ -1,0 +1,41 @@
+.moldura {
+  display: flex;
+  align-items: stretch;
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  overflow: hidden;
+}
+
+.moldura:focus-within {
+  outline: var(--largura-borda-forte) solid var(--cor-foco);
+  outline-offset: 1px;
+}
+
+.simbolo {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--espaco-3);
+  background: var(--superficie-afundada);
+  border-right: var(--largura-borda) solid var(--cor-borda);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.campo {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-3);
+  border: none;
+  background: transparent;
+  text-align: right;
+  font-size: var(--texto-md);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.campo:focus {
+  outline: none;
+}
