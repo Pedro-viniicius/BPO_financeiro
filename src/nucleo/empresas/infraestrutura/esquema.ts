@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, index, jsonb, pgEnum, pgTable, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { user } from "@/nucleo/autenticacao/infraestrutura/esquema-better-auth";
 
@@ -64,6 +64,20 @@ export const filiais = pgTable(
 );
 
 /**
+ * Papeis aceitos em um vinculo. A lista e a mesma de
+ * `nucleo/autorizacao/papeis.ts` (PAPEIS); um teste garante que as duas nao
+ * divergem. O banco recusa qualquer outro valor.
+ */
+export const papelVinculo = pgEnum("papel_vinculo", [
+  "administrador",
+  "financeiro",
+  "tesouraria",
+  "controladoria",
+  "auditor",
+  "somente_leitura",
+]);
+
+/**
  * Vinculo de um usuario com a estrutura empresarial.
  *
  * - `empresa_id` preenchido: acesso a essa empresa com o papel informado.
@@ -72,6 +86,13 @@ export const filiais = pgTable(
  * - `papel`: nome de um papel definido em `nucleo/autorizacao/papeis.ts`.
  * - `permissoes_extras`: permissoes concedidas alem do papel (lista de textos).
  * - `permissoes_removidas`: permissoes retiradas do papel para este vinculo.
+ * - `ativo = false`: vinculo revogado. O acesso termina na proxima requisicao;
+ *   a linha permanece para a auditoria fazer sentido.
+ *
+ * Unicidade `unico_vinculos_usuario_escopo` com NULLS NOT DISTINCT: um usuario
+ * tem no maximo um vinculo por empresa e no maximo um vinculo "toda a
+ * organizacao" por organizacao (sem isso, dois vinculos com `empresa_id` nulo
+ * seriam aceitos, porque o PostgreSQL trata NULLs como distintos).
  *
  * A politica de autorizacao (deny por padrao) esta em `nucleo/autorizacao`.
  */
@@ -86,7 +107,7 @@ export const vinculosUsuario = pgTable(
       .notNull()
       .references(() => organizacoes.id),
     empresaId: uuid("empresa_id").references(() => empresas.id),
-    papel: text("papel").notNull(),
+    papel: papelVinculo("papel").notNull(),
     permissoesExtras: jsonb("permissoes_extras").$type<string[]>().notNull().default([]),
     permissoesRemovidas: jsonb("permissoes_removidas").$type<string[]>().notNull().default([]),
     ativo: boolean("ativo").notNull().default(true),
@@ -96,6 +117,6 @@ export const vinculosUsuario = pgTable(
   (tabela) => [
     index("vinculos_usuario_usuario_idx").on(tabela.usuarioId),
     index("vinculos_usuario_empresa_idx").on(tabela.empresaId),
-    uniqueIndex("vinculos_usuario_unico_idx").on(tabela.usuarioId, tabela.organizacaoId, tabela.empresaId),
+    unique("unico_vinculos_usuario_escopo").on(tabela.usuarioId, tabela.organizacaoId, tabela.empresaId).nullsNotDistinct(),
   ],
 );

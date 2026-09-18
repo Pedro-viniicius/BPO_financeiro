@@ -1,0 +1,35 @@
+.pagina {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--espaco-7) var(--espaco-4);
+  background: var(--superficie-fundo);
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+  width: 100%;
+  max-width: 440px;
+  padding: var(--espaco-6);
+  background: var(--superficie-cartao);
+  border: var(--largura-borda) solid var(--cor-borda);
+  border-radius: var(--raio-3);
+  box-shadow: var(--sombra-2);
+}
+
+.marca {
+  font-weight: var(--peso-forte);
+  color: var(--cor-marca-forte);
+}
+
+@media (max-width: 767px) {
+  .pagina {
+    padding: var(--espaco-4);
+  }
+  .cartao {
+    padding: var(--espaco-5);
+  }
+}

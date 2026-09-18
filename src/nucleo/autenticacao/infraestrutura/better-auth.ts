@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { twoFactor } from "better-auth/plugins";
 
@@ -7,6 +8,7 @@ import { obterBancoDados } from "@/nucleo/banco-dados/publico";
 import { obterVariaveisAmbiente } from "@/nucleo/configuracao/publico";
 import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
 
+import { contarUsuarios } from "./contar-usuarios";
 import * as esquemaAutenticacao from "./esquema-better-auth";
 
 /**
@@ -43,9 +45,13 @@ function criarAutenticacao() {
       enabled: true,
       minPasswordLength: 10,
       maxPasswordLength: 128,
-      // O primeiro usuario e criado pelo instalador; os demais entram por convite (Gate 5).
-      disableSignUp: producao,
-      requireEmailVerification: producao,
+      // Cadastro publico: sempre para o PRIMEIRO usuario (instalacao vazia);
+      // depois, em producao, so por convite. Regra em `databaseHooks.user.create.before`.
+      disableSignUp: false,
+      // Verificacao de e-mail obrigatoria so faz sentido quando existe envio de
+      // e-mail (integracoes/email, gate posterior). Exigir sem enviar trancaria
+      // o primeiro usuario de uma instalacao de producao para fora.
+      requireEmailVerification: false,
       revokeSessionsOnPasswordReset: true,
       resetPasswordTokenExpiresIn: 60 * 30,
       sendResetPassword: async ({ user, url }) => {
@@ -82,12 +88,33 @@ function criarAutenticacao() {
 
     socialProviders: provedoresSociais,
 
+    databaseHooks: {
+      user: {
+        create: {
+          before: async () => {
+            if (await cadastroAberto()) return;
+            throw new APIError("FORBIDDEN", { code: "CADASTRO_FECHADO", message: "Cadastro fechado: entrada por convite." });
+          },
+        },
+      },
+    },
+
     plugins: [
       twoFactor({ issuer: "Financeiro" }),
       // Deve ser o ultimo plugin: permite gravar cookies a partir de server actions do Next.js.
       nextCookies(),
     ],
   });
+}
+
+/**
+ * O cadastro publico esta aberto quando a instalacao ainda nao tem usuario
+ * (alguem precisa ser o primeiro) ou fora de producao (testes com varios
+ * usuarios). Em producao com usuarios, a entrada e por convite.
+ */
+export async function cadastroAberto(): Promise<boolean> {
+  if (obterVariaveisAmbiente().AMBIENTE !== "producao") return true;
+  return (await contarUsuarios()) === 0;
 }
 
 const globalComAutenticacao = globalThis as typeof globalThis & { __autenticacaoFinanceiro?: ReturnType<typeof criarAutenticacao> };

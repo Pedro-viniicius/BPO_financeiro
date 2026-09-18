@@ -1,6 +1,5 @@
 import { CabecalhoPagina, EstadoVazio } from "@/interface/componentes/indice";
-
-import { obterContextoDaCasca } from "./contexto-casca";
+import { exigirContextoAplicacao, ROTAS } from "@/nucleo/empresas/publico";
 
 /**
  * Inicio — provisorio. A tela real (docs/ux/dashboard.md) depende dos casos de
@@ -8,13 +7,13 @@ import { obterContextoDaCasca } from "./contexto-casca";
  * apenas o cabecalho padrao e um estado vazio honesto.
  */
 export default async function PaginaInicio() {
-  const contexto = await obterContextoDaCasca();
+  const { empresaAtiva } = await exigirContextoAplicacao(ROTAS.inicio);
 
   return (
     <>
       <CabecalhoPagina
         titulo="Início"
-        empresa={contexto.nomeDaEmpresa}
+        empresa={empresaAtiva.nomeFantasia ?? empresaAtiva.nome}
         descricao="Sua situação de hoje e o que precisa de atenção"
       />
       <EstadoVazio

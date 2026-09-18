@@ -78,7 +78,8 @@ Identificadores em portugues, sem acento, *kebab-case* — mesma regra dos
 diretorios (Gate 2). O rotulo visivel leva acento; a URL nao.
 
 ```text
-/                              Inicio
+/                              Redireciona pelo estado de acesso (ADR-025)
+/inicio                        Inicio
 /contas-pagar                  Lista (abas por query string)
 /contas-pagar/nova             Formulario de criacao
 /contas-pagar/[codigo]         Detalhe do titulo
@@ -95,7 +96,8 @@ diretorios (Gate 2). O rotulo visivel leva acento; a URL nao.
 /cadastros                     Abas: clientes, fornecedores, categorias, centros de custo
 /configuracoes
 /entrar                        Autenticacao (fora da casca)
-/primeiro-acesso               Configuracao inicial (fora da casca)
+/criar-conta                   Primeiro usuario da instalacao (fora da casca)
+/primeiro-acesso               Primeira empresa (fora da casca; exige sessao)
 ```
 
 O identificador da URL de um titulo e o **codigo legivel** (`CP-2026-000123`),

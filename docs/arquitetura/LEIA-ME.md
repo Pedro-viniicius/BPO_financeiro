@@ -7,6 +7,7 @@
 | [dependencias.md](dependencias.md) | Regras de fronteira e como o lint as aplica |
 | [banco-dados.md](banco-dados.md) | PostgreSQL, Drizzle, migracoes, usuarios do banco, identificadores de empresa, dinheiro e datas |
 | [modelos-deploy.md](modelos-deploy.md) | Modelos A/B/C, Docker, backup e restauracao |
+| [autenticacao-e-empresa-ativa.md](autenticacao-e-empresa-ativa.md) | Gate 5: estados de acesso, redirecionamentos, primeiro acesso, empresa ativa, isolamento entre empresas, fronteira build x runtime |
 | [tarefas.md](tarefas.md) | Fila de tarefas, outbox e executor |
 | [integracoes.md](integracoes.md) | Portas e adaptadores; alinhamento comercial |
 | [inteligencia-artificial.md](inteligencia-artificial.md) | Fluxo da IA e o que sai da aplicacao |

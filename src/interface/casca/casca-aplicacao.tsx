@@ -8,7 +8,7 @@ import { PONTOS_DE_QUEBRA } from "../tokens/pontos-de-quebra";
 import { BarraInferior } from "./barra-inferior";
 import { CabecalhoAplicacao, type CabecalhoAplicacaoProps } from "./cabecalho-aplicacao";
 import estilos from "./casca-aplicacao.module.css";
-import { NAVEGACAO_APOIO, navegacaoVisivel, type GrupoDeNavegacao } from "./mapa-navegacao";
+import { NAVEGACAO_APOIO, type GrupoDeNavegacao } from "./mapa-navegacao";
 import { NavegacaoLateral } from "./navegacao-lateral";
 
 export interface CascaAplicacaoProps {
@@ -19,7 +19,7 @@ export interface CascaAplicacaoProps {
   readonly children: ReactNode;
 }
 
-const ROTAS_BARRA_INFERIOR = ["/", "/contas-pagar", "/contas-receber"] as const;
+const ROTAS_BARRA_INFERIOR = ["/inicio", "/contas-pagar", "/contas-receber"] as const;
 
 /**
  * Casca do sistema: cabecalho + barra lateral + conteudo (docs/ux/navegacao.md,
@@ -77,5 +77,3 @@ export function CascaAplicacao({ cabecalho, grupos, contadores, children }: Casc
     </div>
   );
 }
-
-export { navegacaoVisivel };

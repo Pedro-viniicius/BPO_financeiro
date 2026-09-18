@@ -25,9 +25,9 @@ Fluxo de dependencia dentro do modulo: `interface → aplicacao → dominio`;
 
 | Pasta | Responsabilidade | Estado no Gate 2 |
 |---|---|---|
-| `nucleo/autenticacao` | Better Auth: e-mail/senha, sessoes, TOTP, Google; `SessaoAtual` | implementado e testado manualmente |
+| `nucleo/autenticacao` | Better Auth: e-mail/senha, sessoes, TOTP, Google; `SessaoAtual`; entrar/criar conta/sair | implementado; fluxo verificado no Gate 5 |
 | `nucleo/autorizacao` | permissoes, papeis, politica negar-por-padrao, `ContextoUsuario` | implementado + testes |
-| `nucleo/empresas` | organizacao → empresa → filial; vinculos de usuario | esquema + tipos |
+| `nucleo/empresas` | organizacao → empresa → filial; vinculos; empresa ativa; instalador da primeira empresa; `resolverContextoAplicacao` | implementado + testes (Gate 5) |
 | `nucleo/auditoria` | eventos de auditoria somente insercao | implementado + protecao no banco verificada |
 | `nucleo/eventos` | eventos de dominio; outbox; entregador | implementado + testes de integracao |
 | `nucleo/tarefas` | fila no PostgreSQL; executor; processo de linha de comando | implementado + testes |

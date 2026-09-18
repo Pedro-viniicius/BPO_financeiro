@@ -1,0 +1,45 @@
+/* Estilos das telas de entrada e primeiro acesso (formulario unico, uma coluna). */
+.titulo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.descricao {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.controle {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--espaco-3);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  font-size: var(--texto-md);
+}
+
+.controle[aria-invalid="true"] {
+  border-color: var(--cor-perigo-forte);
+}
+
+.acoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-2);
+}
+
+.ligacoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  font-size: var(--texto-sm);
+}

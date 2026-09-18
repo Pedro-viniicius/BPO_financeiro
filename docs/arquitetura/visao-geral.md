@@ -48,8 +48,8 @@ Navegador
    │  HTTPS
    ▼
 src/app/  (rota ou server action)                      ┐ Interface
-   │  obterSessaoAtual() → SessaoAtual                 │
-   │  monta ContextoUsuario (empresa ativa + permissoes)│
+   │  exigirContextoAplicacao() → sessao + empresa     │
+   │  ativa + ContextoUsuario (nucleo/empresas, Gate 5) │
    ▼                                                    ┘
 modulos/<x>/aplicacao/  (caso de uso)                  ┐ Aplicacao
    │  exigirPermissao(contexto, "contas_pagar.pagar")   │

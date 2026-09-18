@@ -14,6 +14,13 @@ export { CampoFormulario, type AtributosDoControle, type CampoFormularioProps } 
 export { CartaoResumo, type CartaoResumoProps } from "./cartao-resumo/cartao-resumo";
 export { DialogoConfirmacao, type DialogoConfirmacaoProps } from "./dialogo-confirmacao/dialogo-confirmacao";
 export { Esqueleto, type EsqueletoProps } from "./esqueleto/esqueleto";
+export {
+  AcoesFormularioSimples,
+  ControleTexto,
+  FormularioSimples,
+  LigacoesFormularioSimples,
+  TituloFormularioSimples,
+} from "./formulario-simples/formulario-simples";
 export { EstadoVazio, type EstadoVazioProps } from "./estado-vazio/estado-vazio";
 export { Gaveta, type GavetaProps } from "./gaveta/gaveta";
 export { LinhaDoTempo, type EventoDaLinhaDoTempo, type LinhaDoTempoProps } from "./linha-do-tempo/linha-do-tempo";

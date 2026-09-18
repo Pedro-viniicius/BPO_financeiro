@@ -4,9 +4,9 @@ Servicos de plataforma que todos os modulos usam, sem regra de negocio financeir
 
 | Pasta | Responsabilidade | Responde |
 |---|---|---|
-| `autenticacao/` | Better Auth: e-mail/senha, sessoes, TOTP, Google | Quem e o usuario? |
+| `autenticacao/` | Better Auth: e-mail/senha, sessoes, TOTP, Google; `entrarComEmail`, `criarContaComEmail`, `sairDaSessao` | Quem e o usuario? |
 | `autorizacao/` | permissoes, papeis, politica "negar por padrao" | O que ele pode fazer? |
-| `empresas/` | organizacao -> empresa -> filial, vinculos de usuario | Em qual empresa ele age? |
+| `empresas/` | organizacao -> empresa -> filial, vinculos, empresa ativa, instalador da primeira empresa, `resolverContextoAplicacao`/`exigirContextoAplicacao`, tabela de destinos por estado | Em qual empresa ele age? |
 | `auditoria/` | trilha financeira somente insercao | Quem fez o que, quando? |
 | `eventos/` | eventos de dominio com outbox transacional | Como modulos reagem uns aos outros? |
 | `tarefas/` | fila de tarefas no PostgreSQL e executor | O que roda em segundo plano? |

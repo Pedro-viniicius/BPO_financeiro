@@ -18,12 +18,40 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: 0;
   min-height: 40px;
   padding: 0 var(--espaco-3);
   background: var(--cor-marca-suave);
   border: var(--largura-borda) solid var(--cor-marca-borda);
   border-radius: var(--raio-2);
+}
+
+.seletorEmpresa {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.selectEmpresa {
+  max-width: 260px;
+  padding: 0 var(--espaco-1);
+  border: 0;
+  background: transparent;
+  color: var(--cor-marca-forte);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-forte);
+  cursor: pointer;
+}
+
+/* Sem JavaScript o botao e o unico jeito de enviar; com JavaScript ele fica discreto. */
+.botaoTrocar {
+  padding: 0 var(--espaco-2);
+  border: 0;
+  background: transparent;
+  color: var(--cor-marca-forte);
+  font-size: var(--texto-xs);
+  text-decoration: underline;
   cursor: pointer;
 }
 
@@ -79,6 +107,7 @@
   align-items: flex-end;
   gap: 0;
   margin-left: auto;
+  cursor: default;
 }
 
 .nomeUsuario {

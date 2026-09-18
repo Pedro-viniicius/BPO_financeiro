@@ -118,6 +118,7 @@ Na CI, o PostgreSQL sobe automaticamente e a variavel ja vem definida.
 | `testes/transacoes.teste.ts` | uma falha desfaz tudo; codigo nao e consumido em transacao desfeita |
 | `testes/concorrencia.teste.ts` | operacoes simultaneas nao furam a unicidade |
 | `testes/estrutura-modelo.teste.ts` | toda tabela financeira tem `empresa_id`; dinheiro e NUMERIC(15,2); datas e instantes nos tipos certos; nomes em portugues |
+| `testes/acesso-empresas.teste.ts` | isolamento entre empresas na consulta real; instalacao da primeira empresa atomica e serializada por lock; enum de papel e unicidade `NULLS NOT DISTINCT` |
 | `testes/apoio-testes-banco.ts` | (apoio) cenarios e helpers reutilizaveis |
 
 ## 6. Convencoes de nomes (resumo)

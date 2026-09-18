@@ -23,9 +23,10 @@ describe("navegacaoVisivel", () => {
 });
 
 describe("rotaAtiva", () => {
-  it("Inicio so e ativo na raiz exata", () => {
-    expect(rotaAtiva("/", "/")).toBe(true);
-    expect(rotaAtiva("/contas-pagar", "/")).toBe(false);
+  it("Inicio vive em /inicio; a raiz e apenas redirecionamento", () => {
+    expect(NAVEGACAO_PRINCIPAL[0]?.itens[0]?.rota).toBe("/inicio");
+    expect(rotaAtiva("/inicio", "/inicio")).toBe(true);
+    expect(rotaAtiva("/contas-pagar", "/inicio")).toBe(false);
   });
 
   it("subrotas mantem o item pai ativo, sem confundir prefixos", () => {

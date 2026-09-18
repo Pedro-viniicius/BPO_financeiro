@@ -31,7 +31,8 @@
    `drizzle-orm`, `better-auth`, `postgres` em `dominio/` ou `aplicacao/`.
    `zod` e permitido (biblioteca pura de validacao).
 3. **Frameworks so em camadas tecnicas:** `infraestrutura/`, `interface/`,
-   `src/app/`, `src/composicao/`, `src/banco-dados/`, `nucleo/banco-dados/`.
+   `src/app/`, `src/proxy.ts`, `src/composicao/`, `src/banco-dados/`,
+   `nucleo/banco-dados/`.
 4. **Dominio nao importa camadas superiores** (aplicacao, infraestrutura, interface).
 5. **Aplicacao nao importa infraestrutura nem interface** — depende de contratos.
 6. **Modulos so se conhecem pelo `publico.ts`.** `@/modulos/contas-receber/publico`
@@ -47,6 +48,11 @@
 13. **`src/app` nunca importa dominio/aplicacao/infraestrutura diretamente**
     nem `src/banco-dados/`.
 14. **`src/banco-dados/` so agrega esquemas.**
+15. **`src/interface/` (sistema de design) nao conhece negocio:** nao importa
+    `modulos/`, `banco-dados/`, `integracoes/`, `composicao/`, `app/` nem
+    internos do `nucleo/` — so `publico.ts` (tipos como `Permissao`). Recebe
+    dados prontos (ADR-024). Regra `sistema-de-design-nao-conhece-negocio`,
+    acrescentada no Gate 5.
 
 ## Como verificar
 

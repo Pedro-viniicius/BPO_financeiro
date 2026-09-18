@@ -15,8 +15,8 @@ e controle gerencial.
 | 2 | Arquitetura | concluido — [`docs/arquitetura/`](docs/arquitetura/LEIA-ME.md), [`docs/decisoes/`](docs/decisoes/LEIA-ME.md) |
 | 3 | Modelo de Dados | concluido — [`docs/modelo-dados/`](docs/modelo-dados/LEIA-ME.md), [`src/banco-dados/`](src/banco-dados/LEIA-ME.md) |
 | 4 | UX, Arquitetura de Informacao e Sistema de Interface | concluido — [`docs/ux/`](docs/ux/LEIA-ME.md), [`src/interface/`](src/interface/LEIA-ME.md), ADR-020 a 024 |
-| 5 | Fundacao (instalador, convites, telas base) | proximo |
-| 6 | Operacao Financeira | — |
+| 5 | Fundacao: autenticacao, primeiro acesso, empresa ativa | concluido — [`docs/arquitetura/autenticacao-e-empresa-ativa.md`](docs/arquitetura/autenticacao-e-empresa-ativa.md), ADR-025 |
+| 6 | Operacao Financeira | proximo |
 | 7 | Tesouraria | — |
 | 8 | Controle Gerencial | — |
 | 9 | Analises (IA) | — |
@@ -45,6 +45,11 @@ pnpm dev                             # http://localhost:3000
 pnpm tarefas:executar                # em outro terminal: processo de tarefas
 ```
 
+Primeiro uso: `http://localhost:3000` leva a `/entrar` → "Criar a primeira
+conta" (`/criar-conta`) → `/primeiro-acesso` (cadastra a empresa; voce vira
+administrador) → `/inicio`. Fluxo completo em
+[`docs/arquitetura/autenticacao-e-empresa-ativa.md`](docs/arquitetura/autenticacao-e-empresa-ativa.md).
+
 Verificacoes (o que a CI roda):
 
 ```
@@ -55,7 +60,9 @@ pnpm verificar:tudo    # lint + tipos + arquitetura + testes + licencas + build
 
 ```
 src/
-  app/            rotas e telas (Next.js); (aplicacao)/ = tudo dentro da casca
+  app/            rotas e telas (Next.js); (publico)/ entrar e criar conta,
+                  (autenticado)/ primeiro acesso, (aplicacao)/ tudo dentro da casca
+  proxy.ts        repassa a rota pedida em cabecalho; nao decide acesso
   interface/      sistema de design: tokens, componentes, formatacao, casca
   composicao/     escolha de provedores concretos
   modulos/        modulos de negocio (contas-pagar, bancos, dre, orcamento...)

@@ -31,5 +31,6 @@ escolha meses depois.
 | [022](ADR-022-pagina-gaveta-dialogo.md) | Onde uma acao abre: pagina, gaveta ou dialogo | Aceita |
 | [023](ADR-023-conciliacao-duas-colunas.md) | Conciliacao em duas colunas pareadas, so no desktop | Aceita |
 | [024](ADR-024-camada-apresentacao.md) | Camada de apresentacao: a interface nao decide regra financeira | Aceita |
+| [025](ADR-025-contexto-organizacional.md) | Contexto organizacional autenticado e empresa ativa | Aceita |
 
 Status possiveis: Proposta, Aceita, Substituida (por outra ADR), Rejeitada.

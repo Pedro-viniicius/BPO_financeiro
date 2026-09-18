@@ -32,7 +32,7 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
     itens: [
       {
         rotulo: "Início",
-        rota: "/",
+        rota: "/inicio",
         permissao: "relatorios.visualizar",
         descricao: "Sua situação de hoje e o que precisa de atenção",
       },

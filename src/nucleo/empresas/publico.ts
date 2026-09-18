@@ -1,2 +1,30 @@
-/** Interface publica do modulo de empresas (organizacao -> empresa -> filial). */
+/**
+ * Interface publica do modulo de empresas (organizacao -> empresa -> filial)
+ * e do acesso de usuarios a elas (vinculos, empresa ativa, primeiro acesso).
+ */
 export type { Empresa, Filial, Organizacao } from "./dominio/estrutura-empresarial";
+export { resolverEmpresaAtiva, UsuarioJaPossuiEmpresa, CnpjJaCadastrado, type EmpresaAcessivel } from "./dominio/acesso-empresas";
+export {
+  esquemaInstalacaoEmpresa,
+  instalarPrimeiraEmpresa,
+  PAPEL_DO_INSTALADOR,
+  type DadosInstalacaoEmpresa,
+} from "./aplicacao/instalar-primeira-empresa";
+export { trocarEmpresaAtiva } from "./aplicacao/trocar-empresa-ativa";
+export type { LeitorAcessoEmpresas, UnidadeInstalacaoEmpresa } from "./aplicacao/repositorio-acesso-empresas";
+export { RepositorioAcessoEmpresasDrizzle } from "./infraestrutura/repositorio-acesso-empresas-drizzle";
+export { AcessoEmpresasEmMemoria } from "./infraestrutura/acesso-empresas-em-memoria";
+export { decidirDestino, destinoPadrao, retornoSeguro, ROTAS, type EstadoAcesso } from "./interface/destino";
+export {
+  estadoAcessoAtual,
+  exigirContextoAplicacao,
+  exigirSessaoSemEmpresa,
+  listarEmpresasAcessiveisDoUsuario,
+  redirecionarSeJaEntrou,
+  resolverContextoAplicacao,
+  rotaAtualDaRequisicao,
+  type ContextoAplicacao,
+  type ResolucaoContexto,
+} from "./interface/contexto-aplicacao";
+export { acaoInstalarPrimeiraEmpresa, acaoTrocarEmpresaAtiva, type EstadoFormularioInstalacao } from "./interface/acoes-empresas";
+export { gravarPreferenciaEmpresaAtiva, apagarPreferenciaEmpresaAtiva } from "./interface/cookie-empresa-ativa";

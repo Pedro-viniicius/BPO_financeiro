@@ -19,7 +19,7 @@ explicacao (nunca uma pagina em branco).
 ```mermaid
 graph TD
   L["/entrar"] --> PA["/primeiro-acesso<br/>(1a vez)"]
-  L --> H["/ Início"]
+  L --> H["/inicio Início"]
   PA --> H
 
   H --> CPL["/contas-pagar<br/>Lista"]
@@ -88,22 +88,36 @@ graph TD
 
 | | |
 |---|---|
-| **Objetivo** | Concluir a jornada J1 em menos de 10 minutos: empresa, conta bancaria, saldo inicial, categorias |
+| **Objetivo** | Concluir a jornada J1 em menos de 10 minutos: empresa (Gate 5), depois conta bancaria, saldo inicial e categorias (painel "Comece por aqui", Gates 6 e 7) |
 | **Usuario** | Marcia, Carlos |
-| **Acao principal** | `Continuar` (assistente de 4 passos, com "Fazer depois" em 3 deles) |
+| **Acao principal** | `Criar empresa e entrar` (Gate 5: um passo — nome, nome fantasia, CNPJ opcional). Os passos financeiros viram o painel "Comece por aqui" no `Início` |
 | **Acoes secundarias** | Importar clientes/fornecedores por CSV; convidar usuario |
 | **Info mais importante** | O passo atual e quantos faltam |
 | **Origem** | Primeiro login de uma instalacao/empresa |
 | **Destinos** | `Início` com o painel de "Comece por aqui" |
 | **Estado vazio** | E, por definicao, o estado vazio do produto inteiro |
 | **Erros** | CNPJ invalido: valida estrutura e explica; saldo inicial ausente: aceita e avisa que o saldo ficara incompleto ate o primeiro extrato |
-| **Permissoes** | `empresas.gerenciar` |
+| **Permissoes** | Sessao valida e **nenhum** vinculo ativo; quem ja tem empresa e levado a `/inicio` |
+
+## A3. Criar conta (`/criar-conta`)
+
+| | |
+|---|---|
+| **Objetivo** | Criar o primeiro usuario de uma instalacao |
+| **Usuario** | Quem instala (Marcia, Carlos) |
+| **Acao principal** | `Criar conta` (nome, e-mail, senha com confirmacao) |
+| **Origem** | Link "Criar a primeira conta" em `/entrar`, exibido so enquanto o cadastro esta aberto |
+| **Destinos** | `/primeiro-acesso` |
+| **Erros** | Senhas diferentes; e-mail ja cadastrado; instalacao ja com usuarios (em producao): aviso "entrada por convite" |
+| **Permissoes** | Publica enquanto a instalacao nao tem usuario; fora de producao, sempre |
 
 ---
 
 # B. Inicio
 
-## B1. Inicio (`/`)
+## B1. Inicio (`/inicio`)
+
+> `/` nao tem conteudo: redireciona pelo estado de acesso (ADR-025).
 
 | | |
 |---|---|

@@ -23,8 +23,11 @@ instalacao. Configuracao em `src/nucleo/autenticacao/infraestrutura/better-auth.
   (verificado: 6a tentativa recebe HTTP 429);
 - plugin `twoFactor` (TOTP + codigos de recuperacao);
 - Google via `socialProviders` apenas se as variaveis existirem;
-- em producao: cadastro livre desligado (usuarios entram por convite),
-  e-mail verificado obrigatorio, cookies `Secure`;
+- cadastro publico aberto apenas enquanto a instalacao nao tem usuario;
+  depois, em producao, recusado (entrada por convite) — regra em
+  `databaseHooks.user.create.before` (Gate 5, ADR-025). Cookies `Secure` em
+  producao. Verificacao de e-mail obrigatoria fica para quando existir envio
+  de e-mail (`integracoes/email`);
 - rotas em `/api/autenticacao/*`; prefixo de cookie `financeiro`.
 
 **Vocabulario externo mantido:** tabelas `user`, `session`, `account`,
@@ -55,12 +58,23 @@ Sao modulos separados.
 - Biblioteca jovem (1.x): acompanhar mudancas. Ela valida o esquema na
   inicializacao e aponta colunas faltantes (ja aconteceu no Gate 2 com
   `two_factor`; corrigido antes da primeira migracao publicada).
-- O envio real de e-mail (redefinicao, convite) depende de
-  `integracoes/email`, que so ganha adaptador SMTP no Gate 5.
+- O envio real de e-mail (redefinicao, convite, verificacao) depende de
+  `integracoes/email`, que ganha adaptador SMTP em um gate posterior.
+
+## Atualizacao (Gate 5)
+
+- Entrar e criar conta pela interface passam pelo `handler` HTTP da
+  biblioteca (nao por `api.signInEmail`), porque so ele aplica o limite de
+  tentativas e a verificacao de Origin. *Verificado: a 6a tentativa pelo
+  formulario recebe "Muitas tentativas".*
+- `SessaoAtual` continua sendo o unico objeto que sai do modulo; a empresa
+  ativa e o `ContextoUsuario` sao responsabilidade de `nucleo/empresas`
+  (ADR-025).
 
 ## Riscos
 
-- Reautenticacao para acoes sensiveis ainda nao implementada (Gate 5).
+- Reautenticacao para acoes sensiveis e tela do segundo fator (TOTP) no
+  login ainda nao implementadas (gate de usuarios).
 
 ## Criterios para revisao futura
 

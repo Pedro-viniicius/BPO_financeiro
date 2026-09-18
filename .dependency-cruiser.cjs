@@ -18,7 +18,7 @@ const PACOTES_FRAMEWORK = "node_modules/(next|react|react-dom|drizzle-orm|drizzl
 const PACOTES_IA = "node_modules/(openai|@anthropic-ai|@ai-sdk|ai|@google/generative-ai|@mistralai|ollama)($|/)";
 
 /** Arquivos que podem usar frameworks: camadas tecnicas e pontos de entrada. */
-const CAMINHOS_TECNICOS = "/(infraestrutura|interface)/|^src/nucleo/banco-dados/|^src/banco-dados/|^src/app/|^src/composicao/|\\.teste\\.tsx?$";
+const CAMINHOS_TECNICOS = "/(infraestrutura|interface)/|^src/nucleo/banco-dados/|^src/banco-dados/|^src/app/|^src/proxy\\.ts$|^src/composicao/|\\.teste\\.tsx?$";
 
 module.exports = {
   forbidden: [
@@ -140,6 +140,13 @@ module.exports = {
       to: { path: "/(infraestrutura|dominio|aplicacao)/|^src/banco-dados/" },
     },
     {
+      name: "sistema-de-design-nao-conhece-negocio",
+      comment: "src/interface/ (tokens, componentes, casca) recebe dados prontos: nao importa modulos, banco, integracoes, composicao, app nem internos do nucleo (ADR-024). Do nucleo, apenas publico.ts (tipos como Permissao).",
+      severity: "error",
+      from: { path: "^src/interface/", pathNot: "\\.teste\\.tsx?$" },
+      to: { path: "^src/(modulos|banco-dados|integracoes|composicao|app)/|^src/nucleo/", pathNot: "^src/nucleo/[^/]+/publico\\.ts$" },
+    },
+    {
       name: "esquemas-so-importam-esquemas",
       comment: "Um arquivo de esquema (infraestrutura/esquema*.ts) so importa outros esquemas e os utilitarios de src/banco-dados/esquemas/. Fecha a excecao das regras de publico.ts.",
       severity: "error",
@@ -159,7 +166,7 @@ module.exports = {
       severity: "warn",
       from: {
         orphan: true,
-        pathNot: ["\\.d\\.ts$", "\\.teste\\.tsx?$", "publico\\.ts$", "^src/app/", "esquema[^/]*\\.ts$", "executor-linha-comando\\.ts$", "migrar\\.ts$", "^src/composicao/"],
+        pathNot: ["\\.d\\.ts$", "\\.teste\\.tsx?$", "publico\\.ts$", "^src/app/", "^src/proxy\\.ts$", "esquema[^/]*\\.ts$", "executor-linha-comando\\.ts$", "migrar\\.ts$", "^src/composicao/"],
       },
       to: {},
     },

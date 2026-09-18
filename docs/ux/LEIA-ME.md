@@ -52,8 +52,10 @@ exatamente como o usuario le, com acentuacao correta.
 - `src/interface/componentes/` — 17 componentes do sistema de design;
 - `src/interface/formatacao/` — dinheiro, data, percentual;
 - `src/interface/casca/` — cabecalho, barra lateral, barra inferior, casca;
-- `src/app/(aplicacao)/` — a casca ligada ao Next.js, com `Início` provisorio.
+- `src/app/(aplicacao)/` — a casca ligada ao Next.js, com `Início` provisorio
+  em `/inicio`.
 
 As telas de negocio (listas, formularios, conciliacao) sao construidas nos
-Gates 6 a 8 sobre estes padroes. Autenticacao, primeiro acesso e escolha da
-empresa ativa sao o Gate 5.
+Gates 6 a 8 sobre estes padroes. Autenticacao (`/entrar`, `/criar-conta`),
+primeiro acesso e empresa ativa foram entregues no Gate 5
+([`docs/arquitetura/autenticacao-e-empresa-ativa.md`](../arquitetura/autenticacao-e-empresa-ativa.md)).

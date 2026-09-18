@@ -40,7 +40,7 @@ tres itens; a lista inteira cabe em uma tela sem rolagem em 1366x768.
 
 | Item | Rotulo na interface | Rota | Por que aqui |
 |---|---|---|---|
-| Inicio | `Início` | `/` | E a resposta a "e ai, como estamos?" e o ponto de partida de todas as jornadas diarias (M1, M2, M3, R7). Primeiro item porque e o mais visitado por quatro das cinco personas. |
+| Inicio | `Início` | `/inicio` | E a resposta a "e ai, como estamos?" e o ponto de partida de todas as jornadas diarias (M1, M2, M3, R7). Primeiro item porque e o mais visitado por quatro das cinco personas. |
 | Contas a pagar | `Contas a pagar` | `/contas-pagar` | Tarefa mais frequente do produto (R1, R2). Primeiro item do grupo porque "sair dinheiro" e o que mais assusta e o que mais se registra. |
 | Contas a receber | `Contas a receber` | `/contas-receber` | Espelho da anterior; fica imediatamente abaixo para aproveitar o modelo mental ja formado. Absorve **Cobranca** como aba, porque "quem me deve" e "como cobro" sao a mesma tarefa em momentos diferentes. |
 | Bancos e caixa | `Bancos e caixa` | `/bancos` | O usuario pensa **Banco → Conta → Saldo/Movimentacoes**. O rotulo inclui "caixa" porque dinheiro em especie e uma conta no modelo, mas nao e um banco — sem o rotulo, o usuario nao encontra. |

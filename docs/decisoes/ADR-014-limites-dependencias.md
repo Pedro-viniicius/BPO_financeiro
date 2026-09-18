@@ -37,6 +37,7 @@ Regras (nomes em portugues, cada uma com comentario explicativo):
 | `compartilhado-nao-importa-nada-interno` | compartilhado → qualquer pasta interna |
 | `app-nao-importa-infraestrutura` | app → dominio/aplicacao/infraestrutura ou banco-dados |
 | `banco-dados-so-agrega-esquemas` | banco-dados → qualquer coisa que nao seja esquema |
+| `sistema-de-design-nao-conhece-negocio` | src/interface → modulos, banco, integracoes, composicao, app ou internos do nucleo (Gate 5; ADR-024) |
 | `sem-dependencias-orfas-em-modulos` (aviso) | arquivos sem uso |
 
 Validacao feita no Gate 2: arquivos propositalmente errados dispararam 5

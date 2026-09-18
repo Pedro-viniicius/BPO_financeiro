@@ -14,11 +14,18 @@
 - Verificacao em duas etapas (TOTP) com codigos de recuperacao; contador de
   falhas e bloqueio temporario na tabela `two_factor`.
 - "Continuar com Google" (OAuth/OIDC) opcional; um so conceito de login social.
-- Em producao: cadastro publico desligado (entrada por convite), e-mail
-  verificado obrigatorio.
+- Cadastro publico so para o primeiro usuario da instalacao; depois, em
+  producao, recusado pelo Better Auth (entrada por convite). *Verificado em
+  AMBIENTE=producao: segundo cadastro recebe 403 `CADASTRO_FECHADO`.*
+- Entrar/criar conta pela interface passam pelo handler HTTP da biblioteca:
+  limite de 5 tentativas/min por IP vale tambem para o formulario
+  (*verificado: 6a tentativa recebe "Muitas tentativas"*). Mensagem identica
+  para senha errada e e-mail inexistente.
+- Verificacao de e-mail obrigatoria: adiada ate existir envio de e-mail.
 - Passkeys e SSO: compativeis (plugins da mesma biblioteca), nao ativados.
-- **(Gate 5)** reautenticacao para acoes sensiveis (alterar e-mail, desativar
-  2FA, aprovar pagamentos acima de limite, exportar dados).
+- **(gate de usuarios)** reautenticacao para acoes sensiveis (alterar e-mail,
+  desativar 2FA, aprovar pagamentos acima de limite, exportar dados) e tela
+  do segundo fator no login.
 
 ## 2. Sessoes
 
@@ -28,7 +35,8 @@
   (sair, redefinir senha, remover vinculo) vale na hora. *Verificado:
   `get-session` devolve `null` imediatamente apos `sign-out`.*
 - Redefinicao de senha revoga todas as sessoes.
-- **(Gate 5)** lista de sessoes ativas na tela do usuario, com "encerrar".
+- Sair revoga a sessao no banco e apaga o cookie de empresa ativa.
+- **(gate de usuarios)** lista de sessoes ativas na tela do usuario, com "encerrar".
 
 ## 3. Autorizacao (o que pode fazer)
 
@@ -37,9 +45,18 @@
   `exigirPermissao(contexto, permissao)`. Esconder botao nao e controle de acesso.
 - Escopo de empresa obrigatorio em todo repositorio (`EscopoEmpresa`).
   Usuario sem vinculo com a empresa → `UsuarioSemAcessoAEmpresa`.
+- **Empresa ativa** (Gate 5, ADR-025): resolvida no servidor a cada
+  requisicao a partir dos vinculos ativos do usuario; o cookie
+  `financeiro.empresa-ativa` e preferencia, nunca prova. Id de empresa vindo
+  de URL, cookie, formulario ou cabecalho nunca autoriza sozinho. Detalhe em
+  [`../arquitetura/autenticacao-e-empresa-ativa.md`](../arquitetura/autenticacao-e-empresa-ativa.md).
 - Segregacao de funcoes: papel Financeiro nao aprova; regra de dominio
   `AprovacaoPeloProprioAutor` impede aprovar o que se registrou.
-- **(Gate 5)** testes automatizados de isolamento entre empresas por modulo.
+- Isolamento entre empresas coberto por testes unitarios
+  (`trocar-empresa-ativa.teste.ts`) e de integracao no PostgreSQL
+  (`acesso-empresas.teste.ts`): A nao enxerga, nao ativa e nao opera a
+  empresa de B, mesmo adulterando cookie ou formulario. Cada modulo
+  financeiro futuro acrescenta o seu teste sobre esta base.
 
 ## 4. Segredos
 
@@ -100,8 +117,10 @@
 - Cookies `SameSite=Lax` + verificacao de `Origin` pelo Better Auth nas rotas
   de autenticacao (`trustedOrigins` = `APLICACAO_URL`).
 - Server actions do Next.js verificam origem por padrao.
-- **(Gate 5)** rotas de API proprias que aceitem cookie exigirao cabecalho
-  `Origin` compativel ou token.
+- As acoes de entrar/criar conta repassam o `Origin` do navegador ao Better
+  Auth, que o confere contra `trustedOrigins`.
+- **(quando existirem)** rotas de API proprias que aceitem cookie exigirao
+  cabecalho `Origin` compativel ou token.
 
 ## 11. Injecao de SQL
 

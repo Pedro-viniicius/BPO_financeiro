@@ -27,8 +27,16 @@ hierarquia, dados de clientes diferentes se misturariam.
   Sem ele, uma conta que vence hoje as 21h em Sao Paulo pareceria vencida em UTC.
 - `vinculos_usuario.empresa_id` **nulo** = acesso a todas as empresas da
   organizacao (util para o operador de BPO e o administrador do grupo).
+- `vinculos_usuario.papel`: enum `papel_vinculo` (`administrador`,
+  `financeiro`, `tesouraria`, `controladoria`, `auditor`, `somente_leitura`)
+  — a mesma lista de `nucleo/autorizacao/papeis.ts`, com teste que impede
+  divergencia.
 - `vinculos_usuario.permissoes_extras` / `permissoes_removidas`: ajuste fino
   sobre o papel, sem criar papeis novos.
+- `vinculos_usuario.ativo = false`: vinculo revogado; a linha fica.
+- Unicidade `unico_vinculos_usuario_escopo (usuario_id, organizacao_id,
+  empresa_id)` com `NULLS NOT DISTINCT`: no maximo um vinculo por empresa e
+  um "toda a organizacao" por organizacao.
 
 ## Relacionamentos
 
@@ -50,7 +58,12 @@ usuario      N:N empresas (via vinculos_usuario)
   organizacao diretamente (exceto `pessoas` e `vinculos_usuario`).
 - Empresa e filial sao desativadas (`ativa = false`), nunca apagadas.
 - Apagar uma organizacao com empresas e bloqueado (RESTRICT).
-- Um vinculo revogado encerra o acesso; o historico de auditoria permanece.
+- Um vinculo revogado encerra o acesso na proxima requisicao; o historico de
+  auditoria permanece.
+- A primeira empresa de um usuario nasce pelo instalador
+  (`instalarPrimeiraEmpresa`): organizacao + empresa + vinculo
+  `administrador` + auditoria `empresa.instalada`, em uma transacao
+  (ADR-025).
 
 ## O que NAO pertence aqui
 

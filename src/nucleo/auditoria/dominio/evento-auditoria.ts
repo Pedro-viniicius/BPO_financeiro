@@ -44,6 +44,7 @@ export const ACOES_AUDITORIA = {
   conciliacaoDesfeita: "conciliacao.desfeita",
   extratoImportado: "extrato.importado",
   importacaoRevertida: "importacao.revertida",
+  empresaInstalada: "empresa.instalada",
   usuarioConvidado: "usuario.convidado",
   usuarioPermissaoAlterada: "usuario.permissao_alterada",
   usuarioVinculoRevogado: "usuario.vinculo_revogado",

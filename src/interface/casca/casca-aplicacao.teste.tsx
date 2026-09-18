@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 
 import { PERMISSOES_POR_PAPEL } from "@/nucleo/autorizacao/publico";
 
-import { CascaAplicacao, navegacaoVisivel } from "./casca-aplicacao";
+import { CascaAplicacao } from "./casca-aplicacao";
+import { navegacaoVisivel } from "./mapa-navegacao";
 
 describe("CascaAplicacao", () => {
   it("renderiza cabecalho, navegacao filtrada, conteudo e barra inferior", () => {
@@ -25,5 +26,6 @@ describe("CascaAplicacao", () => {
     expect(html).not.toContain("Resultados");
     expect(html).not.toContain("Orçamento");
     expect(html).toContain('aria-label="Navegação rápida"');
+    expect(html).toContain('href="/inicio"');
   });
 });

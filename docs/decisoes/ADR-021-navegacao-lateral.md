@@ -38,3 +38,5 @@ informacao. No maximo dois itens exibem contador.
   criar um modulo. O `mapa-navegacao.teste.ts` trava o limite de contadores.
 - Em tablet a barra fica compacta; em celular vira painel + barra inferior de
   quatro destinos ([`docs/ux/responsividade.md`](../ux/responsividade.md)).
+- Gate 5: `Início` vive em `/inicio`; `/` apenas redireciona pelo estado de
+  acesso (ADR-025).
