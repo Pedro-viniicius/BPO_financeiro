@@ -31,3 +31,16 @@ export function tomDaSituacao(situacao: SituacaoDerivada): "sucesso" | "perigo" 
       return "neutro";
   }
 }
+
+/**
+ * As categorias que podem classificar uma conta a pagar ou a receber.
+ *
+ * O grupo `transferencia` fica de fora: por definicao do proprio modelo, ele
+ * "nao entra na DRE". E onde vivem coisas como o "Ajuste de saldo" — conserto
+ * de base, nao despesa nem receita. Oferece-lo na lista de uma conta a pagar
+ * criaria um gasto que nunca apareceria no resultado, e ninguem descobriria
+ * isso ate fechar o mes.
+ */
+export function categoriasQueClassificamContas<T extends { grupoDre: string }>(categorias: readonly T[]): readonly T[] {
+  return categorias.filter((categoria) => categoria.grupoDre !== "transferencia");
+}

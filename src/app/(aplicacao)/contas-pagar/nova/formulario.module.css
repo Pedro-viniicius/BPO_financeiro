@@ -1,0 +1,143 @@
+.escolha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+}
+
+.opcao {
+  display: flex;
+  flex: 1 1 12rem;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  min-height: 44px;
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  cursor: pointer;
+}
+
+.opcao:hover {
+  border-color: var(--cor-marca-acao);
+}
+
+.opcao:focus-within {
+  box-shadow: var(--anel-foco);
+}
+
+.opcaoMarcada {
+  border-color: var(--cor-marca-acao);
+  background: var(--superficie-realce);
+}
+
+.opcaoTexto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.opcaoTitulo {
+  font-weight: var(--peso-medio);
+}
+
+.opcaoExplicacao {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.previa {
+  width: 100%;
+  margin-top: var(--espaco-4);
+  border-collapse: collapse;
+}
+
+.previa caption {
+  margin-bottom: var(--espaco-2);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  text-align: left;
+}
+
+.previa th,
+.previa td {
+  padding: var(--espaco-2);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+.previa th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.previa input {
+  width: 100%;
+  min-width: 8rem;
+}
+
+.numero {
+  width: 4rem;
+  color: var(--cor-texto-secundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.conferencia {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+  padding: var(--espaco-3);
+  border-radius: var(--raio-1);
+  background: var(--superficie-afundada);
+  font-size: var(--texto-sm);
+}
+
+.conferencia strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.confere {
+  color: var(--cor-sucesso-forte);
+}
+
+.naoConfere {
+  color: var(--cor-perigo-forte);
+  font-weight: var(--peso-medio);
+}
+
+@media (max-width: 48rem) {
+  .previa,
+  .previa tbody,
+  .previa tr,
+  .previa td {
+    display: block;
+  }
+
+  .previa thead {
+    display: none;
+  }
+
+  .previa tr {
+    margin-bottom: var(--espaco-3);
+    padding-bottom: var(--espaco-3);
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .previa td {
+    border: 0;
+  }
+
+  .previa td::before {
+    content: attr(data-rotulo);
+    display: block;
+    margin-bottom: var(--espaco-1);
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}

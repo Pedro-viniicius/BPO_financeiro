@@ -1,0 +1,93 @@
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-5);
+}
+
+.extrato {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.extrato th,
+.extrato td {
+  padding: var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.extrato th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.numeros {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/*
+ * Verde e vermelho aqui sao SEMANTICOS (entrou / saiu), nunca a cor da marca.
+ * E a coluna sozinha ja diz qual e qual: a cor reforca, nao informa.
+ */
+.entrada {
+  color: var(--cor-valor-positivo);
+}
+
+.saida {
+  color: var(--cor-valor-negativo);
+}
+
+.observacao {
+  display: block;
+  margin-top: var(--espaco-1);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+@media (max-width: 48rem) {
+  .extrato,
+  .extrato tbody,
+  .extrato tr,
+  .extrato td {
+    display: block;
+  }
+
+  .extrato thead {
+    display: none;
+  }
+
+  .extrato tr {
+    margin-bottom: var(--espaco-3);
+    padding: var(--espaco-3);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-2);
+  }
+
+  .extrato td {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--espaco-3);
+    padding: var(--espaco-1) 0;
+    border: 0;
+  }
+
+  .extrato td::before {
+    content: attr(data-rotulo);
+    flex: 0 0 auto;
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .numeros {
+    text-align: right;
+  }
+}

@@ -33,3 +33,138 @@
 @media (max-width: 1023px) {
   .resumo { grid-template-columns: 1fr; }
 }
+
+/* ---- Historico de baixas, com a acao de estorno em cada linha ---- */
+
+.baixas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.baixa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.baixaEstornada {
+  background: var(--superficie-afundada);
+}
+
+.baixaTexto {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.baixaValor {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Riscado marca o que foi desfeito, mas nunca sozinho: o selo "Estornado" ao
+ * lado diz a mesma coisa em palavras. Quem usa leitor de tela nao "ve" o
+ * risco, e quem enxerga pouco pode nao perceber a linha fina.
+ */
+.baixaEstornada .baixaValor {
+  color: var(--cor-texto-fraco);
+  text-decoration: line-through;
+}
+
+.baixaDetalhe {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.baixaMotivo {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  font-style: italic;
+}
+
+.baixaAcao {
+  flex: 0 0 auto;
+}
+
+.parcelas {
+  width: 100%;
+  margin-top: var(--espaco-3);
+  border-collapse: collapse;
+}
+
+.parcelas th,
+.parcelas td {
+  padding: var(--espaco-2) var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+.parcelas th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.parcelaAtual {
+  background: var(--superficie-realce);
+}
+
+.numeros {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+@media (max-width: 48rem) {
+  .parcelas,
+  .parcelas tbody,
+  .parcelas tr,
+  .parcelas td {
+    display: block;
+  }
+
+  .parcelas thead {
+    display: none;
+  }
+
+  .parcelas tr {
+    margin-bottom: var(--espaco-3);
+    padding: var(--espaco-3);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-2);
+  }
+
+  .parcelas td {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--espaco-3);
+    border: 0;
+    padding: var(--espaco-1) 0;
+  }
+
+  .parcelas td::before {
+    content: attr(data-rotulo);
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .numeros {
+    text-align: left;
+  }
+}

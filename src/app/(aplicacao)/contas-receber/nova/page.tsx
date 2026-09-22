@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Aviso, CabecalhoPagina } from "@/interface/componentes/indice";
 import Link from "next/link";
 
+import { categoriasQueClassificamContas } from "../../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../../_apoio/contexto-financeiro";
 import { FormularioNovaContaReceber } from "./formulario";
 
@@ -38,7 +39,7 @@ export default async function PaginaNovaContaReceber() {
           Toda conta a pagar precisa de um cliente e de uma categoria — é a categoria que responde depois “com o que estamos gastando?”.
         </Aviso>
       ) : (
-        <FormularioNovaContaReceber clientees={clientees} categorias={categorias} hoje={hoje} />
+        <FormularioNovaContaReceber clientees={clientees} categorias={categoriasQueClassificamContas(categorias)} hoje={hoje} />
       )}
     </>
   );

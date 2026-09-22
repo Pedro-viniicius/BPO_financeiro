@@ -2,20 +2,13 @@ import type { Metadata } from "next";
 
 import { CabecalhoPagina, EstadoVazio, TituloSecao } from "@/interface/componentes/indice";
 
-import { formatarDinheiro } from "../_apoio/apresentacao";
+import { formatarDataBrasileira, formatarDinheiro } from "../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../_apoio/contexto-financeiro";
 import { TabelaSimples } from "../_apoio/tabela-simples";
 import { FormularioContaBancaria } from "./formulario";
+import { NOMES_TIPO_CONTA } from "./tipos-de-conta";
 
 export const metadata: Metadata = { title: "Bancos e caixa" };
-
-const NOMES_TIPO: Record<string, string> = {
-  conta_corrente: "Conta corrente",
-  conta_poupanca: "Poupança",
-  conta_pagamento: "Conta de pagamento",
-  aplicacao: "Aplicação",
-  caixa: "Caixa",
-};
 
 /**
  * Bancos e caixa — o minimo do Gate 5.
@@ -26,6 +19,9 @@ const NOMES_TIPO: Record<string, string> = {
  *
  * O saldo NAO e uma coluna: e saldo inicial mais as movimentacoes, calculado
  * na consulta. Saldo materializado sai de sincronia e ninguem percebe.
+ *
+ * Cada conta abre o proprio extrato, com saldo acumulado e o lancamento de
+ * ajuste — a forma certa de corrigir um saldo que ja tem historico.
  */
 export default async function PaginaBancos() {
   const { escopo, hoje, permissoes } = await exigirContextoFinanceiro("bancos.visualizar", "/bancos");
@@ -49,15 +45,19 @@ export default async function PaginaBancos() {
             { chave: "tipo", titulo: "Tipo" },
             { chave: "banco", titulo: "Banco" },
             { chave: "agencia", titulo: "Agência / conta" },
+            { chave: "desde", titulo: "Saldo inicial" },
             { chave: "saldo", titulo: "Saldo atual", alinhamento: "direita" },
           ]}
           linhas={contas.map((c) => ({
             chave: c.id,
             celulas: {
-              nome: c.nome,
-              tipo: NOMES_TIPO[c.tipo] ?? c.tipo,
+              // O nome leva ao extrato: e la que se confere o saldo e se acha
+              // o lancamento errado antes de corrigi-lo.
+              nome: { tipo: "link" as const, texto: c.nome, rota: `/bancos/${c.id}` },
+              tipo: NOMES_TIPO_CONTA[c.tipo] ?? c.tipo,
               banco: c.instituicaoNome ?? "—",
               agencia: [c.agencia, c.numeroConta].filter(Boolean).join(" / ") || "—",
+              desde: `${formatarDinheiro(c.saldoInicial)} em ${formatarDataBrasileira(c.dataSaldoInicial)}`,
               saldo: formatarDinheiro(c.saldoAtual),
             },
           }))}

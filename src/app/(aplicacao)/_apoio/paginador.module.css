@@ -1,0 +1,43 @@
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-4);
+  padding-top: var(--espaco-3);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.contagem {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.contagem strong {
+  color: var(--cor-texto-primario);
+  font-variant-numeric: tabular-nums;
+}
+
+.navegacao {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.pagina {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  white-space: nowrap;
+}
+
+.inativo {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  color: var(--cor-texto-fraco);
+  font-size: var(--texto-sm);
+}

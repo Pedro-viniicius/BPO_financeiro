@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Aviso, CabecalhoPagina } from "@/interface/componentes/indice";
 import Link from "next/link";
 
+import { categoriasQueClassificamContas } from "../../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../../_apoio/contexto-financeiro";
 import { FormularioNovaContaPagar } from "./formulario";
 
@@ -38,7 +39,7 @@ export default async function PaginaNovaContaPagar() {
           Toda conta a pagar precisa de um fornecedor e de uma categoria — é a categoria que responde depois “com o que estamos gastando?”.
         </Aviso>
       ) : (
-        <FormularioNovaContaPagar fornecedores={fornecedores} categorias={categorias} hoje={hoje} />
+        <FormularioNovaContaPagar fornecedores={fornecedores} categorias={categoriasQueClassificamContas(categorias)} hoje={hoje} />
       )}
     </>
   );

@@ -1,0 +1,43 @@
+/*
+ * Dobra de correcao (estorno, cancelamento).
+ *
+ * `<summary>` e estilizado como botao secundario, mas continua sendo o
+ * controle nativo de `<details>`: abre e fecha sem JavaScript, com teclado, e
+ * anuncia o estado ao leitor de tela sem nenhum `aria-*` escrito a mao.
+ */
+.dobra {
+  margin: 0;
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espaco-4);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  cursor: pointer;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  list-style: none;
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:hover {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.dobra[open] .gatilho {
+  margin-bottom: var(--espaco-3);
+}

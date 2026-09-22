@@ -1,0 +1,32 @@
+/*
+ * Campo que nao pode mais ser alterado.
+ *
+ * Fundo afundado e borda tracejada dizem "isto nao e um campo" sem depender de
+ * cor, e o motivo em texto fica sempre visivel — nunca em tooltip.
+ */
+.bloqueado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  margin-bottom: var(--espaco-4);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-afundada);
+}
+
+.bloqueadoRotulo {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.bloqueadoValor {
+  font-size: var(--texto-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.bloqueadoMotivo {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
