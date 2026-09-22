@@ -3,17 +3,27 @@
  * Outros modulos (fluxo de caixa, previsao, DRE) importam SOMENTE daqui.
  */
 export {
-  NOMES_SITUACOES,
-  SITUACOES_CONTA_PAGAR,
+  NOMES_SITUACAO_TITULO,
   podeTransitar,
-  type SituacaoContaPagar,
-  type SituacaoExibida,
-} from "./dominio/situacao-conta-pagar";
+  SITUACOES_TITULO_PAGAR,
+  type SituacaoTituloPagar,
+} from "./dominio/situacao-titulo-pagar";
 export {
   AprovacaoPeloProprioAutor,
   ContaPagarJaCancelada,
   ContaPagarNaoEncontrada,
+  EdicaoBloqueadaPorPagamento,
   PagamentoJaRegistrado,
   TransicaoSituacaoInvalida,
 } from "./dominio/erros";
-export type { FiltroContasPagar, RepositorioContasPagar, ResumoContaPagar } from "./aplicacao/repositorio-contas-pagar";
+export type {
+  ContaPagarDetalhada,
+  ContaPagarNaLista,
+  DadosEdicaoContaPagar,
+  DadosNovaContaPagar,
+  DadosPagamento,
+  FiltroContasPagar,
+  PagamentoRegistrado,
+  RepositorioContasPagar,
+} from "./aplicacao/repositorio-contas-pagar";
+export { RepositorioContasPagarDrizzle } from "./infraestrutura/repositorio-contas-pagar-drizzle";

@@ -43,3 +43,18 @@ export class AprovacaoPeloProprioAutor extends ErroDominio {
     super("Quem registrou a conta nao pode aprova-la. Outra pessoa precisa aprovar.");
   }
 }
+
+/**
+ * Depois de existir pagamento, o valor original e a existencia da conta viram
+ * historia: mexer neles faria o saldo ja calculado deixar de bater com o
+ * dinheiro que saiu da conta bancaria. Descricao, categoria e vencimento
+ * continuam editaveis — eles nao alteram a aritmetica.
+ */
+export class EdicaoBloqueadaPorPagamento extends ErroDominio {
+  readonly codigo = "edicao_bloqueada_por_pagamento";
+  readonly categoria: CategoriaErro = "regra_negocio";
+
+  constructor() {
+    super("Esta conta já tem pagamento registrado: o valor original não pode mais ser alterado.");
+  }
+}
