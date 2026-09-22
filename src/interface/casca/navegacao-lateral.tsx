@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
+  estaDisponivel,
   NAVEGACAO_APOIO,
   rotaAtiva,
   type GrupoDeMenu,
@@ -80,6 +81,29 @@ function LinhaDeNavegacao({
   readonly ativo: boolean;
   readonly contador?: number;
 }) {
+  /*
+   * Modulo ainda sem rota: aparece, explica, e nao navega.
+   *
+   * E um <span>, nao um <a> desabilitado: link sem destino continua focavel e
+   * anunciado como link pelo leitor de tela, o que promete uma navegacao que
+   * nao existe. O "Em breve" e texto de verdade dentro do item — nao tooltip,
+   * nem so cor — entao quem usa leitor de tela recebe a mesma informacao que
+   * quem enxerga.
+   */
+  if (!estaDisponivel(item)) {
+    return (
+      <li>
+        <span className={`${estilos.item} ${estilos.emBreve}`} aria-disabled="true" title={item.descricao}>
+          <span className={estilos.rotulo}>{item.rotulo}</span>
+          <span className={estilos.sigla} aria-hidden="true">
+            {item.sigla ?? item.rotulo.slice(0, 2)}
+          </span>
+          <span className={estilos.selo}>Em breve</span>
+        </span>
+      </li>
+    );
+  }
+
   return (
     <li>
       <Link

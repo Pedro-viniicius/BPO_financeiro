@@ -13,6 +13,17 @@ import type { Permissao } from "@/nucleo/autorizacao/publico";
  * barra inferior precisam saber para desenhar um item; manter a permissao
  * fora daqui evita que componentes de apresentacao conhecam autorizacao.
  */
+/**
+ * Um destino esta "disponivel" (rota implementada) ou "em_breve" (aparece no
+ * menu, explica que ainda nao existe, e NAO navega).
+ *
+ * O menu mostra o mapa do produto inteiro de proposito: esconder um modulo
+ * futuro faria o usuario achar que ele nunca vai existir. Mas link que leva a
+ * 404 e pior do que item desabilitado — entao quem ainda nao tem rota fica
+ * visivel e inerte, nunca clicavel.
+ */
+export type Disponibilidade = "disponivel" | "em_breve";
+
 export interface ItemDeMenu {
   /** Rotulo como o usuario le — com acento. */
   readonly rotulo: string;
@@ -28,6 +39,8 @@ export interface ItemDeMenu {
   readonly exata?: boolean;
   /** Apenas dois itens podem exibir contador; mais do que isso vira ruido. */
   readonly aceitaContador?: boolean;
+  /** Ausente significa "disponivel". So os futuros precisam declarar. */
+  readonly disponibilidade?: Disponibilidade;
 }
 
 /** Item do sistema autenticado: um destino do menu MAIS a permissao que o revela. */
@@ -95,6 +108,7 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "Cc",
         permissao: "bancos.conciliar",
         descricao: "Conferir o extrato com os seus lançamentos",
+        disponibilidade: "em_breve",
         aceitaContador: true,
       },
       {
@@ -103,6 +117,7 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "FC",
         permissao: "fluxo_caixa.visualizar",
         descricao: "Entradas e saídas no tempo",
+        disponibilidade: "em_breve",
       },
     ],
   },
@@ -115,6 +130,7 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "Re",
         permissao: "dre.visualizar",
         descricao: "DRE gerencial, margens e indicadores",
+        disponibilidade: "em_breve",
       },
       {
         rotulo: "Orçamento",
@@ -122,6 +138,7 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "Or",
         permissao: "orcamento.visualizar",
         descricao: "Planejado comparado ao realizado",
+        disponibilidade: "em_breve",
       },
       {
         rotulo: "Dívidas",
@@ -129,6 +146,7 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "Dv",
         permissao: "dividas.visualizar",
         descricao: "Empréstimos e financiamentos",
+        disponibilidade: "em_breve",
       },
     ],
   },
@@ -149,6 +167,7 @@ export const NAVEGACAO_APOIO: readonly ItemDeNavegacao[] = [
     sigla: "Cf",
     permissao: "configuracao.gerenciar",
     descricao: "Empresa, usuários, preferências e auditoria",
+    disponibilidade: "em_breve",
   },
 ];
 
@@ -160,6 +179,11 @@ export function navegacaoVisivel(
   return grupos
     .map((grupo) => ({ ...grupo, itens: grupo.itens.filter((item) => permissoes.has(item.permissao)) }))
     .filter((grupo) => grupo.itens.length > 0);
+}
+
+/** Verdadeiro quando o item ja tem rota implementada e pode ser clicado. */
+export function estaDisponivel(item: ItemDeMenu): boolean {
+  return (item.disponibilidade ?? "disponivel") === "disponivel";
 }
 
 /** Verdadeiro quando a rota atual pertence ao item (considera subrotas). */

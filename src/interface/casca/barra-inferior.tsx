@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import estilos from "./barra-inferior.module.css";
-import { rotaAtiva, type ItemDeMenu } from "./mapa-navegacao";
+import { estaDisponivel, rotaAtiva, type ItemDeMenu } from "./mapa-navegacao";
 
 export interface BarraInferiorProps {
   /** Ate quatro destinos; a doc de responsividade fixa: Início, Pagar, Receber, Mais. */
@@ -18,6 +18,9 @@ export interface BarraInferiorProps {
  * renderizada pelo CSS. Ver docs/ux/responsividade.md, secao 3.
  */
 export function BarraInferior({ itens, aoAbrirMais }: BarraInferiorProps) {
+  // A barra inferior tem 4 lugares no celular: gastar um com modulo que nao
+  // abre seria desperdicio. Os futuros ficam so no painel completo.
+  itens = itens.filter(estaDisponivel);
   const rotaAtual = usePathname() ?? "/";
 
   return (

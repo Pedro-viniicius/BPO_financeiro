@@ -1,6 +1,12 @@
 /**
  * Interface publica do modulo "bancos".
- * Ainda sem exportacoes: o modulo sera implementado nos proximos gates.
- * Outros modulos so podem importar deste arquivo.
+ * No Gate 5 entra apenas o minimo que as baixas exigem: contas bancarias e a
+ * movimentacao gerada por pagamento/recebimento. Conciliacao, extrato e fluxo
+ * de caixa sao Gate 6.
  */
-export {};
+export type {
+  ContaBancariaNaLista,
+  DadosNovaContaBancaria,
+  RepositorioContasBancarias,
+} from "./aplicacao/repositorio-contas-bancarias";
+export { RepositorioContasBancariasDrizzle } from "./infraestrutura/repositorio-contas-bancarias-drizzle";

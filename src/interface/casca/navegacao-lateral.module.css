@@ -111,3 +111,35 @@
     display: none;
   }
 }
+
+/*
+ * Modulo ainda nao disponivel: presente no mapa, visivelmente inerte.
+ * Sem cor de link, sem hover, cursor de "nao da para clicar".
+ */
+.emBreve {
+  color: var(--cor-texto-fraco);
+  cursor: not-allowed;
+}
+
+.emBreve:hover {
+  background: transparent;
+}
+
+.selo {
+  margin-left: auto;
+  padding: 2px var(--espaco-2);
+  border: var(--largura-borda) solid var(--cor-borda);
+  border-radius: var(--raio-completo);
+  background: var(--superficie-afundada);
+  color: var(--cor-texto-fraco);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+/* Na barra compacta (tablet) so cabe a sigla; o selo sairia por cima. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .selo {
+    display: none;
+  }
+}

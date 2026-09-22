@@ -1,6 +1,14 @@
 /**
  * Interface publica do modulo "cadastros".
- * Ainda sem exportacoes: o modulo sera implementado nos proximos gates.
- * Outros modulos so podem importar deste arquivo.
+ * Pessoas (identidade, por organizacao) e os papeis cliente/fornecedor
+ * (por empresa), mais categorias financeiras e plano de contas.
  */
-export {};
+export type {
+  CategoriaNaLista,
+  DadosNovaCategoria,
+  DadosNovaPessoa,
+  OpcaoSimples,
+  PessoaNaLista,
+  RepositorioCadastros,
+} from "./aplicacao/repositorio-cadastros";
+export { RepositorioCadastrosDrizzle } from "./infraestrutura/repositorio-cadastros-drizzle";
