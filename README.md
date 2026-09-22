@@ -64,6 +64,11 @@ Verificacoes (o que a CI roda):
 pnpm verificar:tudo    # lint + tipos + arquitetura + testes + licencas + build
 ```
 
+Os testes de integracao (restricoes, privilegios, transacoes, concorrencia e
+isolamento entre empresas) so rodam com `BANCO_URL_TESTE` apontando para um
+banco descartavel com as migracoes aplicadas — o mesmo container acima serve.
+Sem ela, essas suites sao PULADAS e `pnpm testar` passa sem te-las executado.
+
 ## Estrutura
 
 ```
