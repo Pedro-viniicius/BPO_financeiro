@@ -1,14 +1,17 @@
 /**
  * Interface publica do modulo "bancos".
- * Entram as contas bancarias, o extrato com saldo acumulado e o lancamento de
- * ajuste. Conciliacao, importacao de extrato e fluxo de caixa sao Gate 6.
+ * Contas bancarias, extrato com saldo acumulado, lancamento de ajuste e
+ * transferencia entre contas proprias.
  */
 export type {
   ContaBancariaNaLista,
   DadosAjusteDeSaldo,
   DadosEdicaoContaBancaria,
+  DadosEstornoTransferencia,
   DadosNovaContaBancaria,
+  DadosNovaTransferencia,
   LinhaDoExtrato,
   RepositorioContasBancarias,
+  TransferenciaNaLista,
 } from "./aplicacao/repositorio-contas-bancarias";
 export { RepositorioContasBancariasDrizzle } from "./infraestrutura/repositorio-contas-bancarias-drizzle";

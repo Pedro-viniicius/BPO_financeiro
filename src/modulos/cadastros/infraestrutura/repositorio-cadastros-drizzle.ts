@@ -6,7 +6,7 @@ import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
  * outro pelo `publico.ts`, e esquema nao e interface publica.
  */
 import { categoriasFinanceiras, contasPlano } from "@/banco-dados/esquemas/indice";
-import { executarEmTransacao, type BancoDados } from "@/nucleo/banco-dados/publico";
+import { executarEmTransacao, type ExecutorBancoDados } from "@/nucleo/banco-dados/publico";
 
 import type {
   CategoriaNaLista,
@@ -28,7 +28,7 @@ import { clientes, fornecedores, pessoas } from "./esquema";
  * escopo vem do contexto do servidor, nunca do cliente.
  */
 export class RepositorioCadastrosDrizzle implements RepositorioCadastros {
-  constructor(private readonly banco: BancoDados) {}
+  constructor(private readonly banco: ExecutorBancoDados) {}
 
   async listarPessoas(escopo: EscopoEmpresa, busca?: string): Promise<readonly PessoaNaLista[]> {
     const condicoes = [eq(pessoas.organizacaoId, escopo.organizacaoId), eq(pessoas.ativo, true)];

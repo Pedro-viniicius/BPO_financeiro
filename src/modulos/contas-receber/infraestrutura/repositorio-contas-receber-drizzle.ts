@@ -30,7 +30,7 @@ import {
 } from "@/banco-dados/esquemas/indice";
 import { filtroPorSituacaoDerivada, situacaoDerivadaSql } from "@/banco-dados/consultas/situacao-derivada-sql";
 import { RegistradorAuditoriaDrizzle } from "@/nucleo/auditoria/publico";
-import { executarEmTransacao, type BancoDados, type ExecutorBancoDados } from "@/nucleo/banco-dados/publico";
+import { executarEmTransacao, type ExecutorBancoDados } from "@/nucleo/banco-dados/publico";
 import { formatarCodigo, PREFIXOS_CODIGO } from "@/nucleo/codigos/publico";
 
 import type {
@@ -65,7 +65,7 @@ import { parcelasReceber, recebimentos, titulosReceber } from "./esquema";
  * a parcela e guarda o motivo. Nenhum `delete` nesta classe.
  */
 export class RepositorioContasReceberDrizzle implements RepositorioContasReceber {
-  constructor(private readonly banco: BancoDados) {}
+  constructor(private readonly banco: ExecutorBancoDados) {}
 
   /** As colunas que o CASE da situacao derivada le. Uma definicao para consulta e contagem. */
   private colunasDaSituacao() {
@@ -657,7 +657,7 @@ export class RepositorioContasReceberDrizzle implements RepositorioContasReceber
   private async contarBaixasAtivas(
     escopo: EscopoEmpresa,
     tituloId: string,
-    executor: ExecutorBancoDados | BancoDados = this.banco,
+    executor: ExecutorBancoDados = this.banco,
     parcelaId?: string,
   ): Promise<{ noTitulo: number; naParcela: number }> {
     const linhas = await executor

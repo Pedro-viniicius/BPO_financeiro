@@ -67,6 +67,8 @@ export interface LinhaDoExtrato {
   readonly saldoAcumulado: Dinheiro;
   /** Verdadeiro quando esta linha desfaz outra. */
   readonly ehEstorno: boolean;
+  /** Estado na conciliacao: conferida com o extrato ou ainda pendente. */
+  readonly conciliada: boolean;
 }
 
 export interface DadosAjusteDeSaldo {
@@ -75,6 +77,37 @@ export interface DadosAjusteDeSaldo {
   readonly data: DataCivil;
   /** Obrigatorio: um ajuste sem explicacao e um buraco na contabilidade. */
   readonly motivo: string;
+  readonly usuarioId: string;
+}
+
+
+/** Uma transferencia entre duas contas da MESMA empresa. */
+export interface TransferenciaNaLista {
+  readonly id: string;
+  readonly data: DataCivil;
+  readonly valor: Dinheiro;
+  readonly descricao: string | null;
+  readonly contaOrigemId: string;
+  readonly contaOrigemNome: string;
+  readonly contaDestinoId: string;
+  readonly contaDestinoNome: string;
+  readonly estornada: boolean;
+  /** Falso quando ja foi estornada ou quando alguma das duas pontas esta conciliada. */
+  readonly podeEstornar: boolean;
+}
+
+export interface DadosNovaTransferencia {
+  readonly contaOrigemId: string;
+  readonly contaDestinoId: string;
+  readonly data: DataCivil;
+  readonly valor: Dinheiro;
+  readonly descricao?: string;
+  readonly usuarioId: string;
+}
+
+export interface DadosEstornoTransferencia {
+  readonly motivo: string;
+  readonly dataEstorno: DataCivil;
   readonly usuarioId: string;
 }
 
@@ -91,6 +124,14 @@ export interface RepositorioContasBancarias {
    * base do calculo em silencio.
    */
   registrarAjuste(escopo: EscopoEmpresa, contaId: string, dados: DadosAjusteDeSaldo): Promise<{ movimentacaoId: string }>;
+  /**
+   * Transferencia entre contas proprias: duas movimentacoes vinculadas (saida
+   * e entrada) numa unica transacao. Nao e receita nem despesa.
+   */
+  criarTransferencia(escopo: EscopoEmpresa, dados: DadosNovaTransferencia): Promise<{ transferenciaId: string }>;
+  listarTransferencias(escopo: EscopoEmpresa, paginacao: Paginacao): Promise<PaginaResultado<TransferenciaNaLista>>;
+  /** Cria as movimentacoes inversas nas DUAS contas. Nada e apagado. */
+  estornarTransferencia(escopo: EscopoEmpresa, transferenciaId: string, dados: DadosEstornoTransferencia): Promise<void>;
   listarInstituicoes(): Promise<readonly { id: string; nome: string }[]>;
   /**
    * A lista de instituicoes nasce vazia (a semente do Banco Central ficou para

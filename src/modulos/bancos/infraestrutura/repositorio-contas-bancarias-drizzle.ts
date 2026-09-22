@@ -1,23 +1,27 @@
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import type { DataCivil } from "@/compartilhado/datas/indice";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
 import { deslocamento, type EscopoEmpresa, type PaginaResultado, type Paginacao } from "@/compartilhado/tipos/indice";
 /* Tabelas de outro modulo vem do agregador: esquema nao e interface publica. */
-import { categoriasFinanceiras, contasPlano } from "@/banco-dados/esquemas/indice";
+import { categoriasFinanceiras, conciliacoesMovimentacoes, contasPlano } from "@/banco-dados/esquemas/indice";
 import { RegistradorAuditoriaDrizzle } from "@/nucleo/auditoria/publico";
-import { executarEmTransacao, type BancoDados, type ExecutorBancoDados } from "@/nucleo/banco-dados/publico";
+import { executarEmTransacao, type ExecutorBancoDados } from "@/nucleo/banco-dados/publico";
 
 import type {
   ContaBancariaNaLista,
   DadosAjusteDeSaldo,
   DadosEdicaoContaBancaria,
+  DadosEstornoTransferencia,
   DadosNovaContaBancaria,
+  DadosNovaTransferencia,
   LinhaDoExtrato,
   RepositorioContasBancarias,
+  TransferenciaNaLista,
 } from "../aplicacao/repositorio-contas-bancarias";
-import { contasBancarias, instituicoesBancarias, movimentacoesBancarias } from "./esquema";
+import { contasBancarias, instituicoesBancarias, movimentacoesBancarias, transferencias } from "./esquema";
 
 /**
  * Codigo e nome da classificacao usada pelos lancamentos de ajuste.
@@ -43,7 +47,7 @@ const CATEGORIA_AJUSTE = "Ajuste de saldo";
  * outra empresa informando o UUID.
  */
 export class RepositorioContasBancariasDrizzle implements RepositorioContasBancarias {
-  constructor(private readonly banco: BancoDados) {}
+  constructor(private readonly banco: ExecutorBancoDados) {}
 
   /**
    * O saldo sai de `saldo_inicial + entradas - saidas`, calculado na consulta.
@@ -208,8 +212,9 @@ export class RepositorioContasBancariasDrizzle implements RepositorioContasBanca
       observacoes: string | null;
       saldo_acumulado: string;
       eh_estorno: boolean;
+      conciliada: boolean;
     }>(sql`
-      SELECT id, data, tipo, valor, descricao, origem, observacoes, saldo_acumulado, eh_estorno
+      SELECT id, data, tipo, valor, descricao, origem, observacoes, saldo_acumulado, eh_estorno, conciliada
       FROM (
         SELECT
           m.id,
@@ -220,6 +225,10 @@ export class RepositorioContasBancariasDrizzle implements RepositorioContasBanca
           m.origem::text AS origem,
           m.observacoes,
           m.movimentacao_estornada_id IS NOT NULL AS eh_estorno,
+          EXISTS (
+            SELECT 1 FROM conciliacoes_movimentacoes cm
+            WHERE cm.movimentacao_id = m.id AND cm.ativo = true
+          ) AS conciliada,
           ${conta.saldoInicial}::numeric
             + SUM(CASE WHEN m.tipo = 'entrada' THEN m.valor ELSE -m.valor END)
               OVER (ORDER BY m.data_movimentacao, m.criado_em, m.id ROWS UNBOUNDED PRECEDING) AS saldo_acumulado,
@@ -249,6 +258,7 @@ export class RepositorioContasBancariasDrizzle implements RepositorioContasBanca
           observacoes: linha.observacoes,
           saldoAcumulado: Dinheiro.deTexto(linha.saldo_acumulado),
           ehEstorno: linha.eh_estorno,
+          conciliada: linha.conciliada,
         }),
       ),
       total: contagem?.total ?? 0,
@@ -304,6 +314,249 @@ export class RepositorioContasBancariasDrizzle implements RepositorioContasBanca
       });
 
       return { movimentacaoId: movimentacao!.id };
+    }, this.banco);
+  }
+
+  /**
+   * Transferencia entre duas contas da propria empresa.
+   *
+   * Duas movimentacoes numa transacao so: a saida na origem e a entrada no
+   * destino. Se apenas uma entrasse, o dinheiro sumiria (ou nasceria) — e o
+   * erro so apareceria na conciliacao do mes seguinte, quando uma das contas
+   * nao batesse.
+   *
+   * NAO E RECEITA NEM DESPESA. `origem = 'transferencia'` e categoria nula:
+   * o Gate 7 monta o resultado a partir da categoria, entao transferencia
+   * fica de fora sem precisar de excecao escrita la. No fluxo de caixa ela
+   * aparece em coluna propria, porque para UMA conta ela e dinheiro que entra
+   * ou sai de verdade, mesmo sem ser receita nem despesa.
+   */
+  async criarTransferencia(escopo: EscopoEmpresa, dados: DadosNovaTransferencia): Promise<{ transferenciaId: string }> {
+    return executarEmTransacao(async (transacao) => {
+      if (dados.contaOrigemId === dados.contaDestinoId) throw new Error("CONTAS_IGUAIS");
+      if (!dados.valor.ehPositivo()) throw new Error("VALOR_INVALIDO");
+
+      // As DUAS contas precisam ser desta empresa; saber o UUID nao basta.
+      const contas = await transacao
+        .select({ id: contasBancarias.id, nome: contasBancarias.nome })
+        .from(contasBancarias)
+        .where(
+          and(
+            inArray(contasBancarias.id, [dados.contaOrigemId, dados.contaDestinoId]),
+            eq(contasBancarias.empresaId, escopo.empresaId),
+          ),
+        )
+        .for("update");
+      if (contas.length !== 2) throw new Error("CONTA_BANCARIA_NAO_ENCONTRADA");
+
+      const nomeDe = (id: string) => contas.find((conta) => conta.id === id)?.nome ?? "conta";
+      const rotulo = dados.descricao?.trim()
+        ? dados.descricao.trim()
+        : `Transferência ${nomeDe(dados.contaOrigemId)} → ${nomeDe(dados.contaDestinoId)}`;
+
+      const [saida] = await transacao
+        .insert(movimentacoesBancarias)
+        .values({
+          empresaId: escopo.empresaId,
+          contaBancariaId: dados.contaOrigemId,
+          dataMovimentacao: dados.data,
+          tipo: "saida",
+          valor: dados.valor.paraTexto(),
+          descricao: rotulo,
+          origem: "transferencia",
+        })
+        .returning({ id: movimentacoesBancarias.id });
+
+      const [entrada] = await transacao
+        .insert(movimentacoesBancarias)
+        .values({
+          empresaId: escopo.empresaId,
+          contaBancariaId: dados.contaDestinoId,
+          dataMovimentacao: dados.data,
+          tipo: "entrada",
+          valor: dados.valor.paraTexto(),
+          descricao: rotulo,
+          origem: "transferencia",
+        })
+        .returning({ id: movimentacoesBancarias.id });
+
+      const [transferencia] = await transacao
+        .insert(transferencias)
+        .values({
+          empresaId: escopo.empresaId,
+          contaOrigemId: dados.contaOrigemId,
+          contaDestinoId: dados.contaDestinoId,
+          dataTransferencia: dados.data,
+          valor: dados.valor.paraTexto(),
+          descricao: dados.descricao?.trim() || null,
+          movimentacaoSaidaId: saida!.id,
+          movimentacaoEntradaId: entrada!.id,
+        })
+        .returning({ id: transferencias.id });
+
+      await new RegistradorAuditoriaDrizzle(transacao).registrar({
+        acao: "transferencia.criada",
+        entidade: "transferencia",
+        entidadeId: transferencia!.id,
+        organizacaoId: escopo.organizacaoId,
+        empresaId: escopo.empresaId,
+        usuarioId: comoIdentificador<"Usuario">(dados.usuarioId),
+        origem: "interface",
+        dadosDepois: {
+          valor: dados.valor.paraTexto(),
+          data: dados.data,
+          contaOrigemId: dados.contaOrigemId,
+          contaDestinoId: dados.contaDestinoId,
+        },
+      });
+
+      return { transferenciaId: transferencia!.id };
+    }, this.banco);
+  }
+
+  async listarTransferencias(escopo: EscopoEmpresa, paginacao: Paginacao): Promise<PaginaResultado<TransferenciaNaLista>> {
+    const origem = alias(contasBancarias, "conta_origem");
+    const destino = alias(contasBancarias, "conta_destino");
+
+    const linhas = await this.banco
+      .select({
+        id: transferencias.id,
+        data: transferencias.dataTransferencia,
+        valor: transferencias.valor,
+        descricao: transferencias.descricao,
+        contaOrigemId: transferencias.contaOrigemId,
+        contaOrigemNome: origem.nome,
+        contaDestinoId: transferencias.contaDestinoId,
+        contaDestinoNome: destino.nome,
+        movimentacaoSaidaId: transferencias.movimentacaoSaidaId,
+        movimentacaoEntradaId: transferencias.movimentacaoEntradaId,
+        estornada: sql<boolean>`EXISTS (
+          SELECT 1 FROM ${movimentacoesBancarias} e
+          WHERE e.movimentacao_estornada_id IN (${transferencias.movimentacaoSaidaId}, ${transferencias.movimentacaoEntradaId})
+        )`,
+        conciliada: sql<boolean>`EXISTS (
+          SELECT 1 FROM ${conciliacoesMovimentacoes} cm
+          WHERE cm.ativo = true
+            AND cm.movimentacao_id IN (${transferencias.movimentacaoSaidaId}, ${transferencias.movimentacaoEntradaId})
+        )`,
+      })
+      .from(transferencias)
+      .innerJoin(origem, eq(origem.id, transferencias.contaOrigemId))
+      .innerJoin(destino, eq(destino.id, transferencias.contaDestinoId))
+      .where(eq(transferencias.empresaId, escopo.empresaId))
+      .orderBy(desc(transferencias.dataTransferencia), desc(transferencias.criadoEm))
+      .limit(paginacao.tamanho)
+      .offset(deslocamento(paginacao));
+
+    const [contagem] = await this.banco
+      .select({ total: sql<number>`count(*)::int` })
+      .from(transferencias)
+      .where(eq(transferencias.empresaId, escopo.empresaId));
+
+    return {
+      itens: linhas.map(
+        (linha): TransferenciaNaLista => ({
+          id: linha.id,
+          data: linha.data as DataCivil,
+          valor: Dinheiro.deTexto(linha.valor),
+          descricao: linha.descricao,
+          contaOrigemId: linha.contaOrigemId,
+          contaOrigemNome: linha.contaOrigemNome,
+          contaDestinoId: linha.contaDestinoId,
+          contaDestinoNome: linha.contaDestinoNome,
+          estornada: linha.estornada,
+          podeEstornar: !linha.estornada && !linha.conciliada,
+        }),
+      ),
+      total: contagem?.total ?? 0,
+      pagina: paginacao.pagina,
+      tamanho: paginacao.tamanho,
+    };
+  }
+
+  /**
+   * Estorno de transferencia: as DUAS pontas voltam.
+   *
+   * Nao existe coluna de estorno em `transferencias`, e nem precisa: o estorno
+   * vive onde o dinheiro esta, nas movimentacoes. Cada uma das duas originais
+   * ganha a sua inversa com `origem = 'estorno'`, e o indice unico
+   * `unico_movimentacoes_estorno` impede estornar a mesma transferencia duas
+   * vezes — a segunda tentativa esbarra no banco, mesmo em corrida.
+   */
+  async estornarTransferencia(
+    escopo: EscopoEmpresa,
+    transferenciaId: string,
+    dados: DadosEstornoTransferencia,
+  ): Promise<void> {
+    await executarEmTransacao(async (transacao) => {
+      const [transferencia] = await transacao
+        .select({
+          id: transferencias.id,
+          valor: transferencias.valor,
+          contaOrigemId: transferencias.contaOrigemId,
+          contaDestinoId: transferencias.contaDestinoId,
+          movimentacaoSaidaId: transferencias.movimentacaoSaidaId,
+          movimentacaoEntradaId: transferencias.movimentacaoEntradaId,
+        })
+        .from(transferencias)
+        .where(and(eq(transferencias.id, transferenciaId), eq(transferencias.empresaId, escopo.empresaId)))
+        .for("update")
+        .limit(1);
+      if (!transferencia) throw new Error("TRANSFERENCIA_NAO_ENCONTRADA");
+
+      const pontas = [transferencia.movimentacaoSaidaId, transferencia.movimentacaoEntradaId];
+
+      const [jaEstornada] = await transacao
+        .select({ id: movimentacoesBancarias.id })
+        .from(movimentacoesBancarias)
+        .where(inArray(movimentacoesBancarias.movimentacaoEstornadaId, pontas))
+        .limit(1);
+      if (jaEstornada) throw new Error("TRANSFERENCIA_JA_ESTORNADA");
+
+      // Mesmo acordo do Gate 5.1: nao se desfaz o que ja foi conferido com o
+      // extrato sem antes desfazer a conciliacao, que tem registro proprio.
+      const [conciliada] = await transacao
+        .select({ id: conciliacoesMovimentacoes.id })
+        .from(conciliacoesMovimentacoes)
+        .where(and(inArray(conciliacoesMovimentacoes.movimentacaoId, pontas), eq(conciliacoesMovimentacoes.ativo, true)))
+        .limit(1);
+      if (conciliada) throw new Error("TRANSFERENCIA_CONCILIADA");
+
+      await transacao.insert(movimentacoesBancarias).values([
+        {
+          empresaId: escopo.empresaId,
+          contaBancariaId: transferencia.contaOrigemId,
+          dataMovimentacao: dados.dataEstorno,
+          tipo: "entrada",
+          valor: transferencia.valor,
+          descricao: "Estorno de transferência",
+          origem: "estorno",
+          movimentacaoEstornadaId: transferencia.movimentacaoSaidaId,
+          observacoes: dados.motivo,
+        },
+        {
+          empresaId: escopo.empresaId,
+          contaBancariaId: transferencia.contaDestinoId,
+          dataMovimentacao: dados.dataEstorno,
+          tipo: "saida",
+          valor: transferencia.valor,
+          descricao: "Estorno de transferência",
+          origem: "estorno",
+          movimentacaoEstornadaId: transferencia.movimentacaoEntradaId,
+          observacoes: dados.motivo,
+        },
+      ]);
+
+      await new RegistradorAuditoriaDrizzle(transacao).registrar({
+        acao: "transferencia.estornada",
+        entidade: "transferencia",
+        entidadeId: transferenciaId,
+        organizacaoId: escopo.organizacaoId,
+        empresaId: escopo.empresaId,
+        usuarioId: comoIdentificador<"Usuario">(dados.usuarioId),
+        origem: "interface",
+        dadosDepois: { motivo: dados.motivo, valor: transferencia.valor, data: dados.dataEstorno },
+      });
     }, this.banco);
   }
 

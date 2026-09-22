@@ -45,10 +45,19 @@ export function obterBancoDados(): BancoDados {
  * Executa uma funcao dentro de uma transacao. Se a funcao lancar, tudo e desfeito.
  * Use para operacoes que escrevem em mais de uma tabela (ex.: registrar pagamento
  * + movimentacao + evento de saida + auditoria).
+ *
+ * O segundo parametro aceita uma TRANSACAO, nao so a conexao. Quando recebe
+ * uma, o PostgreSQL abre um SAVEPOINT em vez de uma transacao nova: a operacao
+ * interna passa a fazer parte da externa e e desfeita junto com ela.
+ *
+ * E isso que permite conciliar e dar baixa no mesmo ato (Gate 6): a
+ * conciliacao abre a transacao e entrega essa transacao ao repositorio de
+ * contas a pagar, em vez de cada um abrir a sua e o sistema ficar com metade
+ * do trabalho feito se a segunda falhar.
  */
 export async function executarEmTransacao<T>(
   operacao: (transacao: TransacaoBancoDados) => Promise<T>,
-  banco: BancoDados = obterBancoDados(),
+  banco: ExecutorBancoDados = obterBancoDados(),
 ): Promise<T> {
-  return banco.transaction(operacao);
+  return banco.transaction(operacao) as Promise<T>;
 }
