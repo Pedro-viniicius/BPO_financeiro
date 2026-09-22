@@ -1,0 +1,74 @@
+.contas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--espaco-4);
+  margin: var(--espaco-4) 0;
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-afundada);
+}
+
+.contas dt {
+  margin-bottom: var(--espaco-1);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.contas dd {
+  margin: 0;
+}
+
+.numero {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+.alerta {
+  color: var(--cor-perigo-forte);
+}
+
+/* Dobra nativa: abrir e fechar sem JavaScript. */
+.dobra {
+  margin: 0;
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espaco-4);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  cursor: pointer;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  list-style: none;
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:hover {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.corpoDobra {
+  margin-top: var(--espaco-3);
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background: var(--superficie-afundada);
+}

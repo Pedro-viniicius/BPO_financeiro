@@ -108,7 +108,6 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "Cc",
         permissao: "bancos.conciliar",
         descricao: "Conferir o extrato com os seus lançamentos",
-        disponibilidade: "em_breve",
         aceitaContador: true,
       },
       {
@@ -117,7 +116,6 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "FC",
         permissao: "fluxo_caixa.visualizar",
         descricao: "Entradas e saídas no tempo",
-        disponibilidade: "em_breve",
       },
     ],
   },

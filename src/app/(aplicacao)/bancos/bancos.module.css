@@ -1,0 +1,33 @@
+.transferencias {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin: var(--espaco-3) 0 var(--espaco-5);
+  padding: 0;
+  list-style: none;
+}
+
+.transferencia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.transferenciaValor {
+  margin: 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+.transferenciaApoio {
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}

@@ -1,0 +1,232 @@
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-5);
+}
+
+.seletor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-5);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* ---- Duas colunas no desktop, empilhado no celular ---- */
+
+.painel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--espaco-5);
+  align-items: start;
+}
+
+.coluna {
+  min-width: 0;
+}
+
+.tituloColuna {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-3);
+}
+
+.contagem {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.itemConciliado {
+  background: var(--superficie-afundada);
+  border-style: dashed;
+}
+
+.itemIgnorado {
+  background: var(--superficie-afundada);
+  opacity: 0.85;
+}
+
+.itemExato {
+  border-left: 3px solid var(--cor-sucesso-forte);
+}
+
+.itemRevisao {
+  border-left: 3px solid var(--cor-atencao-forte);
+}
+
+.linhaTopo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
+
+.valor {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+.entrada {
+  color: var(--cor-valor-positivo);
+}
+
+.saida {
+  color: var(--cor-valor-negativo);
+}
+
+.descricao {
+  margin: var(--espaco-1) 0 0;
+  overflow-wrap: anywhere;
+}
+
+.apoio {
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.sugestao {
+  margin-top: var(--espaco-3);
+  padding-top: var(--espaco-3);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+}
+
+.candidatas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin: var(--espaco-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.candidata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  padding: var(--espaco-2) var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background: var(--superficie-afundada);
+  font-size: var(--texto-sm);
+}
+
+.marcavel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  cursor: pointer;
+}
+
+.dobra {
+  margin-top: var(--espaco-2);
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espaco-4);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  cursor: pointer;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  list-style: none;
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:hover {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.dobra[open] .gatilho {
+  margin-bottom: var(--espaco-3);
+}
+
+.corpoDobra {
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background: var(--superficie-afundada);
+}
+
+.diferencaZerada {
+  color: var(--cor-sucesso-forte);
+  font-weight: var(--peso-medio);
+}
+
+.diferencaAberta {
+  color: var(--cor-perigo-forte);
+  font-weight: var(--peso-medio);
+}
+
+.importacoes {
+  width: 100%;
+  margin-top: var(--espaco-3);
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+
+.importacoes th,
+.importacoes td {
+  padding: var(--espaco-2) var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+@media (max-width: 62rem) {
+  .painel {
+    grid-template-columns: 1fr;
+  }
+}

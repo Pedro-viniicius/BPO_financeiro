@@ -1,0 +1,218 @@
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-5);
+}
+
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-5);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+/* ---- Grafico de saldo ---- */
+
+.grafico {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espaco-1);
+  height: 11rem;
+  margin-bottom: var(--espaco-5);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  overflow-x: auto;
+}
+
+.coluna {
+  display: flex;
+  flex: 1 1 2rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--espaco-1);
+  min-width: 2.5rem;
+  height: 100%;
+}
+
+.trilho {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+}
+
+.haste {
+  width: 100%;
+  min-height: 2px;
+  border-radius: var(--raio-1) var(--raio-1) 0 0;
+  background: var(--cor-marca-acao);
+}
+
+/* Previsto: mesma cor, textura mais leve. A legenda diz o mesmo em palavras. */
+.hastePrevista {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--cor-marca-media) 0 6px,
+    var(--superficie-realce) 6px 12px
+  );
+  border: 1px solid var(--cor-marca-borda);
+}
+
+.hasteNegativa {
+  background: var(--cor-perigo-forte);
+}
+
+.rotuloColuna {
+  color: var(--cor-texto-fraco);
+  font-size: var(--texto-xs);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-4);
+  margin: calc(var(--espaco-5) * -1) 0 var(--espaco-5);
+  padding-top: var(--espaco-3);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.amostra {
+  display: inline-block;
+  width: 1rem;
+  height: 0.75rem;
+  margin-right: var(--espaco-2);
+  vertical-align: -1px;
+  border-radius: 2px;
+}
+
+/* ---- Tabela ---- */
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+.tabela th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.numeros {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.linhaPrevista {
+  background: var(--superficie-realce);
+}
+
+.linhaPrevista td:first-child {
+  border-left: 3px solid var(--cor-marca-borda);
+}
+
+.negativo {
+  color: var(--cor-valor-negativo);
+  font-weight: var(--peso-medio);
+}
+
+.positivo {
+  color: var(--cor-valor-positivo);
+}
+
+.atraso {
+  margin-bottom: var(--espaco-5);
+}
+
+.atrasoLinha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-2);
+}
+
+.mobileSo {
+  display: none;
+}
+
+@media (max-width: 60rem) {
+  .tabela {
+    display: none;
+  }
+
+  .mobileSo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--espaco-3);
+  }
+
+  .cartaoPeriodo {
+    padding: var(--espaco-4);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-2);
+    background: var(--superficie-cartao);
+  }
+
+  .cartaoPrevisto {
+    background: var(--superficie-realce);
+    border-left: 3px solid var(--cor-marca-borda);
+  }
+
+  .cartaoTitulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-2);
+    margin-bottom: var(--espaco-3);
+    font-weight: var(--peso-medio);
+  }
+
+  .cartaoDados {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--espaco-1) var(--espaco-3);
+    margin: 0;
+    font-size: var(--texto-sm);
+  }
+
+  .cartaoDados dt {
+    color: var(--cor-texto-secundario);
+  }
+
+  .cartaoDados dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+}
