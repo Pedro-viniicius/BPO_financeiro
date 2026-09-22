@@ -2,12 +2,19 @@
 .titulo {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-1);
+  gap: var(--espaco-2);
+}
+
+.titulo h1 {
+  font-size: var(--texto-xl);
+  color: var(--cor-texto-primario);
 }
 
 .descricao {
+  margin: 0;
   color: var(--cor-texto-secundario);
-  font-size: var(--texto-sm);
+  font-size: var(--texto-base);
+  text-wrap: pretty;
 }
 
 .formulario {
@@ -40,6 +47,27 @@
 .ligacoes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--espaco-3);
+  align-items: baseline;
+  gap: var(--espaco-2);
+  margin: 0;
+  color: var(--cor-texto-secundario);
   font-size: var(--texto-sm);
+}
+
+/* Links discretos, porem legiveis: cor da marca que passa AA sobre o cartao. */
+.ligacoes :global(a) {
+  color: var(--cor-marca-texto);
+  font-weight: var(--peso-medio);
+  text-decoration: none;
+  border-bottom: var(--largura-borda) solid var(--cor-marca-borda);
+}
+
+.ligacoes :global(a:hover) {
+  border-bottom-color: var(--cor-marca-acao);
+}
+
+/* Separador entre blocos de links, sem virar uma parede de linhas. */
+.ligacoes + .ligacoes {
+  padding-top: var(--espaco-3);
+  border-top: var(--largura-borda) solid var(--cor-borda);
 }

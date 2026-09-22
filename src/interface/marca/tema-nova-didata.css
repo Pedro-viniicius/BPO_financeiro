@@ -1,0 +1,152 @@
+/*
+ * Tema da marca Nova Didata.
+ *
+ * Este arquivo REDEFINE tokens de `tokens.css`. Ele e o unico lugar com cor,
+ * raio, sombra e tipografia proprios da marca. Para vestir o mesmo software
+ * com outra identidade, copie este arquivo, troque os valores e ajuste o
+ * `@import` em `estilos/global.css` — nada mais precisa mudar.
+ *
+ * Direcao visual: laranja institucional sobre neutros quentes e claros.
+ * Profissional e direto, com energia; nunca infantil, nunca "tudo laranja".
+ *
+ * ----------------------------------------------------------------------
+ * O PROBLEMA DO LARANJA, E COMO ELE FOI RESOLVIDO
+ *
+ * O laranja da marca e #FF7B00 (medido na logo oficial: 99,6% dos pixels
+ * opacos sao exatamente essa cor). Ele e vivo e claro — e por isso NAO serve
+ * de fundo para texto:
+ *
+ *     branco sobre #FF7B00 .......... 2,60:1   reprova AA (minimo 4,5:1)
+ *
+ * Pintar o botao primario de #FF7B00 com texto branco seria bonito na captura
+ * de tela e ilegivel no uso. Entao a identidade foi separada em tres papeis,
+ * todos do mesmo matiz (29 graus) — a marca continua sendo uma cor so, lida em
+ * intensidades diferentes:
+ *
+ *     -forte  #FF7B00  identidade pura: simbolo, realces, item ativo, graficos
+ *     -acao   #B35600  fundo de botao primario   -> branco por cima: 4,94:1 AA
+ *     -texto  #A64F00  links e texto da marca    -> sobre cartao:    5,62:1 AA
+ *
+ * Contrastes verificados (WCAG 2.1 AA):
+ *     texto primario  #1A1512 sobre cartao ....... 18,10:1
+ *     texto secundario#4A403A sobre cartao ....... 10,07:1
+ *     texto fraco     #6B5F57 sobre cartao ........ 6,18:1
+ *     botao hover     branco sobre #944600 ........ 6,70:1
+ *
+ * ----------------------------------------------------------------------
+ * MARCA NAO E SEMANTICA
+ *
+ * O laranja institucional nunca substitui cor de significado. Em um sistema
+ * financeiro, trocar isso custa dinheiro de verdade: alguem leria "atencao"
+ * como "marca" e passaria batido por uma conta vencida.
+ *
+ *     verde    -> sucesso, recebimento, resultado positivo
+ *     vermelho -> erro, risco, saida critica
+ *     amarelo  -> atencao
+ *     laranja  -> identidade e acao primaria
+ *
+ * O amarelo de atencao (#7A5C00, matiz 45) fica a 16 graus do laranja da
+ * marca — separacao suficiente, e reforcada porque avisos sempre trazem fundo
+ * e borda proprios, alem de titulo e icone. Cor nunca e o unico sinal.
+ */
+
+:root {
+  /* ---------------------------------------------------------------- *
+   * Marca                                                             *
+   * ---------------------------------------------------------------- */
+  --cor-marca-forte: #ff7b00;
+  --cor-marca-media: #ff9433;
+  --cor-marca-suave: #fff4e8;
+  --cor-marca-borda: #ffd2a6;
+  --cor-marca-contraste: #ffffff;
+
+  /* Papeis que precisam passar no contraste. Ver o bloco acima. */
+  --cor-marca-acao: #b35600;
+  --cor-marca-acao-hover: #944600;
+  --cor-marca-texto: #a64f00;
+
+  --marca-gradiente: linear-gradient(135deg, #ff7b00 0%, #ff9433 100%);
+
+  /* Acento: usado em realces e graficos, nunca como unica informacao. */
+  --cor-acento-forte: #8a4300;
+  --cor-acento-grafico: #ffa24d;
+  --cor-acento-suave: #fff4e8;
+  --cor-acento-borda: #ffd2a6;
+
+  /* ---------------------------------------------------------------- *
+   * Superficies — neutros quentes, nunca cinza frio de escritorio     *
+   * ---------------------------------------------------------------- */
+  --superficie-fundo: #faf7f4;
+  --superficie-cartao: #ffffff;
+  --superficie-elevada: #ffffff;
+  --superficie-afundada: #f2ede7;
+  --superficie-barra: #ffffff;
+  --superficie-realce: #fff6ee;
+
+  --cor-texto-primario: #1a1512;
+  --cor-texto-secundario: #4a403a;
+  --cor-texto-fraco: #6b5f57;
+  --cor-texto-invertido: #ffffff;
+
+  --cor-borda: #e7dfd7;
+  --cor-borda-forte: #6b5f57;
+
+  --cor-neutro-forte: #4a403a;
+  --cor-neutro-suave: #f2ede7;
+  --cor-neutro-borda: #e7dfd7;
+
+  /* ---------------------------------------------------------------- *
+   * Semantica — mantida acessivel e distinguivel do laranja da marca  *
+   * ---------------------------------------------------------------- */
+  --cor-informacao-forte: #1b4f7a;
+  --cor-informacao-suave: #eaf2f9;
+  --cor-informacao-borda: #a8c8e2;
+
+  --cor-sucesso-forte: #1a6647;
+  --cor-sucesso-suave: #e4f2eb;
+  --cor-sucesso-borda: #a3cdb9;
+
+  --cor-atencao-forte: #7a5c00;
+  --cor-atencao-suave: #fdf6dc;
+  --cor-atencao-borda: #e3d08c;
+
+  --cor-perigo-forte: #a32a20;
+  --cor-perigo-forte-hover: #8a241b;
+  --cor-perigo-suave: #fceae7;
+  --cor-perigo-borda: #e6ada6;
+
+  --cor-valor-positivo: #1a6647;
+  --cor-valor-negativo: #a32a20;
+  --cor-valor-neutro: #1a1512;
+
+  /* ---------------------------------------------------------------- *
+   * Forma                                                             *
+   * ---------------------------------------------------------------- */
+  --raio-1: 6px;
+  --raio-2: 10px;
+  --raio-3: 16px;
+  --raio-cartao: var(--raio-3);
+
+  /* Sombras quentes: usam o marrom do texto, nao cinza puro. */
+  --sombra-1: 0 1px 2px rgba(26, 21, 18, 0.05);
+  --sombra-2: 0 4px 16px rgba(26, 21, 18, 0.07);
+  --sombra-3: 0 18px 40px rgba(26, 21, 18, 0.14);
+  --sombra-cartao: var(--sombra-1);
+
+  /* ---------------------------------------------------------------- *
+   * Tipografia                                                        *
+   * ---------------------------------------------------------------- */
+  --fonte-base: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-titulo: var(--fonte-base);
+  --rastreio-titulo: -0.015em;
+
+  /*
+   * Foco: anel solido no laranja profundo (4,94:1 com o cartao) mais halo na
+   * cor viva da marca. O laranja vivo sozinho daria 2,60:1 — abaixo dos 3:1
+   * que a WCAG exige para componentes de interface.
+   */
+  --cor-foco: #b35600;
+  --anel-foco: 0 0 0 2px var(--superficie-cartao), 0 0 0 4px var(--cor-foco), 0 0 0 7px rgba(255, 123, 0, 0.3);
+  --cor-selecao: #fff4e8;
+  --cor-sobreposicao: rgba(26, 21, 18, 0.5);
+}

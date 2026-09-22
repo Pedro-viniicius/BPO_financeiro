@@ -9,7 +9,7 @@
  * identidade (cor, raio, sombra, tipografia). Trocar de marca = trocar esta
  * unica linha e o arquivo correspondente em `src/interface/marca/`.
  */
-@import "../marca/tema-essencial-fit.css";
+@import "../marca/tema-nova-didata.css";
 
 *,
 *::before,

@@ -23,7 +23,7 @@ export default async function PaginaEntrar({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <TituloFormularioSimples titulo="Entrar" descricao="Use o e-mail e a senha da sua conta." />
+      <TituloFormularioSimples titulo="Entrar" descricao="Acesse o financeiro da sua empresa." />
       <FormularioEntrar retorno={retorno} sessaoExpirada={sessaoExpirada} senhaRedefinida={senhaRedefinida} />
       <LigacoesFormularioSimples>
         <Link href={ROTAS.esqueciSenha}>Esqueci minha senha</Link>

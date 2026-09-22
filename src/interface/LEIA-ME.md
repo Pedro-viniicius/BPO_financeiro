@@ -6,7 +6,7 @@ Sistema de design e casca da aplicacao (Gate 4). Documentacao em
 | Pasta | Conteudo | Pode importar |
 |---|---|---|
 | `tokens/` | `tokens.css` (unica fonte de valores visuais) e `pontos-de-quebra.ts` | nada |
-| `marca/` | Identidade da empresa dona da instalacao: `identidade.ts` (nome, assinatura, perguntas), `tema-essencial-fit.css` (redefine os tokens) e `logotipo.tsx`. Trocar de marca acontece aqui. | `tokens/` |
+| `marca/` | Identidade da empresa dona da instalacao: `identidade.ts` (nome, assinatura, perguntas), `tema-nova-didata.css` (redefine os tokens) e `logotipo.tsx`. Trocar de marca acontece aqui. | `tokens/` |
 | `estilos/` | `global.css`: reset, foco, utilitarios (`.numero-tabular`, `.apenas-leitor-de-tela`, `.pular-para-conteudo`); importa `tokens/` e o tema da marca | `tokens/`, `marca/` |
 | `formatacao/` | valor → texto: `formatarDinheiro`, `formatarData`, `formatarPercentual` | `compartilhado/` |
 | `componentes/` | 29 componentes, um por pasta (`nome/nome.tsx` + `nome.module.css`), exportados por `indice.ts` | `tokens/`, `formatacao/`, `compartilhado/` |

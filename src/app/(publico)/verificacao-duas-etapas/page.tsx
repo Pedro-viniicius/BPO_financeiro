@@ -29,7 +29,7 @@ export default async function PaginaVerificacaoDuasEtapas({
     <>
       <TituloFormularioSimples
         titulo="Verificação em duas etapas"
-        descricao="Sua conta pede um código do aplicativo de autenticação para concluir a entrada."
+        descricao="Informe o código do seu aplicativo de autenticação para concluir a entrada."
       />
       <FormularioSegundoFator retorno={retorno} rotaEntrar={ROTAS.entrar} />
     </>

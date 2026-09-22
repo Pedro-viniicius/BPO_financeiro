@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--espaco-2);
-  color: var(--cor-marca-forte);
+  color: var(--cor-marca-texto);
   font-family: var(--fonte-titulo);
   letter-spacing: var(--rastreio-titulo);
   text-decoration: none;
@@ -25,7 +25,16 @@
 
 .nome {
   font-weight: var(--peso-forte);
-  color: var(--cor-marca-forte);
+  /* Texto na cor da marca usa o tom que passa no contraste, nao o vivo. */
+  color: var(--cor-marca-texto);
+}
+
+/* Arte oficial: nunca deforma e nunca estoura o container. */
+.arte {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
 }
 
 .assinatura {

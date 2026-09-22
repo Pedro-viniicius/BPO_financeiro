@@ -42,7 +42,7 @@ export default async function PaginaRedefinirSenha({
 
   return (
     <>
-      <TituloFormularioSimples titulo="Escolha uma nova senha" descricao="Depois de salvar, entre com a senha nova." />
+      <TituloFormularioSimples titulo="Escolha uma nova senha" descricao="Depois de salvar, entre com a nova senha." />
       <FormularioRedefinirSenha token={token} rotaEsqueciSenha={ROTAS.esqueciSenha} tamanhoMinimoSenha={TAMANHO_MINIMO_SENHA} />
     </>
   );

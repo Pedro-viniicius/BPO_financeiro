@@ -90,6 +90,22 @@
   --cor-marca-contraste: #ffffff;
   --marca-gradiente: linear-gradient(135deg, #17548c 0%, #2b6ca8 100%);
 
+  /*
+   * A cor da marca nem sempre serve de FUNDO para texto: marcas claras e
+   * saturadas (um laranja vivo, por exemplo) reprovam o contraste minimo com
+   * branco por cima. Por isso a identidade tem tres papeis separados, e o tema
+   * decide o valor de cada um:
+   *
+   *   -forte  identidade: simbolo, realces, indicador de item ativo
+   *   -acao   fundo de botao primario; precisa passar AA com -contraste
+   *   -texto  texto e links na cor da marca sobre fundo claro; precisa passar AA
+   *
+   * Em marcas escuras os tres podem ser o mesmo valor. Em marcas claras, nao.
+   */
+  --cor-marca-acao: #17548c;
+  --cor-marca-acao-hover: #123f69;
+  --cor-marca-texto: #17548c;
+
   /* Acento: usado em destaques e em graficos, nunca como unica informacao. */
   --cor-acento-forte: #5b4a00;
   --cor-acento-grafico: #b99400;
@@ -113,6 +129,7 @@
   --cor-atencao-borda: #ddc188;
 
   --cor-perigo-forte: #9c241d;
+  --cor-perigo-forte-hover: #8a241b;
   --cor-perigo-suave: #fbe9e7;
   --cor-perigo-borda: #e2aba6;
 
@@ -127,8 +144,12 @@
    * ---------------------------------------------------------------- */
   --opacidade-desabilitado: 0.55;
   --opacidade-carregando: 0.6;
+  /*
+   * Foco visivel: anel SOLIDO (>= 3:1 com o fundo, WCAG 2.4.11) mais um halo
+   * suave. O halo sozinho nao basta — e translucido e some em fundo claro.
+   */
   --cor-foco: #17548c;
-  --anel-foco: 0 0 0 3px rgba(23, 84, 140, 0.35);
+  --anel-foco: 0 0 0 2px var(--superficie-cartao), 0 0 0 4px var(--cor-foco), 0 0 0 7px rgba(23, 84, 140, 0.25);
   --cor-sobreposicao: rgba(22, 25, 29, 0.45);
   --cor-selecao: #e8f0f8;
 

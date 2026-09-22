@@ -5,9 +5,21 @@
   gap: var(--espaco-2);
   border-radius: var(--raio-2);
   border: var(--largura-borda) solid transparent;
+  font-family: inherit;
   font-weight: var(--peso-medio);
+  line-height: 1;
   cursor: pointer;
-  transition: background var(--transicao-rapida), border-color var(--transicao-rapida);
+  transition: background var(--transicao-rapida), border-color var(--transicao-rapida), color var(--transicao-rapida);
+}
+
+/*
+ * Foco visivel em TODAS as variantes. Antes nao havia nenhuma regra: quem
+ * navega por teclado dependia do contorno padrao do navegador, que some
+ * assim que o componente ganha `border-radius` e fundo proprio.
+ */
+.botao:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
 }
 
 .normal {
@@ -27,13 +39,22 @@
   cursor: not-allowed;
 }
 
+/*
+ * Primario: fundo na cor de ACAO da marca (a que passa no contraste com o
+ * texto invertido), nao na cor viva da identidade. Ver `tema-nova-didata.css`.
+ */
 .primario {
-  background: var(--cor-marca-forte);
-  color: var(--cor-texto-invertido);
+  background: var(--cor-marca-acao);
+  color: var(--cor-marca-contraste);
 }
 
 .primario:hover:not(:disabled) {
-  background: #123f69;
+  background: var(--cor-marca-acao-hover);
+}
+
+.primario:active:not(:disabled) {
+  background: var(--cor-marca-acao-hover);
+  transform: translateY(1px);
 }
 
 .secundario {
@@ -44,11 +65,12 @@
 
 .secundario:hover:not(:disabled) {
   background: var(--superficie-realce);
+  border-color: var(--cor-marca-acao);
 }
 
 .discreto {
   background: transparent;
-  color: var(--cor-marca-forte);
+  color: var(--cor-marca-texto);
 }
 
 .discreto:hover:not(:disabled) {
@@ -61,5 +83,15 @@
 }
 
 .perigo:hover:not(:disabled) {
-  background: #7d1c16;
+  background: var(--cor-perigo-forte-hover);
+}
+
+/* Quem desliga animacoes nao quer o botao "afundando" ao clicar. */
+@media (prefers-reduced-motion: reduce) {
+  .botao {
+    transition: none;
+  }
+  .primario:active:not(:disabled) {
+    transform: none;
+  }
 }

@@ -15,7 +15,7 @@ export default async function PaginaEsqueciSenha() {
     <>
       <TituloFormularioSimples
         titulo="Esqueci minha senha"
-        descricao="Enviaremos um link para você escolher uma nova senha."
+        descricao="Enviaremos um link para você criar uma nova senha."
       />
       <FormularioEsqueciSenha rotaEntrar={ROTAS.entrar} />
     </>

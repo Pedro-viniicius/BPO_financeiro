@@ -39,7 +39,48 @@
   border: var(--largura-borda) solid var(--cor-borda-forte);
   border-radius: var(--raio-2);
   background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  font-family: inherit;
   font-size: var(--texto-md);
+  transition: border-color var(--transicao-rapida), box-shadow var(--transicao-rapida);
+}
+
+.campo :global(input)::placeholder,
+.campo :global(textarea)::placeholder {
+  /* Placeholder e exemplo, nunca rotulo: fica claro que e texto auxiliar. */
+  color: var(--cor-texto-fraco);
+  opacity: 1;
+}
+
+.campo :global(input:hover:not(:disabled)),
+.campo :global(select:hover:not(:disabled)),
+.campo :global(textarea:hover:not(:disabled)) {
+  border-color: var(--cor-marca-acao);
+}
+
+/* Foco: anel da marca em vez do contorno generico do navegador. */
+.campo :global(input:focus-visible),
+.campo :global(select:focus-visible),
+.campo :global(textarea:focus-visible) {
+  outline: none;
+  border-color: var(--cor-marca-acao);
+  box-shadow: var(--anel-foco);
+}
+
+.campo :global(input:disabled),
+.campo :global(select:disabled),
+.campo :global(textarea:disabled) {
+  background: var(--superficie-afundada);
+  color: var(--cor-texto-fraco);
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campo :global(input),
+  .campo :global(select),
+  .campo :global(textarea) {
+    transition: none;
+  }
 }
 
 .campo :global(input[aria-invalid="true"]),

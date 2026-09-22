@@ -1,10 +1,34 @@
+/*
+ * Telas publicas de autenticacao.
+ *
+ * O fundo nao e chapado: um brilho quentissimo da marca no topo da pagina
+ * assina a tela sem pintar nada de laranja. Em `prefers-reduced-motion` nada
+ * muda aqui, porque nao ha movimento — apenas cor.
+ */
 .pagina {
   display: flex;
   align-items: flex-start;
   justify-content: center;
   min-height: 100dvh;
-  padding: var(--espaco-7) var(--espaco-4);
-  background: var(--superficie-fundo);
+  padding: var(--espaco-7) var(--espaco-4) var(--espaco-6);
+  background-color: var(--superficie-fundo);
+  background-image: radial-gradient(90rem 32rem at 50% -14rem, var(--cor-marca-suave) 0%, transparent 70%);
+  background-repeat: no-repeat;
+}
+
+.coluna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-5);
+  width: 100%;
+  max-width: 26rem;
+}
+
+.marca {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--espaco-2);
 }
 
 .cartao {
@@ -12,7 +36,6 @@
   flex-direction: column;
   gap: var(--espaco-5);
   width: 100%;
-  max-width: 440px;
   padding: var(--espaco-6);
   background: var(--superficie-cartao);
   border: var(--largura-borda) solid var(--cor-borda);
@@ -20,16 +43,32 @@
   box-shadow: var(--sombra-2);
 }
 
-.marca {
-  font-weight: var(--peso-forte);
-  color: var(--cor-marca-forte);
+/* Fio da marca no topo do cartao: identidade sem invadir a area de leitura. */
+.cartao::before {
+  content: "";
+  display: block;
+  height: 3px;
+  margin: calc(var(--espaco-6) * -1) calc(var(--espaco-6) * -1) 0;
+  border-radius: var(--raio-3) var(--raio-3) 0 0;
+  background: var(--marca-gradiente);
+}
+
+.rodape {
+  margin: 0;
+  color: var(--cor-texto-fraco);
+  font-size: var(--texto-sm);
+  text-align: center;
+  text-wrap: balance;
 }
 
 @media (max-width: 767px) {
   .pagina {
-    padding: var(--espaco-4);
+    padding: var(--espaco-5) var(--espaco-4) var(--espaco-5);
   }
   .cartao {
     padding: var(--espaco-5);
+  }
+  .cartao::before {
+    margin: calc(var(--espaco-5) * -1) calc(var(--espaco-5) * -1) 0;
   }
 }
