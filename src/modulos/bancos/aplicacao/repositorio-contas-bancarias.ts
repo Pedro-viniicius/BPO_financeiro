@@ -1,13 +1,13 @@
 import type { DataCivil } from "@/compartilhado/datas/indice";
 import type { Dinheiro } from "@/compartilhado/dinheiro/indice";
-import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
+import type { EscopoEmpresa, PaginaResultado, Paginacao } from "@/compartilhado/tipos/indice";
 
 /**
- * Contas bancarias — o minimo que o Gate 5 precisa.
+ * Contas bancarias e o extrato delas.
  *
- * Existe aqui porque pagamento e recebimento EXIGEM conta bancaria e
- * movimentacao (as duas colunas sao NOT NULL no modelo do Gate 3). Sem
- * cadastrar conta, nenhuma baixa pode ser registrada.
+ * Existe porque pagamento e recebimento EXIGEM conta bancaria e movimentacao
+ * (as duas colunas sao NOT NULL no modelo do Gate 3). Sem cadastrar conta,
+ * nenhuma baixa pode ser registrada.
  *
  * O que NAO entra agora: conciliacao, importacao de extrato, transferencia e
  * fluxo de caixa. Tudo isso e Gate 6.
@@ -22,9 +22,14 @@ export interface ContaBancariaNaLista {
   readonly nome: string;
   readonly tipo: string;
   readonly instituicaoNome: string | null;
+  readonly instituicaoBancariaId: string | null;
   readonly agencia: string | null;
   readonly numeroConta: string | null;
+  readonly saldoInicial: Dinheiro;
+  readonly dataSaldoInicial: DataCivil;
   readonly saldoAtual: Dinheiro;
+  /** Falso enquanto nao houver nenhuma movimentacao: so ai o saldo inicial e editavel. */
+  readonly saldoInicialEditavel: boolean;
   readonly ativa: boolean;
 }
 
@@ -38,11 +43,54 @@ export interface DadosNovaContaBancaria {
   readonly dataSaldoInicial: DataCivil;
 }
 
+export interface DadosEdicaoContaBancaria {
+  readonly nome: string;
+  readonly tipo: "conta_corrente" | "conta_poupanca" | "conta_pagamento" | "aplicacao" | "caixa";
+  readonly instituicaoBancariaId?: string;
+  readonly agencia?: string;
+  readonly numeroConta?: string;
+  /** Aceitos SO enquanto a conta nao tiver movimentacao. Depois, a correcao e por ajuste. */
+  readonly saldoInicial?: Dinheiro;
+  readonly dataSaldoInicial?: DataCivil;
+}
+
+/** Uma linha do extrato, com o saldo da conta apos ela. */
+export interface LinhaDoExtrato {
+  readonly id: string;
+  readonly data: DataCivil;
+  readonly tipo: "entrada" | "saida";
+  readonly valor: Dinheiro;
+  readonly descricao: string;
+  readonly origem: string;
+  readonly observacoes: string | null;
+  /** Saldo da conta depois desta movimentacao. */
+  readonly saldoAcumulado: Dinheiro;
+  /** Verdadeiro quando esta linha desfaz outra. */
+  readonly ehEstorno: boolean;
+}
+
+export interface DadosAjusteDeSaldo {
+  readonly tipo: "entrada" | "saida";
+  readonly valor: Dinheiro;
+  readonly data: DataCivil;
+  /** Obrigatorio: um ajuste sem explicacao e um buraco na contabilidade. */
+  readonly motivo: string;
+  readonly usuarioId: string;
+}
+
 export interface RepositorioContasBancarias {
   listar(escopo: EscopoEmpresa): Promise<readonly ContaBancariaNaLista[]>;
   buscarPorId(escopo: EscopoEmpresa, id: string): Promise<ContaBancariaNaLista | null>;
   criar(escopo: EscopoEmpresa, dados: DadosNovaContaBancaria): Promise<{ contaId: string }>;
-  editar(escopo: EscopoEmpresa, id: string, dados: Omit<DadosNovaContaBancaria, "saldoInicial" | "dataSaldoInicial">): Promise<void>;
+  editar(escopo: EscopoEmpresa, id: string, dados: DadosEdicaoContaBancaria): Promise<void>;
+  /** Movimentacoes em ordem de data, com o saldo acumulado linha a linha. */
+  extrato(escopo: EscopoEmpresa, contaId: string, paginacao: Paginacao): Promise<PaginaResultado<LinhaDoExtrato>>;
+  /**
+   * Lancamento de ajuste: a forma CERTA de corrigir o saldo de uma conta que
+   * ja tem movimentacao. Aparece no extrato, com motivo, em vez de mudar a
+   * base do calculo em silencio.
+   */
+  registrarAjuste(escopo: EscopoEmpresa, contaId: string, dados: DadosAjusteDeSaldo): Promise<{ movimentacaoId: string }>;
   listarInstituicoes(): Promise<readonly { id: string; nome: string }[]>;
   /**
    * A lista de instituicoes nasce vazia (a semente do Banco Central ficou para

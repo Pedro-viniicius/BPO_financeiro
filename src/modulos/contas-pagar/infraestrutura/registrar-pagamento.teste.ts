@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { dataCivilDeTexto } from "@/compartilhado/datas/indice";
+import { dataCivilDeTexto, type DataVencimento } from "@/compartilhado/datas/indice";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
@@ -41,9 +41,9 @@ describe.skipIf(!urlBancoTeste)("registrar pagamento (PostgreSQL real)", () => {
         descricao: `Conta de ${valor}`,
         fornecedorId: cenario.fornecedorId,
         categoriaId: cenario.categoriaId,
-        dataVencimento: dataCivilDeTexto(vencimento),
         dataCompetencia: dataCivilDeTexto("2026-10-01"),
-        valor: Dinheiro.deTexto(valor),
+        valorTotal: Dinheiro.deTexto(valor),
+        parcelas: [{ numero: 1, dataVencimento: dataCivilDeTexto(vencimento) as DataVencimento, valor: Dinheiro.deTexto(valor) }],
       },
       usuarioId,
     );

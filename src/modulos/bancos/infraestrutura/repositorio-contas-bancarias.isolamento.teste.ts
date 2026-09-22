@@ -54,7 +54,11 @@ describe.skipIf(!urlBancoTeste)("isolamento de contas bancarias (PostgreSQL real
   });
 
   it("A nao edita a conta bancaria de B mesmo sabendo o UUID", async () => {
-    await repositorio.editar(escopoA, b.contaBancariaId, { nome: "INVADIDA", tipo: "caixa" });
+    // Recusa com o MESMO erro de um id inexistente: a resposta nao revela que
+    // a conta existe em outra empresa.
+    await expect(repositorio.editar(escopoA, b.contaBancariaId, { nome: "INVADIDA", tipo: "caixa" })).rejects.toThrow(
+      "CONTA_BANCARIA_NAO_ENCONTRADA",
+    );
     const intacta = await repositorio.buscarPorId(escopoB, b.contaBancariaId);
     expect(intacta?.nome).not.toBe("INVADIDA");
   });

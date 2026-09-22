@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { dataCivilDeTexto } from "@/compartilhado/datas/indice";
+import { dataCivilDeTexto, type DataVencimento } from "@/compartilhado/datas/indice";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
 import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
@@ -68,9 +68,9 @@ describe.skipIf(!urlBancoTeste)("isolamento entre empresas em contas a pagar (Po
           descricao: "Aluguel da sala",
           fornecedorId: a.fornecedorId,
           categoriaId: a.categoriaId,
-          dataVencimento: dataCivilDeTexto("2026-10-05"),
           dataCompetencia: dataCivilDeTexto("2026-10-01"),
-          valor: Dinheiro.deTexto("1000.00"),
+          valorTotal: Dinheiro.deTexto("1000.00"),
+          parcelas: [{ numero: 1, dataVencimento: dataCivilDeTexto("2026-10-05") as DataVencimento, valor: Dinheiro.deTexto("1000.00") }],
         },
         usuarioId,
       )
@@ -83,9 +83,9 @@ describe.skipIf(!urlBancoTeste)("isolamento entre empresas em contas a pagar (Po
           descricao: "Energia eletrica",
           fornecedorId: b.fornecedorId,
           categoriaId: b.categoriaId,
-          dataVencimento: dataCivilDeTexto("2026-10-08"),
           dataCompetencia: dataCivilDeTexto("2026-10-01"),
-          valor: Dinheiro.deTexto("500.00"),
+          valorTotal: Dinheiro.deTexto("500.00"),
+          parcelas: [{ numero: 1, dataVencimento: dataCivilDeTexto("2026-10-08") as DataVencimento, valor: Dinheiro.deTexto("500.00") }],
         },
         usuarioId,
       )
@@ -125,12 +125,22 @@ describe.skipIf(!urlBancoTeste)("isolamento entre empresas em contas a pagar (Po
   });
 
   it("A nao edita a conta de B mesmo sabendo o UUID", async () => {
-    await repositorio.editar(escopoA, contaDeB, {
-      descricao: "INVADIDO",
-      categoriaId: a.categoriaId,
-      dataVencimento: dataCivilDeTexto("2030-01-01"),
-      valor: Dinheiro.deTexto("1.00"),
-    });
+    // Recusa com o MESMO erro de um id inexistente: a resposta nao revela que
+    // o registro existe em outra empresa.
+    await expect(
+      repositorio.editar(
+        escopoA,
+        contaDeB,
+        {
+          descricao: "INVADIDO",
+          categoriaId: a.categoriaId,
+          fornecedorId: a.fornecedorId,
+          dataVencimento: dataCivilDeTexto("2030-01-01") as DataVencimento,
+          valor: Dinheiro.deTexto("1.00"),
+        },
+        usuarioId,
+      ),
+    ).rejects.toThrow("PARCELA_NAO_ENCONTRADA");
 
     const intacta = await repositorio.buscarPorId(escopoB, contaDeB, HOJE);
     expect(intacta?.descricao).toBe("Energia eletrica");

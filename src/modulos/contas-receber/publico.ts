@@ -12,10 +12,13 @@ export { ContaReceberJaCancelada, ContaReceberNaoEncontrada, EdicaoBloqueadaPorR
 export type {
   ContaReceberDetalhada,
   ContaReceberNaLista,
+  DadosCancelamento,
   DadosEdicaoContaReceber,
+  DadosEstorno,
   DadosNovaContaReceber,
   DadosRecebimento,
   FiltroContasReceber,
+  ParcelaIrma,
   RecebimentoRegistrado,
   RepositorioContasReceber,
 } from "./aplicacao/repositorio-contas-receber";

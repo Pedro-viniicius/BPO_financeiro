@@ -19,11 +19,14 @@ export {
 export type {
   ContaPagarDetalhada,
   ContaPagarNaLista,
+  DadosCancelamento,
   DadosEdicaoContaPagar,
+  DadosEstorno,
   DadosNovaContaPagar,
   DadosPagamento,
   FiltroContasPagar,
   PagamentoRegistrado,
+  ParcelaIrma,
   RepositorioContasPagar,
 } from "./aplicacao/repositorio-contas-pagar";
 export { RepositorioContasPagarDrizzle } from "./infraestrutura/repositorio-contas-pagar-drizzle";
