@@ -7,10 +7,13 @@ import { obterVariaveisAmbiente } from "@/nucleo/configuracao/publico";
 
 import {
   CadastroFechado,
+  CodigoSegundoFatorInvalido,
   CredenciaisInvalidas,
+  DesafioSegundoFatorExpirado,
   EmailJaCadastrado,
+  FalhaAoEnviarEmail,
   MuitasTentativas,
-  SegundoFatorNaoDisponivel,
+  TokenRedefinicaoInvalido,
 } from "../dominio/erros";
 import { obterAutenticacao } from "../infraestrutura/better-auth";
 
@@ -36,6 +39,17 @@ export interface CredenciaisEntrada {
   readonly senha: string;
 }
 
+/**
+ * O que aconteceu ao entrar com e-mail e senha.
+ *
+ * `segundo_fator` NAO e falha: a senha estava certa, mas a conta exige o
+ * codigo TOTP. O Better Auth ja gravou o cookie do desafio; falta a tela
+ * `/verificacao-duas-etapas` confirmar o codigo para a sessao ser criada.
+ */
+export type ResultadoEntrada =
+  | { readonly tipo: "autenticado"; readonly usuarioId: IdUsuario }
+  | { readonly tipo: "segundo_fator" };
+
 export interface DadosNovaConta extends CredenciaisEntrada {
   readonly nome: string;
 }
@@ -48,17 +62,42 @@ interface RespostaAutenticacao {
 
 export async function entrarComEmail(
   credenciais: CredenciaisEntrada,
-): Promise<Resultado<{ usuarioId: IdUsuario }, CredenciaisInvalidas | MuitasTentativas | SegundoFatorNaoDisponivel>> {
+): Promise<Resultado<ResultadoEntrada, CredenciaisInvalidas | MuitasTentativas>> {
   const resposta = await chamarEndpoint("/sign-in/email", { email: credenciais.email, password: credenciais.senha });
 
   if (resposta.status === 429) return falha(new MuitasTentativas(resposta.retryAfterSegundos));
+
+  // Conta com segundo fator: a resposta traz `twoFactorRedirect` e NAO traz
+  // `user`, porque a sessao so nasce depois do codigo. Precisa vir antes da
+  // checagem de `user`, senao viraria "credenciais invalidas".
+  if (resposta.corpo.twoFactorRedirect) return sucesso({ tipo: "segundo_fator" });
+
   if (resposta.status !== 200 || !resposta.corpo.user) {
     // 401 (senha errada), 403 (e-mail nao verificado) e 404 (e-mail inexistente)
     // recebem a MESMA resposta: a tela nao confirma se um cadastro existe.
     return falha(new CredenciaisInvalidas());
   }
-  if (resposta.corpo.twoFactorRedirect) return falha(new SegundoFatorNaoDisponivel());
-  return sucesso({ usuarioId: comoIdentificador<"Usuario">(resposta.corpo.user.id) });
+  return sucesso({ tipo: "autenticado", usuarioId: comoIdentificador<"Usuario">(resposta.corpo.user.id) });
+}
+
+/**
+ * Confirma o codigo TOTP do desafio pendente e cria a sessao.
+ * O desafio vem do cookie gravado por `entrarComEmail`; se ele expirou ou nao
+ * existe, o Better Auth recusa e a tela manda a pessoa entrar de novo.
+ */
+export async function verificarSegundoFator(codigo: string): Promise<Resultado<{ usuarioId: IdUsuario | null }, CodigoSegundoFatorInvalido | DesafioSegundoFatorExpirado | MuitasTentativas>> {
+  const limpo = codigo.replace(/\D/g, "");
+  if (limpo.length === 0) return falha(new CodigoSegundoFatorInvalido());
+
+  const resposta = await chamarEndpoint("/two-factor/verify-totp", { code: limpo });
+
+  if (resposta.status === 429) return falha(new MuitasTentativas(resposta.retryAfterSegundos));
+  // Sem cookie de desafio (expirou, foi limpo, ou a pessoa abriu a tela direto).
+  if (resposta.status === 400 || resposta.corpo.code === "INVALID_TWO_FACTOR_COOKIE") {
+    return falha(new DesafioSegundoFatorExpirado());
+  }
+  if (resposta.status !== 200) return falha(new CodigoSegundoFatorInvalido());
+  return sucesso({ usuarioId: resposta.corpo.user ? comoIdentificador<"Usuario">(resposta.corpo.user.id) : null });
 }
 
 export async function criarContaComEmail(
@@ -74,6 +113,30 @@ export async function criarContaComEmail(
     throw new Error(`Better Auth recusou o cadastro: ${resposta.status} ${resposta.corpo.code ?? ""}`.trim());
   }
   return sucesso({ usuarioId: comoIdentificador<"Usuario">(resposta.corpo.user.id) });
+}
+
+/**
+ * Pede o e-mail de redefinicao de senha.
+ *
+ * Devolve sempre sucesso, de proposito: responder "esse e-mail nao existe"
+ * transformaria a tela em um verificador de cadastro. A tela mostra o mesmo
+ * texto para todos. Uma falha tecnica (provedor fora) e registrada no log e
+ * sobe como falha — ai o usuario precisa saber que nao adianta esperar.
+ */
+export async function pedirRedefinicaoDeSenha(email: string): Promise<Resultado<void, FalhaAoEnviarEmail>> {
+  const resposta = await chamarEndpoint("/request-password-reset", { email });
+
+  // 200 (enviado) e 404/400 (e-mail desconhecido) sao a MESMA resposta aqui.
+  if (resposta.status === 200 || resposta.status === 404 || resposta.status === 400) return sucesso(undefined);
+  if (resposta.status === 429) return sucesso(undefined);
+  return falha(new FalhaAoEnviarEmail());
+}
+
+/** Troca a senha usando o token recebido por e-mail. */
+export async function redefinirSenha(token: string, novaSenha: string): Promise<Resultado<void, TokenRedefinicaoInvalido>> {
+  const resposta = await chamarEndpoint("/reset-password", { token, newPassword: novaSenha });
+  if (resposta.status !== 200) return falha(new TokenRedefinicaoInvalido());
+  return sucesso(undefined);
 }
 
 /** Encerra a sessao atual (revoga no banco e limpa o cookie). Nunca falha para o usuario. */

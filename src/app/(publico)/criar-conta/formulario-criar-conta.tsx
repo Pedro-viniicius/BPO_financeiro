@@ -15,7 +15,7 @@ import { acaoCriarConta, type EstadoFormularioCriarConta } from "./acoes";
 
 const ESTADO_INICIAL: EstadoFormularioCriarConta = {};
 
-export function FormularioCriarConta() {
+export function FormularioCriarConta({ dicaSenha }: { readonly dicaSenha: string }) {
   const [estado, enviar, pendente] = useActionState(acaoCriarConta, ESTADO_INICIAL);
   const erroDe = (campo: string) => {
     const mensagem = estado.campos?.[campo]?.[0];
@@ -38,7 +38,7 @@ export function FormularioCriarConta() {
         {(atributos) => <ControleTexto {...atributos} name="email" type="email" autoComplete="email" defaultValue={estado.valores?.email ?? ""} />}
       </CampoFormulario>
 
-      <CampoFormulario id="senha" rotulo="Senha" obrigatorio dica="Ao menos 10 caracteres." {...erroDe("senha")}>
+      <CampoFormulario id="senha" rotulo="Senha" obrigatorio dica={dicaSenha} {...erroDe("senha")}>
         {(atributos) => <ControleTexto {...atributos} name="senha" type="password" autoComplete="new-password" />}
       </CampoFormulario>
 

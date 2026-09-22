@@ -18,12 +18,16 @@ export default async function PaginaEntrar({ searchParams }: { searchParams: Pro
   const parametros = await searchParams;
   const retorno = retornoSeguro(typeof parametros.retorno === "string" ? parametros.retorno : null);
   const sessaoExpirada = parametros.motivo === "sessao-expirada";
+  const senhaRedefinida = parametros.motivo === "senha-redefinida";
   const podeCriarConta = await cadastroAberto();
 
   return (
     <>
       <TituloFormularioSimples titulo="Entrar" descricao="Use o e-mail e a senha da sua conta." />
-      <FormularioEntrar retorno={retorno} sessaoExpirada={sessaoExpirada} />
+      <FormularioEntrar retorno={retorno} sessaoExpirada={sessaoExpirada} senhaRedefinida={senhaRedefinida} />
+      <LigacoesFormularioSimples>
+        <Link href={ROTAS.esqueciSenha}>Esqueci minha senha</Link>
+      </LigacoesFormularioSimples>
       {podeCriarConta ? (
         <LigacoesFormularioSimples>
           <span>Primeira vez aqui?</span>

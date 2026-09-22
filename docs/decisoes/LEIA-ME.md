@@ -32,5 +32,6 @@ escolha meses depois.
 | [023](ADR-023-conciliacao-duas-colunas.md) | Conciliacao em duas colunas pareadas, so no desktop | Aceita |
 | [024](ADR-024-camada-apresentacao.md) | Camada de apresentacao: a interface nao decide regra financeira | Aceita |
 | [025](ADR-025-contexto-organizacional.md) | Contexto organizacional autenticado e empresa ativa | Aceita |
+| [026](ADR-026-guarda-de-autorizacao.md) | Guarda unica de autorizacao no servidor | Aceita |
 
 Status possiveis: Proposta, Aceita, Substituida (por outra ADR), Rejeitada.

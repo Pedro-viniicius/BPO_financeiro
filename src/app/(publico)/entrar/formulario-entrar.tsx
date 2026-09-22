@@ -15,12 +15,26 @@ import { acaoEntrar, type EstadoFormularioEntrar } from "./acoes";
 
 const ESTADO_INICIAL: EstadoFormularioEntrar = {};
 
-export function FormularioEntrar({ retorno, sessaoExpirada }: { readonly retorno: string | null; readonly sessaoExpirada: boolean }) {
+export function FormularioEntrar({
+  retorno,
+  sessaoExpirada,
+  senhaRedefinida,
+}: {
+  readonly retorno: string | null;
+  readonly sessaoExpirada: boolean;
+  readonly senhaRedefinida: boolean;
+}) {
   const [estado, enviar, pendente] = useActionState(acaoEntrar, ESTADO_INICIAL);
 
   return (
     <FormularioSimples action={enviar}>
       {retorno ? <input type="hidden" name="retorno" value={retorno} /> : null}
+
+      {senhaRedefinida && !estado.mensagem ? (
+        <Aviso tom="sucesso" titulo="Senha alterada">
+          Entre com a sua nova senha.
+        </Aviso>
+      ) : null}
 
       {sessaoExpirada && !estado.mensagem ? (
         <Aviso tom="informacao" titulo="Sua sessão expirou">

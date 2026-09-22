@@ -37,6 +37,12 @@ export async function acaoEntrar(_anterior: EstadoFormularioEntrar, formulario: 
     return { mensagem: resultado.erro.message, email };
   }
 
+  // Conta com segundo fator: a senha estava certa, mas a sessao so nasce depois
+  // do codigo TOTP. O cookie do desafio ja foi gravado pelo Better Auth.
+  if (resultado.valor.tipo === "segundo_fator") {
+    redirect(retorno ? `${ROTAS.verificacaoDuasEtapas}?retorno=${encodeURIComponent(retorno)}` : ROTAS.verificacaoDuasEtapas);
+  }
+
   const empresas = await listarEmpresasAcessiveisDoUsuario(resultado.valor.usuarioId);
   if (empresas.length === 0) redirect(destinoPadrao("sem_empresa"));
   redirect(retorno ?? ROTAS.inicio);

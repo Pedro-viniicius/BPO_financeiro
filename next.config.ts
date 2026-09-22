@@ -21,6 +21,9 @@ const configuracao: NextConfig = {
   ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
   poweredByHeader: false,
   reactStrictMode: true,
+  // Habilita `forbidden()`, usado pela guarda de autorizacao do servidor para
+  // devolver 403 de verdade em vez de redirecionar ou estourar 500. Ver ADR-026.
+  experimental: { authInterrupts: true },
   async headers() {
     return [{ source: "/(.*)", headers: cabecalhosSeguranca }];
   },

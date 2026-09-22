@@ -16,6 +16,13 @@ export { RepositorioAcessoEmpresasDrizzle } from "./infraestrutura/repositorio-a
 export { AcessoEmpresasEmMemoria } from "./infraestrutura/acesso-empresas-em-memoria";
 export { decidirDestino, destinoPadrao, retornoSeguro, ROTAS, type EstadoAcesso } from "./interface/destino";
 export {
+  decidirAcesso,
+  exigirAcesso,
+  type AcessoParaDecisao,
+  type DecisaoAcesso,
+  type PermissoesExigidas,
+} from "./interface/guarda-acesso";
+export {
   estadoAcessoAtual,
   exigirContextoAplicacao,
   exigirSessaoSemEmpresa,

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { esquemaEmail, esquemaTextoCurto } from "@/compartilhado/validacao/esquemas-comuns";
-import { criarContaComEmail } from "@/nucleo/autenticacao/publico";
+import { criarContaComEmail, TAMANHO_MAXIMO_SENHA, TAMANHO_MINIMO_SENHA } from "@/nucleo/autenticacao/publico";
 import { destinoPadrao } from "@/nucleo/empresas/publico";
 import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
 
@@ -20,7 +20,7 @@ const esquemaNovaConta = z
   .object({
     nome: esquemaTextoCurto,
     email: esquemaEmail,
-    senha: z.string().min(10, "A senha precisa ter ao menos 10 caracteres.").max(128, "Maximo de 128 caracteres."),
+    senha: z.string().min(TAMANHO_MINIMO_SENHA, `A senha precisa ter ao menos ${TAMANHO_MINIMO_SENHA} caracteres.`).max(TAMANHO_MAXIMO_SENHA, `Maximo de ${TAMANHO_MAXIMO_SENHA} caracteres.`),
     confirmacao: z.string(),
   })
   .refine((dados) => dados.senha === dados.confirmacao, { path: ["confirmacao"], message: "As senhas nao conferem." });

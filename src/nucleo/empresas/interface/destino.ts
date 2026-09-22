@@ -11,11 +11,27 @@ export const ROTAS = {
   entrar: "/entrar",
   criarConta: "/criar-conta",
   primeiroAcesso: "/primeiro-acesso",
+  verificacaoDuasEtapas: "/verificacao-duas-etapas",
+  esqueciSenha: "/esqueci-senha",
+  redefinirSenha: "/redefinir-senha",
   inicio: "/inicio",
 } as const;
 
-/** Rotas que nunca sao destino de "retorno" apos entrar. */
-const ROTAS_DE_ENTRADA: readonly string[] = [ROTAS.entrar, ROTAS.criarConta];
+/**
+ * Rotas que nunca sao destino de "retorno" apos entrar.
+ *
+ * `verificacaoDuasEtapas` entra aqui porque durante o desafio TOTP ainda NAO
+ * existe sessao — so o cookie do desafio. Para a tabela de destinos o usuario
+ * e visitante, e a tela precisa ser alcancavel nesse estado. Quem ja tem
+ * sessao nao tem desafio pendente e e levado adiante.
+ */
+const ROTAS_DE_ENTRADA: readonly string[] = [
+  ROTAS.entrar,
+  ROTAS.criarConta,
+  ROTAS.verificacaoDuasEtapas,
+  ROTAS.esqueciSenha,
+  ROTAS.redefinirSenha,
+];
 
 /** Rotas que exigem sessao, mas NAO exigem empresa. */
 const ROTAS_SO_SESSAO: readonly string[] = [ROTAS.primeiroAcesso];

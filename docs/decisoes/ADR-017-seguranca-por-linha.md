@@ -1,6 +1,6 @@
 # ADR-017 — Seguranca por linha (RLS): avaliada, nao adotada agora
 
-**Status:** Aceita · 2026-09-18 · Reavaliar no Gate 10
+**Status:** Aceita · 2026-09-18 · Reconfirmada no Gate 4 (2026-09-22) · Reavaliar no Gate 10
 
 > "Seguranca por linha" (RLS, *Row-Level Security*) e um recurso do PostgreSQL
 > em que o proprio banco filtra as linhas que cada sessao pode ver, com base em
@@ -52,6 +52,30 @@ Conclusao: o custo recai sobre a operacao (inclusive de clientes sem TI, nos
 Modelos B e C), enquanto o beneficio cobre uma classe de erro que ja temos
 como impedir de forma mais barata e mais visivel.
 
+## Reconfirmacao no Gate 4 (2026-09-22)
+
+Antes de escrever o primeiro repositorio financeiro, a decisao foi revista com
+o que o Gate 3 provou contra PostgreSQL real: o isolamento entre empresas das
+consultas de acesso ja e verdadeiro no banco, inclusive contra cookie de
+empresa ativa forjado nos dois sentidos.
+
+**Mantida a opcao A** (isolamento na aplicacao). Nada mudou nos custos
+analisados abaixo — o problema do pool de conexoes com `SET LOCAL` continua
+sendo o mesmo, e agora haveria o agravante de adotar RLS sem nenhuma consulta
+financeira escrita para exercitar as politicas.
+
+O que **mudou** foi o peso dos controles compensatorios: os controles 1 e 3
+deixaram de ser combinado escrito e viraram teste automatizado em
+`src/banco-dados/testes/isolamento-obrigatorio.teste.ts`, que falha a
+verificacao quando um `src/modulos/*/infraestrutura/repositorio-*.ts`:
+
+- nao menciona `EscopoEmpresa` (controle 1); ou
+- nao tem teste citando o repositorio e a palavra "isolamento" (controle 3).
+
+Hoje nao ha repositorio financeiro concreto, entao a trava passa sem cobrar
+nada. No Gate 5 ela morde no primeiro que nascer sem prova de isolamento. Sem
+isso, a opcao A dependeria de disciplina; com isso, depende do build.
+
 ## Controles compensatorios (o que fazemos em vez de RLS)
 
 1. **`EscopoEmpresa` obrigatorio**: todo metodo de repositorio recebe o escopo
@@ -61,6 +85,7 @@ como impedir de forma mais barata e mais visivel.
    tabela financeira for criada sem `empresa_id`.
 3. **Testes de isolamento por modulo** (Gate 5+): para cada consulta publica,
    criar duas empresas e provar que a consulta de uma nao devolve dados da outra.
+   **Obrigatorio por teste** desde o Gate 4 — ver a reconfirmacao acima.
 4. **Revisao de codigo focada**: qualquer novo repositorio passa por conferencia
    do filtro de empresa.
 5. **Auditoria com `empresa_id`**: um acesso indevido fica registrado.

@@ -44,12 +44,61 @@ export class EmailJaCadastrado extends ErroDominio {
   }
 }
 
-/** A conta exige o segundo fator, cuja tela ainda nao existe (gate posterior). */
-export class SegundoFatorNaoDisponivel extends ErroDominio {
-  readonly codigo = "segundo_fator_nao_disponivel";
+/** O codigo TOTP informado nao confere. */
+export class CodigoSegundoFatorInvalido extends ErroDominio {
+  readonly codigo = "codigo_segundo_fator_invalido";
+  readonly categoria: CategoriaErro = "nao_autenticado";
+
+  constructor() {
+    super("Codigo incorreto. Confira o aplicativo de autenticacao e tente de novo.");
+  }
+}
+
+/**
+ * O desafio do segundo fator expirou ou nao existe (a pessoa abriu a tela
+ * direto, demorou demais, ou o cookie foi limpo). O caminho e entrar de novo.
+ */
+export class DesafioSegundoFatorExpirado extends ErroDominio {
+  readonly codigo = "desafio_segundo_fator_expirado";
+  readonly categoria: CategoriaErro = "nao_autenticado";
+
+  constructor() {
+    super("Esta verificacao expirou. Entre com e-mail e senha novamente.");
+  }
+}
+
+/**
+ * Tentativa de ATIVAR o segundo fator enquanto a tela de ativacao nao existe.
+ * Ver `interface/portao-segundo-fator.ts`.
+ */
+export class AtivacaoSegundoFatorIndisponivel extends ErroDominio {
+  readonly codigo = "ativacao_segundo_fator_indisponivel";
   readonly categoria: CategoriaErro = "regra_negocio";
 
   constructor() {
-    super("Esta conta usa verificacao em duas etapas, que ainda nao esta disponivel nesta versao.");
+    super("A verificacao em duas etapas ainda nao pode ser ativada nesta versao.");
+  }
+}
+
+/** O link de redefinicao nao vale mais (expirou, ja foi usado, ou foi adulterado). */
+export class TokenRedefinicaoInvalido extends ErroDominio {
+  readonly codigo = "token_redefinicao_invalido";
+  readonly categoria: CategoriaErro = "nao_autenticado";
+
+  constructor() {
+    super("Este link de redefinicao expirou ou ja foi usado. Peca um novo.");
+  }
+}
+
+/**
+ * O e-mail nao saiu (provedor fora, configuracao errada). Dito ao usuario de
+ * proposito: pior do que falhar e a tela dizer "enviamos" e nada chegar.
+ */
+export class FalhaAoEnviarEmail extends ErroDominio {
+  readonly codigo = "falha_ao_enviar_email";
+  readonly categoria: CategoriaErro = "regra_negocio";
+
+  constructor() {
+    super("Nao foi possivel enviar o e-mail agora. Tente novamente em instantes ou fale com quem administra o sistema.");
   }
 }

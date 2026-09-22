@@ -5,6 +5,8 @@ import { Aviso, LigacoesFormularioSimples, TituloFormularioSimples } from "@/int
 import { cadastroAberto } from "@/nucleo/autenticacao/publico";
 import { redirecionarSeJaEntrou, ROTAS } from "@/nucleo/empresas/publico";
 
+import { DICA_SENHA } from "@/nucleo/autenticacao/publico";
+
 import { FormularioCriarConta } from "./formulario-criar-conta";
 
 export const metadata: Metadata = { title: "Criar conta" };
@@ -21,7 +23,7 @@ export default async function PaginaCriarConta() {
     <>
       <TituloFormularioSimples titulo="Criar conta" descricao="Depois de criar a conta, você cadastra a sua empresa." />
       {aberto ? (
-        <FormularioCriarConta />
+        <FormularioCriarConta dicaSenha={DICA_SENHA} />
       ) : (
         <Aviso tom="informacao" titulo="Esta instalação já tem usuários">
           A entrada de novas pessoas é feita por convite de quem administra o sistema.
