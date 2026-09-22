@@ -57,6 +57,26 @@ export function situacaoDerivada(parcela: ParcelaParaCalculo, hoje: DataCivil): 
   return parcela.valorBaixado.ehPositivo() ? "parcial" : "aberta";
 }
 
+
+/**
+ * O que ainda VAI virar dinheiro nesta parcela.
+ *
+ * Diferente de `saldoRestante`: uma parcela cancelada com R$ 600 em aberto
+ * tem saldo restante de R$ 600 (o fato aritmetico), mas nada disso sera pago
+ * ou recebido — o cancelamento zerou a expectativa. Listas e totais usam este
+ * valor; o detalhe mostra o outro, para quem precisa saber quanto foi
+ * cancelado.
+ */
+export function saldoEmAberto(parcela: ParcelaParaCalculo): Dinheiro {
+  if (parcela.situacaoGravada === "cancelada" || parcela.situacaoGravada === "perdida") return Dinheiro.zero();
+  return saldoRestante(parcela);
+}
+
+/** Quanto deixou de ser cobrado por cancelamento. Zero quando a parcela nao foi cancelada. */
+export function valorCancelado(parcela: ParcelaParaCalculo): Dinheiro {
+  return parcela.situacaoGravada === "cancelada" ? saldoRestante(parcela) : Dinheiro.zero();
+}
+
 /** Verdadeiro quando ainda ha dinheiro a movimentar nesta parcela. */
 export function estaEmAberto(parcela: ParcelaParaCalculo, hoje: DataCivil): boolean {
   const situacao = situacaoDerivada(parcela, hoje);
