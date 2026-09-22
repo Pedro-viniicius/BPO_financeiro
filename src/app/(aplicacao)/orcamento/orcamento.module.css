@@ -1,0 +1,230 @@
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-5);
+}
+
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-5);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--espaco-2) var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+.tabela th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.numeros {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.linhaGrupo {
+  background: var(--superficie-afundada);
+  font-weight: var(--peso-medio);
+}
+
+.linhaGrupo td,
+.linhaGrupo th {
+  border-top: 1px solid var(--cor-borda-forte);
+}
+
+.negativo {
+  color: var(--cor-valor-negativo);
+}
+
+.positivo {
+  color: var(--cor-valor-positivo);
+}
+
+/*
+ * Estouro: fundo, borda E a palavra "Estourou". Cor sozinha nao informa —
+ * ver docs/ux; e numa tela de dinheiro o custo de nao perceber e alto.
+ */
+.estourou {
+  background: var(--cor-perigo-suave);
+}
+
+.selo {
+  display: inline-block;
+  padding: 0 var(--espaco-2);
+  border: 1px solid var(--cor-perigo-borda);
+  border-radius: var(--raio-1);
+  background: var(--cor-perigo-suave);
+  color: var(--cor-perigo-forte);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+/* ---- Barra de execucao ---- */
+
+.execucao {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-width: 8rem;
+}
+
+.trilho {
+  flex: 1;
+  height: 0.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  background: var(--superficie-afundada);
+  overflow: hidden;
+}
+
+.preenchido {
+  height: 100%;
+  background: var(--cor-marca-acao);
+}
+
+.preenchidoEstourado {
+  background: var(--cor-perigo-forte);
+}
+
+.percentual {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---- Grade de planejamento ---- */
+
+.grade {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.grade th,
+.grade td {
+  padding: var(--espaco-1) var(--espaco-2);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+.grade th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+}
+
+.grade input[type="text"] {
+  width: 6rem;
+  padding: var(--espaco-1) var(--espaco-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.rolagem {
+  overflow-x: auto;
+  margin-bottom: var(--espaco-4);
+}
+
+.atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-5);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-afundada);
+}
+
+.nomeCategoria {
+  min-width: 12rem;
+  white-space: nowrap;
+}
+
+/* ---- Celular: cards por categoria ---- */
+
+.celular {
+  display: none;
+}
+
+@media (max-width: 62rem) {
+  .tabela {
+    display: none;
+  }
+
+  .celular {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-3);
+  }
+
+  .cartao {
+    padding: var(--espaco-4);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-2);
+    background: var(--superficie-cartao);
+  }
+
+  .cartaoEstourado {
+    border-left: 3px solid var(--cor-perigo-forte);
+    background: var(--cor-perigo-suave);
+  }
+
+  .cartaoTopo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--espaco-2);
+    margin-bottom: var(--espaco-2);
+  }
+
+  .cartaoDados {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--espaco-1) var(--espaco-3);
+    margin: var(--espaco-2) 0;
+    font-size: var(--texto-sm);
+  }
+
+  .cartaoDados dt {
+    color: var(--cor-texto-secundario);
+  }
+
+  .cartaoDados dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+}

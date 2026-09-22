@@ -135,7 +135,6 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "Or",
         permissao: "orcamento.visualizar",
         descricao: "Planejado comparado ao realizado",
-        disponibilidade: "em_breve",
       },
       {
         rotulo: "Dívidas",

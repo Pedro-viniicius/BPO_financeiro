@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import { inicioDoMes, fimDoMes } from "@/compartilhado/datas/indice";
+import { inicioDoMes, fimDoMes, partesDaData } from "@/compartilhado/datas/indice";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
-import { CabecalhoPagina, CartaoResumo, EstadoVazio, ValorFinanceiro } from "@/interface/componentes/indice";
+import { Aviso, CabecalhoPagina, CartaoResumo, EstadoVazio, ValorFinanceiro } from "@/interface/componentes/indice";
 
 import { formatarDinheiro } from "../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../_apoio/contexto-financeiro";
@@ -29,6 +29,7 @@ export default async function PaginaInicio() {
   const vePagar = permissoes.has("contas_pagar.visualizar");
   const veReceber = permissoes.has("contas_receber.visualizar");
   const veResultado = permissoes.has("dre.visualizar");
+  const veOrcamento = permissoes.has("orcamento.visualizar");
 
   const paginacao = { pagina: 1, tamanho: 500 };
   const vazio = { itens: [], total: 0, pagina: 1, tamanho: paginacao.tamanho };
@@ -39,11 +40,14 @@ export default async function PaginaInicio() {
    * como saber qual esta certo.
    */
   const mes = { de: inicioDoMes(hoje), ate: fimDoMes(hoje), regime: "caixa" as const };
-  const [pagar, receber, resultadoDoMes] = await Promise.all([
+  const { ano: anoCorrente, mes: mesCorrente } = partesDaData(hoje);
+  const [pagar, receber, resultadoDoMes, orcamentoDoMes] = await Promise.all([
     vePagar ? repositorios.contasPagar().listar(escopo, {}, paginacao, hoje) : vazio,
     veReceber ? repositorios.contasReceber().listar(escopo, {}, paginacao, hoje) : vazio,
     veResultado ? repositorios.resultados().montar(escopo, mes, hoje) : null,
+    veOrcamento ? repositorios.orcamento().acompanhar(escopo, anoCorrente, mesCorrente, "caixa", hoje) : null,
   ]);
+  const estouros = orcamentoDoMes?.estouros ?? [];
 
   const emAberto = <T extends { situacao: string }>(itens: readonly T[]) =>
     itens.filter((i) => i.situacao !== "liquidada" && i.situacao !== "cancelada");
@@ -57,7 +61,7 @@ export default async function PaginaInicio() {
   const totalPagar = Dinheiro.somarTodos(aPagar.map((i) => i.saldo));
   const totalReceber = Dinheiro.somarTodos(aReceber.map((i) => i.saldo));
 
-  if (!vePagar && !veReceber && !veResultado) {
+  if (!vePagar && !veReceber && !veResultado && !veOrcamento) {
     return (
       <>
         <CabecalhoPagina titulo="Início" empresa={nomeEmpresa} descricao="Sua situação de hoje" />
@@ -90,6 +94,24 @@ export default async function PaginaInicio() {
   return (
     <>
       <CabecalhoPagina titulo="Início" empresa={nomeEmpresa} descricao="Sua situação de hoje e o que precisa de atenção" />
+
+      {/*
+        Estouro de orcamento vem ANTES dos numeros: e a unica coisa desta tela
+        que pede decisao hoje. Os cartoes abaixo informam; este avisa.
+      */}
+      {estouros.length > 0 ? (
+        <Aviso
+          tom="perigo"
+          titulo={`${estouros.length} ${estouros.length === 1 ? "categoria estourou" : "categorias estouraram"} o orçamento deste mês`}
+          acao={<Link className="acao-primaria" href="/orcamento">Ver o orçamento</Link>}
+          urgente
+        >
+          {estouros
+            .slice(0, 4)
+            .map((linha) => `${linha.categoriaNome} (${formatarDinheiro(linha.noMes.diferenca.absoluto())})`)
+            .join(" · ")}
+        </Aviso>
+      ) : null}
 
       <div className={estilos.grade}>
         {vePagar ? (
