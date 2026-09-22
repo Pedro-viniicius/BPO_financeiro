@@ -36,6 +36,13 @@
       "when": 1789754407599,
       "tag": "0004_vinculos_papel_e_unicidade",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790114028323,
+      "tag": "0005_autor_da_importacao_de_extrato",
+      "breakpoints": true
     }
   ]
 }

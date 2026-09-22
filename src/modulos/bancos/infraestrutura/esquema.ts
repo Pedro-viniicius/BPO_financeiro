@@ -4,6 +4,7 @@ import { type AnyPgColumn, boolean, check, index, integer, jsonb, pgEnum, pgTabl
 import { colunaDataCivil, colunaDinheiro, colunaInstante, colunasTecnicas } from "@/banco-dados/esquemas/colunas-comuns";
 import { formatoExtrato, tipoContaBancaria, tipoMovimentacao } from "@/banco-dados/esquemas/enumeracoes";
 import { arquivos } from "@/nucleo/arquivos/infraestrutura/esquema";
+import { user } from "@/nucleo/autenticacao/infraestrutura/esquema-better-auth";
 import { empresas, filiais } from "@/nucleo/empresas/infraestrutura/esquema";
 import { centrosCusto } from "@/modulos/centros-custo/infraestrutura/esquema";
 import { categoriasFinanceiras } from "@/modulos/plano-contas/infraestrutura/esquema";
@@ -173,6 +174,8 @@ export const extratosBancarios = pgTable(
     /** Saldo final informado pelo banco no arquivo, quando existir. Serve para conferir com o saldo derivado. */
     saldoFinalInformado: colunaDinheiro("saldo_final_informado"),
     quantidadeItens: integer("quantidade_itens").notNull().default(0),
+    /** Quem enviou o arquivo. Mesmo padrao de `criado_por_usuario_id` no resto do modelo. */
+    importadoPorUsuarioId: text("importado_por_usuario_id").references(() => user.id, { onDelete: "set null" }),
     importadoEm: colunaInstante("importado_em").notNull().defaultNow(),
   },
   (tabela) => [
