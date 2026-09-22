@@ -128,7 +128,6 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "Re",
         permissao: "dre.visualizar",
         descricao: "DRE gerencial, margens e indicadores",
-        disponibilidade: "em_breve",
       },
       {
         rotulo: "Orçamento",

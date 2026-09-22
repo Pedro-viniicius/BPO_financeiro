@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { inicioDoMes, fimDoMes } from "@/compartilhado/datas/indice";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { CabecalhoPagina, CartaoResumo, EstadoVazio, ValorFinanceiro } from "@/interface/componentes/indice";
 
@@ -27,12 +28,21 @@ export default async function PaginaInicio() {
    */
   const vePagar = permissoes.has("contas_pagar.visualizar");
   const veReceber = permissoes.has("contas_receber.visualizar");
+  const veResultado = permissoes.has("dre.visualizar");
 
   const paginacao = { pagina: 1, tamanho: 500 };
   const vazio = { itens: [], total: 0, pagina: 1, tamanho: paginacao.tamanho };
-  const [pagar, receber] = await Promise.all([
+  /*
+   * O resultado do mes vem do MODULO DE RESULTADOS, a mesma fonte da tela
+   * `/resultados`. Recalcular aqui "so o numerinho do painel" e como dois
+   * relogios na mesma parede: mais cedo ou mais tarde eles discordam, e nao ha
+   * como saber qual esta certo.
+   */
+  const mes = { de: inicioDoMes(hoje), ate: fimDoMes(hoje), regime: "caixa" as const };
+  const [pagar, receber, resultadoDoMes] = await Promise.all([
     vePagar ? repositorios.contasPagar().listar(escopo, {}, paginacao, hoje) : vazio,
     veReceber ? repositorios.contasReceber().listar(escopo, {}, paginacao, hoje) : vazio,
+    veResultado ? repositorios.resultados().montar(escopo, mes, hoje) : null,
   ]);
 
   const emAberto = <T extends { situacao: string }>(itens: readonly T[]) =>
@@ -47,7 +57,7 @@ export default async function PaginaInicio() {
   const totalPagar = Dinheiro.somarTodos(aPagar.map((i) => i.saldo));
   const totalReceber = Dinheiro.somarTodos(aReceber.map((i) => i.saldo));
 
-  if (!vePagar && !veReceber) {
+  if (!vePagar && !veReceber && !veResultado) {
     return (
       <>
         <CabecalhoPagina titulo="Início" empresa={nomeEmpresa} descricao="Sua situação de hoje" />
@@ -59,7 +69,7 @@ export default async function PaginaInicio() {
     );
   }
 
-  if (pagar.itens.length === 0 && receber.itens.length === 0) {
+  if (pagar.itens.length === 0 && receber.itens.length === 0 && !resultadoDoMes?.temDados) {
     return (
       <>
         <CabecalhoPagina titulo="Início" empresa={nomeEmpresa} descricao="Sua situação de hoje e o que precisa de atenção" />
@@ -104,10 +114,24 @@ export default async function PaginaInicio() {
         ) : null}
         {vePagar && veReceber ? (
         <CartaoResumo
-          titulo="Diferença entre o que entra e o que sai"
+          titulo="Diferença entre o que ainda entra e o que ainda sai"
           valor={<ValorFinanceiro valor={totalReceber.subtrair(totalPagar).paraTexto()} tamanho="destaque" />}
-          explicacao="Considera apenas contas em aberto, sem previsão de caixa."
+          explicacao="Só contas em aberto. Não é o resultado do mês: nada disso aconteceu ainda."
           contagem={`A receber ${formatarDinheiro(totalReceber)} · a pagar ${formatarDinheiro(totalPagar)}`}
+        />
+        ) : null}
+        {resultadoDoMes ? (
+        <CartaoResumo
+          titulo={resultadoDoMes.indicadores.resultado.ehNegativo() ? "Prejuízo do mês" : "Lucro do mês"}
+          valor={<ValorFinanceiro valor={resultadoDoMes.indicadores.resultado.paraTexto()} tamanho="destaque" />}
+          explicacao="Pelo dinheiro que entrou e saiu de verdade neste mês."
+          contagem={
+            resultadoDoMes.indicadores.margem === null
+              ? "Sem receita no mês"
+              : `Margem de ${resultadoDoMes.indicadores.margem.toLocaleString("pt-BR")}%`
+          }
+          tom={resultadoDoMes.indicadores.resultado.ehNegativo() ? "perigo" : "sucesso"}
+          rodape={<Link href="/resultados">Ver o demonstrativo</Link>}
         />
         ) : null}
       </div>

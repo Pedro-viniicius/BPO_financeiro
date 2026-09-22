@@ -54,6 +54,7 @@ describe("autorizacao das telas", () => {
   it("a varredura realmente encontrou as telas (nao passa vazia por engano)", () => {
     expect(ARQUIVOS.length).toBeGreaterThan(15);
     expect(ARQUIVOS.some(({ caminho }) => caminho.endsWith("contas-pagar/page.tsx"))).toBe(true);
+    expect(ARQUIVOS.some(({ caminho }) => caminho.endsWith("route.ts"))).toBe(true);
   });
 
   it("toda pagina exige acesso antes de ler qualquer coisa", () => {
@@ -75,6 +76,29 @@ describe("autorizacao das telas", () => {
    * aqui prenderia a pessoa dentro do sistema.
    */
   const ACOES_SEM_PERMISSAO = ["acaoSair"];
+
+  it("toda rota de API exige acesso", () => {
+    /*
+     * Um `route.ts` devolve dado (ou arquivo) sem passar por tela nenhuma. Foi
+     * o caso que escapou da varredura ate o Gate 7, quando a exportacao do
+     * demonstrativo em CSV virou rota: um endereco que entrega a planilha
+     * inteira e tao sensivel quanto a pagina que mostra os mesmos numeros.
+     */
+    const rotasSemGuarda = ARQUIVOS.filter(({ caminho }) => caminho.endsWith("route.ts"))
+      .filter(({ conteudo }) => !TEM_GUARDA.test(conteudo))
+      .map(({ caminho }) => caminho);
+
+    expect(
+      rotasSemGuarda,
+      "Rota de API sem `exigirContextoFinanceiro`/`exigirAcesso`: entrega dados a qualquer sessao ativa.",
+    ).toEqual([]);
+  });
+
+  it("a exportacao do demonstrativo exige a permissao de exportar, nao so a de ver", () => {
+    const csv = ARQUIVOS.find(({ caminho }) => caminho.endsWith("resultados/csv/route.ts"));
+    expect(csv, "rota de exportacao nao encontrada").toBeDefined();
+    expect(csv!.conteudo).toMatch(/exigirContextoFinanceiro\(\s*"dre\.exportar"/);
+  });
 
   it("toda acao de servidor exige acesso", () => {
     const acoesSemGuarda = ARQUIVOS.filter(({ conteudo }) => conteudo.startsWith('"use server"'))
