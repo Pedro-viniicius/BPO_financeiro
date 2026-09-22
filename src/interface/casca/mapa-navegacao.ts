@@ -142,7 +142,6 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         sigla: "Dv",
         permissao: "dividas.visualizar",
         descricao: "Empréstimos e financiamentos",
-        disponibilidade: "em_breve",
       },
     ],
   },

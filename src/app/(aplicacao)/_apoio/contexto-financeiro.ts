@@ -7,6 +7,7 @@ import { RepositorioContasBancariasDrizzle } from "@/modulos/bancos/publico";
 import { RepositorioCadastrosDrizzle } from "@/modulos/cadastros/publico";
 import { RepositorioContasPagarDrizzle } from "@/modulos/contas-pagar/publico";
 import { RepositorioContasReceberDrizzle } from "@/modulos/contas-receber/publico";
+import { RepositorioDividasDrizzle } from "@/modulos/credito-dividas/publico";
 import { RepositorioConciliacaoDrizzle } from "@/modulos/conciliacao-bancaria/publico";
 import { RepositorioFluxoCaixaDrizzle } from "@/modulos/fluxo-caixa/publico";
 import { RepositorioDreDrizzle } from "@/modulos/dre/publico";
@@ -58,4 +59,5 @@ export const repositorios = {
   conciliacao: () => new RepositorioConciliacaoDrizzle(obterBancoDados()),
   resultados: () => new RepositorioDreDrizzle(obterBancoDados()),
   orcamento: () => new RepositorioOrcamentoDrizzle(obterBancoDados()),
+  dividas: () => new RepositorioDividasDrizzle(obterBancoDados()),
 };

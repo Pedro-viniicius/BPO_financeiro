@@ -26,6 +26,26 @@ import type {
 } from "../aplicacao/repositorio-dre";
 
 /**
+ * Quanto de uma baixa e JUROS de divida.
+ *
+ * Uma parcela de emprestimo mistura duas coisas de naturezas diferentes:
+ * amortizacao (o dinheiro sai, a divida cai — nao empobrece a empresa) e juros
+ * (custo de verdade). Somar a parcela inteira como despesa mostraria um
+ * prejuizo que nao existe.
+ *
+ * Numa baixa PARCIAL o rateio e proporcional a composicao da parcela: pagar
+ * metade de uma parcela de 1.000 (800 de amortizacao e 200 de juros) paga
+ * metade de cada uma das partes. Juros-primeiro tambem seria defensavel, mas o
+ * proporcional mantem o saldo devedor e o resultado sempre coerentes entre si.
+ *
+ * Fora de divida, a expressao vale zero e nada muda.
+ */
+const JUROS_DA_DIVIDA = sql`CASE
+  WHEN pd.id IS NULL OR pd.valor_total = 0 THEN 0
+  ELSE round(p.valor_principal * pd.valor_juros / pd.valor_total, 2)
+END`;
+
+/**
  * Demonstrativo de resultados no PostgreSQL.
  *
  * ----------------------------------------------------------------------
@@ -61,6 +81,11 @@ import type {
  * consulta, e tambem cairiam fora pelo GRUPO do plano (`transferencia`). A
  * redundancia e proposital: um ajuste classificado por engano noutra categoria
  * continuaria fora do resultado, que e onde ele tem de estar.
+ *
+ * A AMORTIZACAO de divida tambem fica de fora (Gate 8): o dinheiro sai, mas a
+ * divida cai junto — a empresa nao ficou mais pobre. Por isso a invariante de
+ * caixa passou a ser "movimentacoes menos amortizacao menos credito de
+ * emprestimo", e nao mais so "movimentacoes".
  *
  * ISOLAMENTO: todo metodo filtra por `escopo.empresaId`.
  */
@@ -104,12 +129,16 @@ export class RepositorioDreDrizzle implements RepositorioDre {
         SELECT to_char(p.data_pagamento, 'YYYY-MM') AS competencia,
                cp.grupo_dre::text AS grupo,
                cf.nome AS categoria,
-               SUM(p.valor_principal)::text AS principal,
-               SUM(p.valor_juros + p.valor_multa)::text AS financeiro,
+               -- Parte operacional: ZERO quando a baixa e de parcela de divida.
+               SUM(CASE WHEN pd.id IS NULL THEN p.valor_principal ELSE 0 END)::text AS principal,
+               -- Juros proprios da baixa (atraso) MAIS os juros embutidos na
+               -- parcela da divida, na proporcao do que foi pago.
+               SUM(p.valor_juros + p.valor_multa + ${JUROS_DA_DIVIDA})::text AS financeiro,
                SUM(p.valor_desconto)::text AS desconto
         FROM pagamentos p
         JOIN parcelas_pagar pp ON pp.id = p.parcela_pagar_id
         JOIN titulos_pagar t ON t.id = pp.titulo_pagar_id
+        LEFT JOIN parcelas_divida pd ON pd.parcela_pagar_id = pp.id
         LEFT JOIN categorias_financeiras cf ON cf.id = t.categoria_id
         LEFT JOIN contas_plano cp ON cp.id = cf.conta_plano_id
         WHERE p.empresa_id = ${escopo.empresaId}
@@ -203,14 +232,19 @@ export class RepositorioDreDrizzle implements RepositorioDre {
     const de = inicioDoMes(filtro.de);
     const ate = fimDoMes(filtro.ate);
 
-    const [aPagar, aReceber, financeirasPagas, financeirasRecebidas, avulsos] = await Promise.all([
+    const [aPagar, aReceber, financeirasPagas, financeirasRecebidas, avulsos, jurosDeDivida] = await Promise.all([
       this.banco.execute<LinhaDeTitulo>(sql`
         SELECT to_char(t.data_competencia, 'YYYY-MM') AS competencia,
                cp.grupo_dre::text AS grupo,
                cf.nome AS categoria,
-               SUM(CASE WHEN pp.situacao IN ('aberta', 'liquidada') THEN pp.valor_original ELSE pp.valor_pago END)::text AS valor
+               -- Parcela de divida nao entra como despesa: so os juros dela
+               -- entram, e na linha financeira (ver a consulta de juros de divida).
+               SUM(CASE WHEN pd.id IS NOT NULL THEN 0
+                        WHEN pp.situacao IN ('aberta', 'liquidada') THEN pp.valor_original
+                        ELSE pp.valor_pago END)::text AS valor
         FROM parcelas_pagar pp
         JOIN titulos_pagar t ON t.id = pp.titulo_pagar_id
+        LEFT JOIN parcelas_divida pd ON pd.parcela_pagar_id = pp.id
         LEFT JOIN categorias_financeiras cf ON cf.id = t.categoria_id
         LEFT JOIN contas_plano cp ON cp.id = cf.conta_plano_id
         WHERE t.empresa_id = ${escopo.empresaId}
@@ -258,9 +292,37 @@ export class RepositorioDreDrizzle implements RepositorioDre {
         GROUP BY 1
       `),
       this.lancamentosAvulsos(escopo, de, ate),
+      /*
+       * Os juros das parcelas de divida, por competencia do titulo. Sem esta
+       * consulta eles sumiriam do regime de competencia: a consulta de titulos
+       * zera a parcela de divida inteira (amortizacao E juros), porque nao tem
+       * como separar as duas coisas la.
+       */
+      this.banco.execute<LinhaFinanceira>(sql`
+        SELECT to_char(t.data_competencia, 'YYYY-MM') AS competencia,
+               SUM(pd.valor_juros)::text AS financeiro,
+               '0'::text AS desconto
+        FROM parcelas_divida pd
+        JOIN parcelas_pagar pp ON pp.id = pd.parcela_pagar_id
+        JOIN titulos_pagar t ON t.id = pp.titulo_pagar_id
+        WHERE pd.empresa_id = ${escopo.empresaId}
+          AND pd.situacao <> 'cancelada'
+          AND t.situacao NOT IN ('rascunho', 'aguardando_aprovacao')
+          AND t.data_competencia BETWEEN ${de}::date AND ${ate}::date
+        GROUP BY 1
+      `),
     ]);
 
     const celulas: Celula[] = [];
+
+    for (const linha of jurosDeDivida) {
+      celulas.push({
+        competencia: linha.competencia,
+        linha: "despesas_financeiras",
+        categoriaNome: "Juros de empréstimos",
+        valor: Dinheiro.deTexto(linha.financeiro),
+      });
+    }
 
     for (const [linhas, tipo] of [
       [aPagar, "saida"],
@@ -331,13 +393,20 @@ export class RepositorioDreDrizzle implements RepositorioDre {
       this.banco.execute<DetalheDeBaixa>(sql`
         SELECT p.id::text AS id, p.data_pagamento::text AS data, t.codigo, t.descricao,
                pes.nome AS pessoa, cf.nome AS categoria, cp.grupo_dre::text AS grupo,
-               p.valor_principal::text AS principal, (p.valor_juros + p.valor_multa)::text AS financeiro,
+               -- As MESMAS duas regras do total (ver \`celulasDeCaixa\`): a parte
+               -- operacional zera quando a baixa e de parcela de divida, e os
+               -- juros embutidos na parcela entram no financeiro. Uma linha que
+               -- soma 295 e um detalhamento que lista 55 e pior do que nao ter
+               -- detalhamento: quem confere fica sem saber onde esta o erro.
+               (CASE WHEN pd.id IS NULL THEN p.valor_principal ELSE 0 END)::text AS principal,
+               (p.valor_juros + p.valor_multa + ${JUROS_DA_DIVIDA})::text AS financeiro,
                p.valor_desconto::text AS desconto, pp.id::text AS parcela_id
         FROM pagamentos p
         JOIN parcelas_pagar pp ON pp.id = p.parcela_pagar_id
         JOIN titulos_pagar t ON t.id = pp.titulo_pagar_id
         JOIN fornecedores f ON f.id = t.fornecedor_id
         JOIN pessoas pes ON pes.id = f.pessoa_id
+        LEFT JOIN parcelas_divida pd ON pd.parcela_pagar_id = pp.id
         LEFT JOIN categorias_financeiras cf ON cf.id = t.categoria_id
         LEFT JOIN contas_plano cp ON cp.id = cf.conta_plano_id
         WHERE p.empresa_id = ${escopo.empresaId} AND p.situacao = 'registrado'

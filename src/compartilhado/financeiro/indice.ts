@@ -1,4 +1,22 @@
 export {
+  CronogramaInvalido,
+  EXPLICACAO_SISTEMA,
+  gerarCronograma,
+  MAXIMO_PARCELAS_DIVIDA,
+  MINIMO_PARCELAS_DIVIDA,
+  NOMES_SISTEMA,
+  prestacaoPrice,
+  saldoApos,
+  SISTEMAS,
+  taxaAnualParaMensal,
+  taxaMensalParaAnual,
+  totalDeJuros,
+  validarCronograma,
+  type ParcelaDoCronograma,
+  type PlanoDoEmprestimo,
+  type SistemaAmortizacao,
+} from "./cronograma-de-divida";
+export {
   estaEmAberto,
   NOMES_SITUACAO_PAGAR,
   NOMES_SITUACAO_RECEBER,

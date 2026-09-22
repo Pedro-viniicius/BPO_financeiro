@@ -1,0 +1,169 @@
+/*
+ * Detalhe da divida.
+ *
+ * O cronograma inteiro em uma tabela: um financiamento de 60 meses tem 60
+ * linhas, e quebrar isso em paginas esconderia justamente a leitura que
+ * importa — a curva do saldo descendo. No celular cada parcela vira um bloco
+ * com os rotulos repetidos.
+ */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-6);
+}
+
+.contrato {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--espaco-4);
+  margin: 0 0 var(--espaco-6);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.contrato dt {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.contrato dd {
+  margin: var(--espaco-1) 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.largo {
+  grid-column: 1 / -1;
+}
+
+.cronograma {
+  width: 100%;
+  margin-bottom: var(--espaco-6);
+  border-collapse: collapse;
+}
+
+.cronograma th,
+.cronograma td {
+  padding: var(--espaco-2) var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+.cronograma thead th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cronograma tfoot th,
+.cronograma tfoot td {
+  border-top: 2px solid var(--cor-borda-forte);
+  border-bottom: 0;
+  font-weight: var(--peso-medio);
+}
+
+.numero {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.numerico {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ligacao {
+  font-size: var(--texto-sm);
+  white-space: nowrap;
+}
+
+.cancelada {
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-realce);
+  color: var(--cor-texto-secundario);
+}
+
+.dobra {
+  margin: 0;
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espaco-4);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  cursor: pointer;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  list-style: none;
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:hover {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.dobra[open] .gatilho {
+  margin-bottom: var(--espaco-3);
+}
+
+@media (max-width: 48rem) {
+  .cronograma,
+  .cronograma tbody,
+  .cronograma tr,
+  .cronograma td {
+    display: block;
+  }
+
+  .cronograma thead,
+  .cronograma tfoot {
+    display: none;
+  }
+
+  .cronograma tr {
+    margin-bottom: var(--espaco-3);
+    padding-bottom: var(--espaco-3);
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .cronograma td {
+    border: 0;
+    text-align: left;
+  }
+
+  .cronograma td::before {
+    content: attr(data-rotulo);
+    display: block;
+    margin-bottom: var(--espaco-1);
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .numerico {
+    text-align: left;
+  }
+}

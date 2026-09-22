@@ -83,4 +83,26 @@ describe("vocabulario das telas", () => {
     expect(NOMES_SITUACAO_RECEBER.liquidada).toBe("Recebida");
     expect(NOMES_SITUACAO_PAGAR.parcial).not.toBe(NOMES_SITUACAO_RECEBER.parcial);
   });
+  /**
+   * Id de PAPEL onde se espera id de PESSOA.
+   *
+   * `listarFornecedores` e `listarClientes` devolvem o id do papel (a linha em
+   * `fornecedores`/`clientes`), que e o que um TITULO referencia. Quem guarda
+   * `pessoa_id` — a divida guarda o credor assim — precisa de
+   * `listarPessoas`. Os dois sao uuid e os dois preenchem um <select> igual,
+   * entao trocar um pelo outro compila, passa no tipo e so falha na hora de
+   * gravar, com "credor nao encontrado". Foi exatamente o que aconteceu na
+   * verificacao manual do Gate 8.
+   */
+  it("telas que guardam pessoa usam listarPessoas, nao a lista de papeis", () => {
+    const erros = arquivosDe(PASTA_APLICACAO)
+      .filter((caminho) => !caminho.includes(".teste."))
+      .flatMap((caminho) => {
+        const conteudo = readFileSync(caminho, "utf-8");
+        const guardaPessoa = /\bcredorPessoaId\b|\bpessoaId:\s*\w+\.id\b/.test(conteudo);
+        const usaPapel = /listarFornecedores|listarClientes/.test(conteudo);
+        return guardaPessoa && usaPapel ? [`${caminho}: guarda pessoa mas le a lista de papeis`] : [];
+      });
+    expect(erros, "Id de papel usado onde o modelo espera id de pessoa.").toEqual([]);
+  });
 });

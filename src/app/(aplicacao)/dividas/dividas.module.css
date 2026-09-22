@@ -1,0 +1,199 @@
+/*
+ * Dividas: painel + cartoes.
+ *
+ * A lista e de CARTOES, nao de linhas de tabela, porque cada divida carrega
+ * numeros que so fazem sentido juntos (saldo, taxa, progresso, proximo
+ * vencimento). Espremer isso em colunas obrigaria a rolar de lado no celular
+ * justamente na informacao que decide a semana.
+ */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-6);
+}
+
+.contador {
+  font-size: var(--texto-3xl);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--espaco-4);
+  margin: 0 0 var(--espaco-6);
+  padding: 0;
+  list-style: none;
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.cartaoTopo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.codigo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+.descricao {
+  margin: var(--espaco-1) 0 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+}
+
+.credor {
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--espaco-3);
+  margin: 0;
+}
+
+.numeros dt {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.numeros dd {
+  margin: var(--espaco-1) 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.progresso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin: 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.barra {
+  display: block;
+  block-size: 0.5rem;
+  border-radius: var(--raio-1);
+  background: var(--superficie-realce);
+  overflow: hidden;
+}
+
+.barraCheia {
+  display: block;
+  block-size: 100%;
+  background: var(--cor-marca-acao);
+}
+
+/* Atraso nunca e so cor: tem fundo, borda e a palavra escrita. */
+.atraso {
+  margin: 0;
+  padding: var(--espaco-2) var(--espaco-3);
+  border: 1px solid var(--cor-perigo-borda, var(--cor-perigo-forte));
+  border-radius: var(--raio-1);
+  background: var(--superficie-perigo, transparent);
+  color: var(--cor-perigo-forte);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.vazioSecao {
+  margin: 0 0 var(--espaco-6);
+  color: var(--cor-texto-secundario);
+}
+
+.encerradas {
+  margin-bottom: var(--espaco-6);
+}
+
+.encerradas summary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+}
+
+.vencimentos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vencimentos th,
+.vencimentos td {
+  padding: var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+.vencimentos th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.numerico {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 48rem) {
+  .vencimentos,
+  .vencimentos tbody,
+  .vencimentos tr,
+  .vencimentos td {
+    display: block;
+  }
+
+  .vencimentos thead {
+    display: none;
+  }
+
+  .vencimentos tr {
+    margin-bottom: var(--espaco-3);
+    padding-bottom: var(--espaco-3);
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .vencimentos td {
+    border: 0;
+    text-align: left;
+  }
+
+  .vencimentos td::before {
+    content: attr(data-rotulo);
+    display: block;
+    margin-bottom: var(--espaco-1);
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .numerico {
+    text-align: left;
+  }
+}

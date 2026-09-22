@@ -7,6 +7,7 @@ import { arquivos } from "@/nucleo/arquivos/infraestrutura/esquema";
 import { empresas } from "@/nucleo/empresas/infraestrutura/esquema";
 import { contasBancarias, movimentacoesBancarias } from "@/modulos/bancos/infraestrutura/esquema";
 import { pessoas } from "@/modulos/cadastros/infraestrutura/esquema";
+import { parcelasPagar } from "@/modulos/contas-pagar/infraestrutura/esquema";
 import { categoriasFinanceiras } from "@/modulos/plano-contas/infraestrutura/esquema";
 
 /**
@@ -82,11 +83,22 @@ export const parcelasDivida = pgTable(
     valorJuros: colunaDinheiro("valor_juros").notNull().default("0"),
     /** amortizacao + juros. Garantido por CHECK. */
     valorTotal: colunaDinheiro("valor_total").notNull(),
+    /**
+     * A parcela de conta a pagar que representa esta parcela no dia a dia.
+     *
+     * A divida NAO tem fluxo de pagamento proprio: quem paga e o modulo de
+     * contas a pagar, com a baixa, o estorno, o desconto e a conciliacao que
+     * ja existem. Esta coluna e a ponte entre os dois, e e por ela que o
+     * demonstrativo descobre quanto de uma baixa e juros (despesa financeira)
+     * e quanto e amortizacao (reducao da divida, que nao e despesa).
+     */
+    parcelaPagarId: uuid("parcela_pagar_id").references(() => parcelasPagar.id, { onDelete: "restrict" }),
     situacao: situacaoParcelaDivida("situacao").notNull().default("aberta"),
     ...colunasTecnicas(),
   },
   (tabela) => [
     uniqueIndex("unico_parcelas_divida_numero").on(tabela.dividaId, tabela.numeroParcela),
+    uniqueIndex("unico_parcelas_divida_conta_pagar").on(tabela.parcelaPagarId).where(sql`parcela_pagar_id IS NOT NULL`),
     index("parcelas_divida_empresa_situacao_vencimento_idx").on(tabela.empresaId, tabela.situacao, tabela.dataVencimento),
     check("verifica_parcelas_divida_numero", sql`numero_parcela > 0`),
     check("verifica_parcelas_divida_valores", sql`valor_amortizacao >= 0 AND valor_juros >= 0`),

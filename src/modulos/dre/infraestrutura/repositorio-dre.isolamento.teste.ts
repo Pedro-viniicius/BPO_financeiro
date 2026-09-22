@@ -16,6 +16,8 @@ import {
 import { RepositorioContasBancariasDrizzle } from "@/modulos/bancos/publico";
 import { RepositorioContasPagarDrizzle } from "@/modulos/contas-pagar/publico";
 import { RepositorioContasReceberDrizzle } from "@/modulos/contas-receber/publico";
+import { RepositorioDividasDrizzle } from "@/modulos/credito-dividas/publico";
+import { gerarCronograma } from "@/compartilhado/financeiro/indice";
 
 import type { LinhaDre } from "../dominio/estrutura-dre";
 import { RepositorioDreDrizzle } from "./repositorio-dre-drizzle";
@@ -25,11 +27,21 @@ import { RepositorioDreDrizzle } from "./repositorio-dre-drizzle";
  *
  * Os dois testes que mandam neste arquivo sao os de INVARIANTE:
  *
- *   CAIXA        resultado = entradas − saidas das movimentacoes do periodo,
+ *   CAIXA        resultado = entradas − saidas das movimentacoes do periodo
+ *                MAIS a amortizacao das parcelas de divida pagas nele,
  *                excluindo transferencia, estorno e ajuste. Se as duas contas
  *                divergirem, o extrato e o DRE contam historias diferentes
  *                sobre o mesmo mes e o usuario nao tem como saber em qual
  *                acreditar.
+ *
+ *                A AMORTIZACAO E O UNICO TERMO QUE SOBRA, e ela SOMA porque e
+ *                uma saida que o resultado nao conta: pagar uma parcela de
+ *                emprestimo tira R$ 1.134,72 do banco, mas so R$ 240,00 disso
+ *                e despesa — o resto e divida virando patrimonio. Contar o
+ *                total como despesa faria o resultado do mes cair pelo simples
+ *                ato de honrar o contrato. O credito do emprestimo e o espelho
+ *                disso (entra dinheiro que nao e receita), mas ja sai antes da
+ *                conta, por `origem = 'ajuste_manual'`.
  *   COMPETENCIA  soma dos titulos nao cancelados da competencia, mais
  *                juros/multas e menos descontos.
  *
@@ -53,6 +65,7 @@ describe.skipIf(!urlBancoTeste)("demonstrativo de resultados (PostgreSQL real)",
   let categoriaReceita = "";
   let categoriaDespesa = "";
   let categoriaTarifa = "";
+  let categoriaFinanceira = "";
 
   const caixa = (extras: Record<string, unknown> = {}) => ({ ...SETEMBRO, regime: "caixa" as const, ...extras });
   const competencia = (extras: Record<string, unknown> = {}) => ({ ...SETEMBRO, regime: "competencia" as const, ...extras });
@@ -143,7 +156,35 @@ describe.skipIf(!urlBancoTeste)("demonstrativo de resultados (PostgreSQL real)",
           SELECT 1 FROM movimentacoes_bancarias e WHERE e.movimentacao_estornada_id = m.id
         )
     `);
-    return Dinheiro.deTexto(linha?.liquido ?? "0").paraTexto();
+    return Dinheiro.deTexto(linha?.liquido ?? "0").somar(await amortizacaoPagaEmSetembro()).paraTexto();
+  }
+
+  /**
+   * A parte das baixas de setembro que abateu divida.
+   *
+   * Calculada com a MESMA regra proporcional do repositorio: `valor_principal`
+   * de uma baixa e o abatimento da parcela, e ele se reparte entre amortizacao
+   * e juros na proporcao do cronograma. Escrever aqui uma regra mais simples
+   * ("e o valor_amortizacao da parcela") faria o teste passar so enquanto
+   * ninguem pagasse uma parcela pela metade.
+   */
+  async function amortizacaoPagaEmSetembro(contaBancariaId?: string): Promise<Dinheiro> {
+    const filtroDeConta = contaBancariaId ? sql`AND p.conta_bancaria_id = ${contaBancariaId}` : sql``;
+    const [linha] = await banco.execute<{ total: string }>(sql`
+      SELECT COALESCE(SUM(
+        CASE WHEN pd.valor_total = 0 THEN 0
+             ELSE round(p.valor_principal * pd.valor_amortizacao / pd.valor_total, 2)
+        END
+      ), 0)::text AS total
+      FROM pagamentos p
+      JOIN parcelas_pagar pp ON pp.id = p.parcela_pagar_id
+      JOIN parcelas_divida pd ON pd.parcela_pagar_id = pp.id
+      WHERE p.empresa_id = ${cenario.empresaId}
+        AND p.situacao = 'registrado'
+        AND p.data_pagamento BETWEEN '2026-09-01' AND '2026-09-30'
+        ${filtroDeConta}
+    `);
+    return Dinheiro.deTexto(linha?.total ?? "0");
   }
 
   beforeAll(async () => {
@@ -161,6 +202,7 @@ describe.skipIf(!urlBancoTeste)("demonstrativo de resultados (PostgreSQL real)",
     categoriaReceita = await categoriaEm("receita_bruta", "3.9.01", "Mensalidades DRE");
     categoriaDespesa = await categoriaEm("despesa_operacional", "4.9.01", "Aluguel DRE");
     categoriaTarifa = await categoriaEm("resultado_financeiro", "4.9.02", "Tarifas DRE");
+    categoriaFinanceira = await categoriaEm("resultado_financeiro", "4.9.03", "Juros de empréstimos DRE");
 
     // 1. Receita recebida em dia: 10.000.
     const receita = await contaReceber("10000.00", "2026-09-05", categoriaReceita);
@@ -232,12 +274,48 @@ describe.skipIf(!urlBancoTeste)("demonstrativo de resultados (PostgreSQL real)",
 
     // 13. Conta a pagar de setembro AINDA EM ABERTO: so na competencia.
     await contaPagar("1200.00", "2026-09-30", categoriaDespesa);
+
+    /*
+     * 14. EMPRESTIMO com uma parcela paga em setembro.
+     *
+     * E o caso que quebraria a invariante antiga: saem R$ 1.134,72 do banco,
+     * mas so R$ 240,00 sao despesa. Sem a divida no cenario, a invariante
+     * "movimentacoes − amortizacao" continuaria passando por vacuidade, e
+     * ninguem saberia que o termo novo esta certo.
+     */
+    const dividas = new RepositorioDividasDrizzle(banco as never);
+    const { dividaId } = await dividas.criar(
+      escopo,
+      {
+        credorPessoaId: cenario.pessoaFornecedorId,
+        tipo: "emprestimo",
+        descricao: "Capital de giro",
+        dataContratacao: dataCivilDeTexto("2026-08-25"),
+        valorPrincipal: Dinheiro.deTexto("12000.00"),
+        taxaMensal: 2,
+        sistema: "price",
+        categoriaJurosId: categoriaFinanceira,
+        usuarioId,
+      },
+      gerarCronograma({
+        valorPrincipal: Dinheiro.deTexto("12000.00"),
+        taxaMensal: 2,
+        quantidadeParcelas: 12,
+        primeiroVencimento: dataCivilDeTexto("2026-09-25") as DataVencimento,
+        sistema: "price",
+      }),
+    );
+    const emprestimo = await dividas.buscarPorId(escopo, dividaId, HOJE);
+    const primeira = emprestimo!.parcelas[0]!;
+    await baixaPagar(primeira.parcelaPagarId!, "2026-09-25", primeira.valorTotal.paraTexto());
   });
 
   afterAll(async () => {
     await banco.execute(sql`DELETE FROM transferencias WHERE empresa_id = ${cenario.empresaId}`);
     await banco.execute(sql`DELETE FROM pagamentos WHERE empresa_id = ${cenario.empresaId}`);
     await banco.execute(sql`DELETE FROM recebimentos WHERE empresa_id = ${cenario.empresaId}`);
+    await banco.execute(sql`DELETE FROM parcelas_divida WHERE empresa_id = ${cenario.empresaId}`);
+    await banco.execute(sql`DELETE FROM dividas WHERE empresa_id = ${cenario.empresaId}`);
     await banco.execute(sql`DELETE FROM parcelas_pagar WHERE empresa_id = ${cenario.empresaId}`);
     await banco.execute(sql`DELETE FROM titulos_pagar WHERE empresa_id = ${cenario.empresaId}`);
     await banco.execute(sql`DELETE FROM parcelas_receber WHERE empresa_id = ${cenario.empresaId}`);
@@ -266,7 +344,8 @@ describe.skipIf(!urlBancoTeste)("demonstrativo de resultados (PostgreSQL real)",
         AND m.origem NOT IN ('transferencia', 'estorno', 'ajuste_manual')
         AND NOT EXISTS (SELECT 1 FROM movimentacoes_bancarias e WHERE e.movimentacao_estornada_id = m.id)
     `);
-    expect(valorDa(resultado.linhas, "resultado_periodo")).toBe(Dinheiro.deTexto(linha!.liquido).paraTexto());
+    const esperado = Dinheiro.deTexto(linha!.liquido).somar(await amortizacaoPagaEmSetembro(cenario.contaBancariaId));
+    expect(valorDa(resultado.linhas, "resultado_periodo")).toBe(esperado.paraTexto());
   });
 
   it("INVARIANTE DE COMPETENCIA: titulos nao cancelados + juros/multas − descontos", async () => {
@@ -327,9 +406,15 @@ describe.skipIf(!urlBancoTeste)("demonstrativo de resultados (PostgreSQL real)",
     expect(valorDa(linhas, "resultado_operacional")).toBe("7950.00");
 
     expect(valorDa(linhas, "receitas_financeiras")).toBe("80.00"); // 50 juros + 30 multa
-    expect(valorDa(linhas, "despesas_financeiras")).toBe("55.00"); // 15 juros + 40 tarifa
+
+    /*
+     * 15 de juros de atraso + 40 de tarifa + 240 dos JUROS da parcela do
+     * emprestimo. Os outros R$ 894,72 daquela parcela sairam do banco e nao
+     * aparecem em lugar nenhum do resultado: sao amortizacao.
+     */
+    expect(valorDa(linhas, "despesas_financeiras")).toBe("295.00");
     expect(valorDa(linhas, "descontos_obtidos")).toBe("20.00");
-    expect(valorDa(linhas, "resultado_periodo")).toBe("7995.00");
+    expect(valorDa(linhas, "resultado_periodo")).toBe("7755.00");
   });
 
   it("as linhas do regime de competencia batem com o esperado", async () => {
@@ -451,9 +536,9 @@ describe.skipIf(!urlBancoTeste)("demonstrativo de resultados (PostgreSQL real)",
     const resultado = await dre.montar(escopo, caixa(), HOJE);
     expect(resultado.indicadores.receitaLiquida.paraTexto()).toBe(valorDa(resultado.linhas, "receita_liquida"));
     expect(resultado.indicadores.resultado.paraTexto()).toBe(valorDa(resultado.linhas, "resultado_periodo"));
-    // 5.000 operacionais + 55 financeiras.
-    expect(resultado.indicadores.despesaTotal.paraTexto()).toBe("5055.00");
-    expect(resultado.indicadores.margem).toBeCloseTo(61.74, 1);
+    // 5.000 operacionais + 295 financeiras (15 + 40 + 240 de juros da divida).
+    expect(resultado.indicadores.despesaTotal.paraTexto()).toBe("5295.00");
+    expect(resultado.indicadores.margem).toBeCloseTo(59.88, 1);
   });
 
   it("periodo sem nada devolve tudo zerado e avisa que nao ha dados", async () => {
@@ -487,7 +572,7 @@ describe.skipIf(!urlBancoTeste)("demonstrativo de resultados (PostgreSQL real)",
       { de: dataCivilDeTexto("2026-10-01"), ate: dataCivilDeTexto("2026-10-31"), regime: "caixa" },
       HOJE,
     );
-    expect(valorDa(setembro.linhas, "despesas_financeiras")).toBe("55.00");
+    expect(valorDa(setembro.linhas, "despesas_financeiras")).toBe("295.00");
     expect(valorDa(outubro.linhas, "despesas_financeiras")).toBe("0.00");
   });
 

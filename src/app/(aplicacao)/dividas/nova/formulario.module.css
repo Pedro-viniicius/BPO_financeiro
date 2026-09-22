@@ -1,0 +1,141 @@
+/*
+ * Previa do cronograma.
+ *
+ * Um financiamento longo tem dezenas de linhas: a tabela rola dentro da
+ * propria caixa em vez de empurrar a pagina, e no celular cada parcela vira
+ * um bloco com rotulo proprio.
+ */
+.resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2) var(--espaco-5);
+  margin: var(--espaco-4) 0 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.resumo strong {
+  color: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.rolagem {
+  max-height: 28rem;
+  overflow-y: auto;
+  margin-top: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+}
+
+.numerico {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.previa {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.previa caption {
+  margin-bottom: var(--espaco-2);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  text-align: left;
+}
+
+.previa th,
+.previa td {
+  padding: var(--espaco-2);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+}
+
+.previa th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.previa input {
+  width: 100%;
+  min-width: 8rem;
+}
+
+.numero {
+  width: 4rem;
+  color: var(--cor-texto-secundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.conferencia {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+  padding: var(--espaco-3);
+  border-radius: var(--raio-1);
+  background: var(--superficie-afundada);
+  font-size: var(--texto-sm);
+}
+
+.conferencia strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.confere {
+  color: var(--cor-sucesso-forte);
+}
+
+.naoConfere {
+  color: var(--cor-perigo-forte);
+  font-weight: var(--peso-medio);
+}
+
+@media (max-width: 48rem) {
+  .previa,
+  .previa tbody,
+  .previa tr,
+  .previa td {
+    display: block;
+  }
+
+  .previa thead {
+    display: none;
+  }
+
+  .previa tr {
+    margin-bottom: var(--espaco-3);
+    padding-bottom: var(--espaco-3);
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .previa td {
+    border: 0;
+  }
+
+  .previa td::before {
+    content: attr(data-rotulo);
+    display: block;
+    margin-bottom: var(--espaco-1);
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (max-width: 48rem) {
+  .rolagem {
+    max-height: none;
+    border: 0;
+  }
+
+  .numerico {
+    text-align: left;
+  }
+}

@@ -43,6 +43,13 @@
       "when": 1790114028323,
       "tag": "0005_autor_da_importacao_de_extrato",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790118535371,
+      "tag": "0006_divida_ligada_a_contas_a_pagar",
+      "breakpoints": true
     }
   ]
 }
