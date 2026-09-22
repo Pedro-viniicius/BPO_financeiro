@@ -57,4 +57,6 @@ export interface RepositorioCadastros {
   listarCategorias(escopo: EscopoEmpresa): Promise<readonly CategoriaNaLista[]>;
   criarCategoria(escopo: EscopoEmpresa, dados: DadosNovaCategoria): Promise<{ categoriaId: string }>;
   listarContasPlano(escopo: EscopoEmpresa): Promise<readonly OpcaoSimples[]>;
+  /** Cria o plano de contas e as categorias iniciais. Nao faz nada se ja houver plano. */
+  semearPlanoPadrao(escopo: EscopoEmpresa): Promise<{ contasCriadas: number; categoriasCriadas: number }>;
 }

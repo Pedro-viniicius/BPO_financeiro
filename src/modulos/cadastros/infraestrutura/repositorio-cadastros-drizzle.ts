@@ -1,7 +1,11 @@
 import { and, asc, eq, ilike, or } from "drizzle-orm";
 
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
-import { categoriasFinanceiras, contasPlano } from "@/modulos/plano-contas/infraestrutura/esquema";
+/*
+ * Tabelas de OUTRO modulo vem do agregador de esquemas: um modulo so conhece o
+ * outro pelo `publico.ts`, e esquema nao e interface publica.
+ */
+import { categoriasFinanceiras, contasPlano } from "@/banco-dados/esquemas/indice";
 import { executarEmTransacao, type BancoDados } from "@/nucleo/banco-dados/publico";
 
 import type {
@@ -12,6 +16,7 @@ import type {
   PessoaNaLista,
   RepositorioCadastros,
 } from "../aplicacao/repositorio-cadastros";
+import { PLANO_PADRAO } from "../aplicacao/plano-padrao";
 import { clientes, fornecedores, pessoas } from "./esquema";
 
 /**
@@ -127,6 +132,38 @@ export class RepositorioCadastrosDrizzle implements RepositorioCadastros {
       .values({ empresaId: escopo.empresaId, nome: dados.nome, contaPlanoId: dados.contaPlanoId })
       .returning({ id: categoriasFinanceiras.id });
     return { categoriaId: categoria!.id };
+  }
+
+  /**
+   * Semeia plano e categorias em UMA transacao. Se ja houver qualquer conta do
+   * plano, nao faz nada: a semente e ponto de partida, nunca sobrescreve o que
+   * o cliente ja organizou.
+   */
+  async semearPlanoPadrao(escopo: EscopoEmpresa): Promise<{ contasCriadas: number; categoriasCriadas: number }> {
+    return executarEmTransacao(async (transacao) => {
+      const [existente] = await transacao
+        .select({ id: contasPlano.id })
+        .from(contasPlano)
+        .where(eq(contasPlano.empresaId, escopo.empresaId))
+        .limit(1);
+      if (existente) return { contasCriadas: 0, categoriasCriadas: 0 };
+
+      let categoriasCriadas = 0;
+      for (const conta of PLANO_PADRAO) {
+        const [criada] = await transacao
+          .insert(contasPlano)
+          .values({ empresaId: escopo.empresaId, codigo: conta.codigo, nome: conta.nome, grupoDre: conta.grupoDre })
+          .returning({ id: contasPlano.id });
+
+        for (const nome of conta.categorias) {
+          await transacao
+            .insert(categoriasFinanceiras)
+            .values({ empresaId: escopo.empresaId, nome, contaPlanoId: criada!.id });
+          categoriasCriadas += 1;
+        }
+      }
+      return { contasCriadas: PLANO_PADRAO.length, categoriasCriadas };
+    }, this.banco);
   }
 
   async listarContasPlano(escopo: EscopoEmpresa): Promise<readonly OpcaoSimples[]> {

@@ -1,0 +1,53 @@
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+.campo select,
+.campo input {
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-3);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  font: inherit;
+}
+
+.crescer { flex: 1 1 14rem; }
+
+.resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-4);
+  padding: var(--espaco-4);
+  margin-bottom: var(--espaco-4);
+  background: var(--superficie-cartao);
+  border: var(--largura-borda) solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.resumoItem { display: flex; flex-direction: column; gap: 2px; }
+.resumoRotulo { font-size: var(--texto-xs); color: var(--cor-texto-fraco); text-transform: uppercase; letter-spacing: 0.04em; }
+.resumoValor { font-size: var(--texto-lg); font-weight: var(--peso-forte); font-variant-numeric: tabular-nums; }
+.vencido { color: var(--cor-perigo-forte); }
+
+/* Desktop: tabela. Celular: cartoes empilhados — tabela larga nao encolhe bem. */
+.tabela { display: block; }
+.cartoes { display: none; }
+
+@media (max-width: 767px) {
+  .tabela { display: none; }
+  .cartoes { display: grid; gap: var(--espaco-3); }
+}

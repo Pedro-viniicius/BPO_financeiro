@@ -1,0 +1,35 @@
+.resumo {
+  display: grid;
+  gap: var(--espaco-4);
+  grid-template-columns: minmax(16rem, 22rem) 1fr;
+  align-items: start;
+  margin-bottom: var(--espaco-5);
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--espaco-3) var(--espaco-4);
+  margin: 0;
+  padding: var(--espaco-4);
+  background: var(--superficie-cartao);
+  border: var(--largura-borda) solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.ficha dt {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-fraco);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ficha dd {
+  margin: 2px 0 0;
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-primario);
+}
+
+@media (max-width: 1023px) {
+  .resumo { grid-template-columns: 1fr; }
+}

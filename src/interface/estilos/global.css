@@ -123,3 +123,52 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Links que agem como botao (navegam, nao submetem).
+ *
+ * Um <a> nao vira <button>: quem navega por teclado espera Enter e "abrir em
+ * nova aba" num link, e Espaco num botao. Trocar isso quebra expectativa. Aqui
+ * so a APARENCIA e compartilhada com `Botao`, usando os mesmos tokens.
+ */
+.acao-primaria,
+.acao-secundaria {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-4);
+  border: var(--largura-borda) solid transparent;
+  border-radius: var(--raio-2);
+  font-weight: var(--peso-medio);
+  text-decoration: none;
+  transition: background var(--transicao-rapida), border-color var(--transicao-rapida);
+}
+
+.acao-primaria {
+  background: var(--cor-marca-acao);
+  color: var(--cor-marca-contraste);
+}
+
+.acao-primaria:hover {
+  background: var(--cor-marca-acao-hover);
+  text-decoration: none;
+}
+
+.acao-secundaria {
+  background: var(--superficie-cartao);
+  border-color: var(--cor-borda-forte);
+  color: var(--cor-texto-primario);
+}
+
+.acao-secundaria:hover {
+  background: var(--superficie-realce);
+  border-color: var(--cor-marca-acao);
+  text-decoration: none;
+}
+
+.acao-primaria:focus-visible,
+.acao-secundaria:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}

@@ -1,13 +1,17 @@
-import { and, desc, eq, gte, ilike, inArray, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, lte, or, sql, type SQL } from "drizzle-orm";
 
 import { hojeDataCivil, type DataCivil, type DataVencimento } from "@/compartilhado/datas/indice";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
 import { saldoRestante, situacaoDerivada, type SituacaoDerivada } from "@/compartilhado/financeiro/indice";
 import { deslocamento, type EscopoEmpresa, type PaginaResultado, type Paginacao } from "@/compartilhado/tipos/indice";
-import { contasBancarias, movimentacoesBancarias } from "@/modulos/bancos/infraestrutura/esquema";
-import { clientes, pessoas } from "@/modulos/cadastros/infraestrutura/esquema";
-import { categoriasFinanceiras } from "@/modulos/plano-contas/infraestrutura/esquema";
+/*
+ * As tabelas de OUTROS modulos vem do agregador de esquemas, nunca do
+ * `infraestrutura/esquema.ts` alheio: um modulo so conhece o outro pelo
+ * `publico.ts`, e esquema nao e interface publica. O agregador existe
+ * exatamente para as juncoes que cruzam modulos.
+ */
+import { categoriasFinanceiras, clientes, contasBancarias, movimentacoesBancarias, pessoas } from "@/banco-dados/esquemas/indice";
 import { RegistradorAuditoriaDrizzle } from "@/nucleo/auditoria/publico";
 import { executarEmTransacao, type BancoDados, type ExecutorBancoDados } from "@/nucleo/banco-dados/publico";
 import { formatarCodigo, PREFIXOS_CODIGO } from "@/nucleo/codigos/publico";
