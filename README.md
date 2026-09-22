@@ -69,6 +69,23 @@ isolamento entre empresas) so rodam com `BANCO_URL_TESTE` apontando para um
 banco descartavel com as migracoes aplicadas — o mesmo container acima serve.
 Sem ela, essas suites sao PULADAS e `pnpm testar` passa sem te-las executado.
 
+## Quando o `next dev` quebra com "unexpected Turbopack error"
+
+O Turbopack guarda um cache persistente em `.next/`. Se rotas forem APAGADAS
+enquanto esse cache existe, o grafo de rotas guardado passa a citar paginas que
+nao estao mais no disco, e a proxima recompilacao (HMR) entra em panic com
+`Cell ... AppPageLoaderTree no longer exists`.
+
+Nao e erro do codigo: o servidor continua respondendo 200. A correcao e apagar
+o cache.
+
+```
+rm -rf .next && pnpm dev
+```
+
+O arquivo de diagnostico fica em `/tmp/next-panic-*.log` e a primeira linha diz
+qual rota falhou — se ela nao existe mais no projeto, e exatamente este caso.
+
 ## Estrutura
 
 ```
