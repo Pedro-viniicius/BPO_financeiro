@@ -1,0 +1,2 @@
+Data;Historico;Valor
+01/09/2026;PAGAMENTO;-100,00
