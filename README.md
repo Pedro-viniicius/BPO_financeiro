@@ -22,6 +22,14 @@ e controle gerencial.
 | 9 | Analises (IA) | — |
 | 10 | Prontidao para producao | — |
 
+## Identidade visual
+
+A marca da instalacao fica isolada em [`src/interface/marca/`](src/interface/marca/LEIA-ME.md):
+`identidade.ts` (nome, assinatura, textos) e um arquivo de tema que redefine os
+tokens de cor, raio, sombra e tipografia. Nenhum componente escreve o nome ou a
+cor da empresa no meio do codigo, e `marca.teste.tsx` falha se alguem voltar a
+fixar um deles. Trocar a marca do produto nao toca em dominio, banco ou regras.
+
 ## Arquitetura em uma frase
 
 > Monolito modular, orientado por dominio, single-tenant por instalacao,
@@ -63,7 +71,7 @@ src/
   app/            rotas e telas (Next.js); (publico)/ entrar e criar conta,
                   (autenticado)/ primeiro acesso, (aplicacao)/ tudo dentro da casca
   proxy.ts        repassa a rota pedida em cabecalho; nao decide acesso
-  interface/      sistema de design: tokens, componentes, formatacao, casca
+  interface/      sistema de design: tokens, marca, componentes, formatacao, casca
   composicao/     escolha de provedores concretos
   modulos/        modulos de negocio (contas-pagar, bancos, dre, orcamento...)
   nucleo/         autenticacao, autorizacao, auditoria, empresas, eventos, tarefas...

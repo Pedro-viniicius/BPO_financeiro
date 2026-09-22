@@ -23,6 +23,16 @@ const CAMINHOS_TECNICOS = "/(infraestrutura|interface)/|^src/nucleo/banco-dados/
 module.exports = {
   forbidden: [
     {
+      // Import que nao resolve para arquivo nenhum. Sem esta regra, `pnpm lint` e
+      // `verificar:arquitetura` passam numa arvore que nao compila, e so o `tsc`
+      // (bem mais lento) acusa o problema.
+      name: "sem-import-quebrado",
+      severity: "error",
+      comment: "Este import nao aponta para nenhum arquivo existente.",
+      from: {},
+      to: { couldNotResolve: true },
+    },
+    {
       name: "sem-dependencias-circulares",
       comment: "Ciclos de importacao tornam o codigo impossivel de entender e de extrair. Quebre o ciclo com um contrato ou evento.",
       severity: "error",
