@@ -78,7 +78,11 @@ existe=$($PSQL "$ADMIN" -tAc "SELECT 1 FROM pg_database WHERE datname = '$NOME'"
 if [ "$existe" != "1" ]; then
   echo "Criando o banco $NOME..."
   $PSQL "$ADMIN" -v ON_ERROR_STOP=1 -c "CREATE DATABASE $NOME OWNER financeiro_migracao"
-  $PSQL "$ADMIN" -v ON_ERROR_STOP=1 -d "$NOME" <<SQL
+
+  # Trocar o banco na propria URL, e nao com `-d`: o psql aplica o ultimo `-d`
+  # por cima da URL e perde host, usuario e senha, caindo no socket local.
+  ADMIN_NO_TESTE=$(printf '%s' "$ADMIN" | sed "s|/[^/?]*\(?.*\)\{0,1\}$|/$NOME|")
+  $PSQL "$ADMIN_NO_TESTE" -v ON_ERROR_STOP=1 <<SQL
 GRANT CONNECT ON DATABASE $NOME TO financeiro_aplicacao, financeiro_migracao, financeiro_backup;
 GRANT CREATE ON DATABASE $NOME TO financeiro_migracao;
 GRANT ALL ON SCHEMA public TO financeiro_migracao;
