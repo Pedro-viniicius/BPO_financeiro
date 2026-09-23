@@ -172,7 +172,6 @@ export const NAVEGACAO_APOIO: readonly ItemDeNavegacao[] = [
     sigla: "Cf",
     permissao: "configuracao.gerenciar",
     descricao: "Empresa, usuários, preferências e auditoria",
-    disponibilidade: "em_breve",
   },
 ];
 

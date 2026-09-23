@@ -1,0 +1,59 @@
+/*
+ * Capa das Configuracoes.
+ *
+ * Cada cartao carrega o ESTADO do assunto, nao so o nome: quem abre esta tela
+ * quase sempre esta atras de uma pendencia de implantacao.
+ */
+.pendencias {
+  margin: 0 0 var(--espaco-5);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-atencao-forte, #b26a00);
+  border-radius: var(--raio-2);
+  background: var(--superficie-atencao, #fff4e5);
+  color: var(--cor-atencao-texto, #6b3f00);
+}
+
+.tudoCerto {
+  margin: 0 0 var(--espaco-5);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-sucesso-forte, #1b7a3d);
+  border-radius: var(--raio-2);
+  background: var(--superficie-sucesso, #eaf7ee);
+  color: var(--cor-sucesso-texto, #10532a);
+}
+
+.cartoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--espaco-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cartoes a {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  min-height: 44px;
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  color: inherit;
+  text-decoration: none;
+}
+
+.cartoes a:hover {
+  border-color: var(--cor-marca-acao);
+}
+
+.cartoes a:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.cartoes span {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
