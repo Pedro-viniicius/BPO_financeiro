@@ -110,7 +110,20 @@ describe.skipIf(!urlBancoTeste)("estrutura do modelo (PostgreSQL real)", () => {
     expect(suspeitas).toEqual([]);
   });
 
-  it("toda chave estrangeira de tabela financeira usa RESTRICT ou SET NULL, exceto as duas excecoes documentadas (CASCADE)", async () => {
+  /**
+   * CASCADE e proibido em tabela financeira: apagar um registro nunca pode
+   * levar dinheiro junto em silencio. As excecoes sao tabelas `itens_X` que
+   * nao existem sozinhas — o item pertence inteiramente ao pai, e mante-lo
+   * depois que o pai sai deixaria linha orfa sem significado:
+   *
+   *   itens_extrato_bancario   linhas de um arquivo de extrato importado
+   *   itens_orcamento          celulas de um orcamento
+   *   itens_lote_importacao    o que uma importacao criou (Gate 9)
+   *
+   * Acrescentar uma quarta exige a mesma pergunta: este item significa
+   * alguma coisa sem o pai? Se significar, e RESTRICT.
+   */
+  it("toda chave estrangeira de tabela financeira usa RESTRICT ou SET NULL, exceto as excecoes documentadas (CASCADE)", async () => {
     const cascatas = await banco.execute<{ table_name: string; constraint_name: string }>(sql`
       SELECT tc.table_name, tc.constraint_name
       FROM information_schema.table_constraints tc
@@ -118,6 +131,10 @@ describe.skipIf(!urlBancoTeste)("estrutura do modelo (PostgreSQL real)", () => {
       WHERE tc.table_schema = 'public' AND tc.constraint_type = 'FOREIGN KEY' AND rc.delete_rule = 'CASCADE'
         AND tc.table_name NOT IN ('session', 'account', 'two_factor', 'vinculos_usuario')
     `);
-    expect(cascatas.map((c) => c.table_name).sort()).toEqual(["itens_extrato_bancario", "itens_orcamento"]);
+    expect(cascatas.map((c) => c.table_name).sort()).toEqual([
+      "itens_extrato_bancario",
+      "itens_lote_importacao",
+      "itens_orcamento",
+    ]);
   });
 });

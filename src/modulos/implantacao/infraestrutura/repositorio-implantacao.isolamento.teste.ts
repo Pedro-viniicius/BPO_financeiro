@@ -27,7 +27,6 @@ describe.skipIf(!urlBancoTeste)("carga inicial (PostgreSQL real)", () => {
   let cenario: CenarioBase;
   let escopo: EscopoEmpresa;
   let usuarioId = "";
-  let categoria = "";
 
   const CORTE = dataCivilDeTexto("2025-12-31");
 
@@ -65,11 +64,10 @@ describe.skipIf(!urlBancoTeste)("carga inicial (PostgreSQL real)", () => {
       INSERT INTO contas_plano (empresa_id, codigo, nome, grupo_dre)
       VALUES (${cenario.empresaId}, '8.1.01', 'Ocupação importada', 'despesa_operacional') RETURNING id::text AS id
     `);
-    const [cat] = await banco.execute<{ id: string }>(sql`
+    await banco.execute(sql`
       INSERT INTO categorias_financeiras (empresa_id, nome, conta_plano_id)
-      VALUES (${cenario.empresaId}, 'Aluguel importado', ${conta!.id}::uuid) RETURNING id::text AS id
+      VALUES (${cenario.empresaId}, 'Aluguel importado', ${conta!.id}::uuid)
     `);
-    categoria = cat!.id;
   });
 
   afterAll(async () => {
