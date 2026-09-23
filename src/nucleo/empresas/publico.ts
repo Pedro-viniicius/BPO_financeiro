@@ -13,6 +13,8 @@ export {
 export { trocarEmpresaAtiva } from "./aplicacao/trocar-empresa-ativa";
 export type { LeitorAcessoEmpresas, UnidadeInstalacaoEmpresa } from "./aplicacao/repositorio-acesso-empresas";
 export { RepositorioAcessoEmpresasDrizzle } from "./infraestrutura/repositorio-acesso-empresas-drizzle";
+export type { DadosDaEmpresa, RepositorioDadosDaEmpresa } from "./aplicacao/dados-da-empresa";
+export { RepositorioDadosDaEmpresaDrizzle } from "./infraestrutura/repositorio-dados-empresa-drizzle";
 export { AcessoEmpresasEmMemoria } from "./infraestrutura/acesso-empresas-em-memoria";
 export { decidirDestino, destinoPadrao, retornoSeguro, ROTAS, type EstadoAcesso } from "./interface/destino";
 export {

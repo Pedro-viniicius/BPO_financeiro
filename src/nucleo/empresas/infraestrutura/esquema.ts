@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, jsonb, pgEnum, pgTable, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, date, index, jsonb, pgEnum, pgTable, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { user } from "@/nucleo/autenticacao/infraestrutura/esquema-better-auth";
 
@@ -35,6 +35,35 @@ export const empresas = pgTable(
     cnpj: text("cnpj"),
     /** Fuso horario usado para calcular "hoje" desta empresa. */
     fusoHorario: text("fuso_horario").notNull().default("America/Sao_Paulo"),
+
+    /*
+     * Contato e endereco da empresa.
+     *
+     * Colunas aqui, e nao uma tabela `enderecos`: e um endereco por empresa, e
+     * nenhuma outra entidade do modelo tem endereco hoje. Uma tabela para uma
+     * relacao 1:1 acrescentaria um join e uma linha nula em troca de nada. Se
+     * um dia pessoas precisarem de endereco, a tabela nasce nessa hora.
+     */
+    email: text("email"),
+    telefone: text("telefone"),
+    cep: text("cep"),
+    logradouro: text("logradouro"),
+    numero: text("numero"),
+    complemento: text("complemento"),
+    bairro: text("bairro"),
+    municipio: text("municipio"),
+    uf: text("uf"),
+
+    /*
+     * DATA DE CORTE: o dia em que a empresa passou a usar o sistema.
+     *
+     * E ela que separa "o que veio de antes" do "o que nasceu aqui". A carga
+     * inicial usa esta data para os saldos das contas bancarias e para saber
+     * quais titulos em aberto precisam ser importados. Sem ela, um saldo
+     * informado nao tem a que dia se referir.
+     */
+    dataInicioUso: date("data_inicio_uso"),
+
     ativa: boolean("ativa").notNull().default(true),
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
     atualizadoEm: timestamp("atualizado_em", { withTimezone: true }).notNull().defaultNow(),
@@ -45,6 +74,8 @@ export const empresas = pgTable(
     uniqueIndex("empresas_cnpj_unico_idx").on(tabela.cnpj),
     check("verifica_empresas_cnpj", sql`cnpj IS NULL OR cnpj ~ '^[0-9]{14}$'`),
     check("verifica_empresas_nome", sql`length(trim(nome)) > 0`),
+    check("verifica_empresas_cep", sql`cep IS NULL OR cep ~ '^[0-9]{8}$'`),
+    check("verifica_empresas_uf", sql`uf IS NULL OR uf ~ '^[A-Z]{2}$'`),
   ],
 );
 

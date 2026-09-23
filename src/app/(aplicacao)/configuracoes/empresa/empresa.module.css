@@ -1,0 +1,8 @@
+.sucesso {
+  margin: 0 0 var(--espaco-4);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-sucesso-forte, #1b7a3d);
+  border-radius: var(--raio-1);
+  background: var(--superficie-sucesso, #eaf7ee);
+  color: var(--cor-sucesso-texto, #10532a);
+}
