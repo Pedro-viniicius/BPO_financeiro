@@ -22,6 +22,7 @@
     "verificar:tudo": "pnpm lint && pnpm verificar:tipos && pnpm verificar:arquitetura && pnpm testar && pnpm verificar:licencas && pnpm build",
     "banco:gerar": "drizzle-kit generate",
     "banco:migrar": "tsx --env-file-if-exists=.env src/banco-dados/migrar.ts",
+    "banco:preparar-teste": "sh scripts/banco/preparar-teste.sh",
     "banco:estudio": "drizzle-kit studio",
     "tarefas:executar": "tsx --env-file-if-exists=.env src/nucleo/tarefas/executor-linha-comando.ts"
   },

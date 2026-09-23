@@ -37,7 +37,10 @@ jobs:
       # Usuarios criados por scripts/banco/criar-usuarios.sql (senha padrao do script; apenas na CI).
       BANCO_URL_ADMIN: postgres://financeiro_admin:senha-admin-ci@localhost:5432/financeiro
       BANCO_URL_MIGRACAO: postgres://financeiro_migracao:troque-esta-senha@localhost:5432/financeiro
-      BANCO_URL_TESTE: postgres://financeiro_aplicacao:troque-esta-senha@localhost:5432/financeiro
+      # Banco PROPRIO para os testes, como em desenvolvimento: as suites de
+      # integracao escrevem de verdade e nao podem dividir banco com a aplicacao.
+      BANCO_URL_TESTE: postgres://financeiro_aplicacao:troque-esta-senha@localhost:5432/financeiro_teste
+      BANCO_ADMIN_URL: postgres://financeiro_admin:senha-admin-ci@localhost:5432/postgres
       BANCO_URL: postgres://financeiro_aplicacao:troque-esta-senha@localhost:5432/financeiro
       APLICACAO_URL: http://localhost:3000
       APLICACAO_SEGREDO: segredo-apenas-para-ci-0123456789abcdefghij
@@ -86,6 +89,9 @@ jobs:
 
       - name: "Aplicar migracoes de novo (deve ser idempotente: nada pendente)"
         run: pnpm banco:migrar
+
+      - name: Criar o banco de testes e aplicar as migracoes nele
+        run: pnpm banco:preparar-teste
 
       - name: Executar testes (unitarios + integracao com PostgreSQL)
         run: pnpm testar

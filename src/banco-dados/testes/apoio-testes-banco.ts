@@ -13,6 +13,32 @@ import * as esquema from "@/banco-dados/esquemas/indice";
  */
 export const urlBancoTeste = process.env.BANCO_URL_TESTE;
 
+/*
+ * O banco de testes nao pode ser o de desenvolvimento.
+ *
+ * As suites de integracao escrevem de verdade — criam empresas, gravam
+ * lancamentos e apagam tudo ao fim. Apontadas para o banco de trabalho, elas
+ * fazem o cadastro de quem esta usando o sistema sumir no meio de uma
+ * conferencia, e transformam sobra de teste em dado "real". A checagem fica
+ * aqui, e nao num teste, porque precisa valer antes de a primeira suite rodar.
+ */
+if (urlBancoTeste && process.env.BANCO_URL && bancoDaUrl(urlBancoTeste) === bancoDaUrl(process.env.BANCO_URL)) {
+  throw new Error(
+    `BANCO_URL_TESTE aponta para o mesmo banco de BANCO_URL ("${bancoDaUrl(urlBancoTeste)}"). ` +
+      "Os testes apagariam os dados de desenvolvimento. Rode `pnpm banco:preparar-teste`.",
+  );
+}
+
+/** Nome do banco e host de uma URL de conexao, sem as credenciais. */
+function bancoDaUrl(url: string): string {
+  try {
+    const analisada = new URL(url);
+    return `${analisada.host}${analisada.pathname}`;
+  } catch {
+    return url;
+  }
+}
+
 export function criarBancoTeste(maximoConexoes = 8) {
   const cliente = postgres(urlBancoTeste ?? "", { max: maximoConexoes });
   const banco = drizzle(cliente, { schema: esquema, casing: "snake_case" });
