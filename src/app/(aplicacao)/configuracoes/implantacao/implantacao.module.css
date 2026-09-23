@@ -1,0 +1,247 @@
+/*
+ * Assistente de implantacao.
+ *
+ * Os passos nao sao bloqueados: mostram estado e deixam a pessoa ir na ordem
+ * que der. Implantacao real e feita aos pedacos, esperando informacao do
+ * cliente para um passo do meio.
+ */
+.passos {
+  display: grid;
+  gap: var(--espaco-4);
+  margin: 0 0 var(--espaco-6);
+  padding: 0;
+  list-style: none;
+  counter-reset: passo;
+}
+
+.passos > li {
+  display: flex;
+  gap: var(--espaco-4);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+/* Concluido tem o selo "Pronto" escrito: a cor sozinha nao informa. */
+.concluido {
+  border-color: var(--cor-sucesso-forte, #1b7a3d);
+}
+
+.numero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 2.5rem;
+  block-size: 2.5rem;
+  border-radius: 50%;
+  background: var(--superficie-realce);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+.corpo {
+  flex: 1 1 auto;
+}
+
+.titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-3);
+}
+
+.explicacao {
+  margin: var(--espaco-2) 0 0;
+  color: var(--cor-texto-secundario);
+}
+
+.resumo {
+  margin: var(--espaco-1) 0 var(--espaco-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.downloads {
+  margin: var(--espaco-3) 0 0;
+}
+
+.regras {
+  margin: 0 0 var(--espaco-5);
+  padding-left: var(--espaco-5);
+  color: var(--cor-texto-secundario);
+}
+
+.regras li {
+  margin-bottom: var(--espaco-2);
+}
+
+.formulario {
+  display: grid;
+  gap: var(--espaco-3);
+  max-inline-size: 40rem;
+}
+
+.previa {
+  margin: var(--espaco-4) 0;
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-marca-acao);
+  border-radius: var(--raio-2);
+  background: var(--superficie-realce);
+}
+
+.previa h3 {
+  margin: 0 0 var(--espaco-2);
+}
+
+.previa ul {
+  margin: var(--espaco-3) 0;
+  padding-left: var(--espaco-5);
+  font-size: var(--texto-sm);
+}
+
+.erros {
+  margin: var(--espaco-4) 0;
+  overflow-x: auto;
+}
+
+.erros table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.erros caption {
+  margin-bottom: var(--espaco-2);
+  color: var(--cor-perigo-forte);
+  font-weight: var(--peso-medio);
+  text-align: left;
+}
+
+.erros th,
+.erros td {
+  padding: var(--espaco-2) var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.erros thead th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sucesso {
+  margin: 0 0 var(--espaco-4);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-sucesso-forte, #1b7a3d);
+  border-radius: var(--raio-1);
+  background: var(--superficie-sucesso, #eaf7ee);
+  color: var(--cor-sucesso-texto, #10532a);
+}
+
+.lotes {
+  display: grid;
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lotes > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.desfeito {
+  opacity: 0.72;
+}
+
+.detalhe {
+  display: block;
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.vazio {
+  color: var(--cor-texto-secundario);
+}
+
+.dobra {
+  margin: 0;
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espaco-3);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  list-style: none;
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.corpoDaDobra {
+  margin-top: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-pagina);
+  min-inline-size: min(26rem, 100%);
+}
+
+@media (max-width: 48rem) {
+  .passos > li {
+    flex-direction: column;
+  }
+
+  .erros table,
+  .erros tbody,
+  .erros tr,
+  .erros td {
+    display: block;
+  }
+
+  .erros thead {
+    display: none;
+  }
+
+  .erros tr {
+    margin-bottom: var(--espaco-3);
+    padding-bottom: var(--espaco-3);
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .erros td {
+    border: 0;
+  }
+
+  .erros td::before {
+    content: attr(data-rotulo);
+    display: block;
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+  }
+}
