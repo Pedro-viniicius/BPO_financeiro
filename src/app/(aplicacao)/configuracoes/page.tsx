@@ -59,6 +59,12 @@ export default async function PaginaConfiguracoes() {
           </Link>
         </li>
         <li>
+          <Link href="/configuracoes/implantacao">
+            <strong>Implantação</strong>
+            <span>O passo a passo para começar: empresa, plano, bancos, cadastros e contas em aberto</span>
+          </Link>
+        </li>
+        <li>
           <Link href="/configuracoes/usuarios">
             <strong>Usuários e acessos</strong>
             <span>Quem entra no sistema, com que papel, e convites em aberto</span>
