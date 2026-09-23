@@ -1,0 +1,130 @@
+# ============================================================================
+# Producao — Modelo A (hospedagem gerida pelo fornecedor) em VPS.
+#
+# Diferencas em relacao ao docker-compose.yml (desenvolvimento):
+#   - proxy Caddy na frente, com HTTPS automatico (Let's Encrypt);
+#   - a aplicacao NAO publica porta no host: so o proxy a alcanca;
+#   - imagens com TAG de versao, para que reverter seja trocar a tag;
+#   - backup com copia FORA do servidor (imagem propria, com rclone e gpg);
+#   - limites de log, para o disco nao encher sozinho.
+#
+# Uso:
+#   cp .env.producao.exemplo .env && edite
+#   scripts/implantar.sh            (nunca `docker compose up` a seco)
+#
+# Ver docs/operacao/implantacao-vps.md.
+# ============================================================================
+name: financeiro
+
+services:
+  banco:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: financeiro
+      POSTGRES_USER: financeiro_admin
+      POSTGRES_PASSWORD: "${BANCO_SENHA_ADMIN:?defina BANCO_SENHA_ADMIN no .env}"
+      # Fuso do servidor de banco. Datas de negocio ja sao DATE (sem fuso);
+      # isto alinha os TIMESTAMPTZ tecnicos e os nomes de arquivo do backup.
+      TZ: America/Sao_Paulo
+    volumes:
+      - dados-banco:/var/lib/postgresql/data
+      - ./scripts/banco/criar-usuarios.sql:/docker-entrypoint-initdb.d/10-criar-usuarios.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financeiro_admin -d financeiro"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # Sem `ports`: o banco so existe dentro da rede do compose. Para acesso
+    # administrativo, tunel SSH (ver o runbook).
+    logging: &registro
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  migracao:
+    image: financeiro:${VERSAO:?defina VERSAO (use scripts/implantar.sh)}
+    command: ["npx", "tsx", "src/banco-dados/migrar.ts"]
+    env_file: .env
+    environment:
+      TZ: America/Sao_Paulo
+    depends_on:
+      banco:
+        condition: service_healthy
+    restart: "no"
+    logging: *registro
+
+  aplicacao:
+    image: financeiro:${VERSAO:?defina VERSAO (use scripts/implantar.sh)}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: America/Sao_Paulo
+    depends_on:
+      migracao:
+        condition: service_completed_successfully
+    volumes:
+      - arquivos:/aplicacao/arquivos
+    logging: *registro
+
+  tarefas:
+    image: financeiro:${VERSAO:?defina VERSAO (use scripts/implantar.sh)}
+    command: ["npx", "tsx", "src/nucleo/tarefas/executor-linha-comando.ts"]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: America/Sao_Paulo
+    depends_on:
+      migracao:
+        condition: service_completed_successfully
+    volumes:
+      - arquivos:/aplicacao/arquivos
+    logging: *registro
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: "${DOMINIO:?defina DOMINIO no .env (ex.: financeiro.novadidata.com.br)}"
+      EMAIL_CERTIFICADO: "${EMAIL_CERTIFICADO:?defina EMAIL_CERTIFICADO no .env}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificados:/data
+      - configuracao-proxy:/config
+    depends_on:
+      - aplicacao
+    logging: *registro
+
+  backup:
+    build:
+      context: .
+      dockerfile: scripts/backup/Dockerfile
+    image: financeiro-backup:${VERSAO:?defina VERSAO (use scripts/implantar.sh)}
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: "${BANCO_SENHA_BACKUP:?defina BANCO_SENHA_BACKUP no .env}"
+      BACKUP_RETENCAO_DIAS: "${BACKUP_RETENCAO_DIAS:-30}"
+      BACKUP_REMOTO_DESTINO: "${BACKUP_REMOTO_DESTINO:-}"
+      BACKUP_REMOTO_RETENCAO_DIAS: "${BACKUP_REMOTO_RETENCAO_DIAS:-}"
+      BACKUP_CHAVE_PUBLICA_GPG: "${BACKUP_CHAVE_PUBLICA_GPG:-}"
+      RCLONE_CONFIG: /rclone/rclone.conf
+      TZ: America/Sao_Paulo
+    volumes:
+      - ./backups:/backups
+      # Credenciais do destino remoto: arquivos do SERVIDOR, nunca do
+      # repositorio. Monta-se a PASTA, e nao o arquivo: um bind-mount de
+      # arquivo inexistente faz o Docker criar um diretorio no lugar dele, e o
+      # servico sobe quebrado numa instalacao nova.
+      - ./segredos:/rclone:ro
+    depends_on:
+      banco:
+        condition: service_healthy
+    logging: *registro
+
+volumes:
+  dados-banco:
+  arquivos:
+  certificados:
+  configuracao-proxy:

@@ -1,0 +1,36 @@
+# ============================================================================
+# Proxy reverso com HTTPS automatico.
+#
+# O Caddy obtem e renova o certificado sozinho (Let's Encrypt), desde que o
+# DNS do dominio aponte para este servidor e as portas 80 e 443 estejam
+# abertas. Sem HTTPS o sistema nao funciona de verdade: os cookies de sessao
+# sao `Secure`, e o navegador simplesmente nao os envia em http.
+# ============================================================================
+{
+	email {$EMAIL_CERTIFICADO}
+	# Sem servidor de administracao: nada a expor.
+	admin off
+}
+
+{$DOMINIO} {
+	encode zstd gzip
+
+	# A aplicacao so e alcancavel por aqui — ela nao publica porta no host.
+	reverse_proxy aplicacao:3000
+
+	header {
+		# HSTS: depois da primeira visita, o navegador se recusa a usar http.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# O proprio next.config.ts ja manda X-Frame-Options: DENY.
+		-Server
+	}
+
+	log {
+		output file /data/acesso.log {
+			roll_size 10MiB
+			roll_keep 5
+		}
+	}
+}

@@ -34,3 +34,6 @@ coverage/
 
 # Cache incremental do TypeScript
 tsconfig.tsbuildinfo
+
+# Credenciais do servidor (rclone, chaves GPG). Ficam no VPS, nunca no git.
+/segredos/
