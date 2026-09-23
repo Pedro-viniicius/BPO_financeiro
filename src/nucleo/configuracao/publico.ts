@@ -1,2 +1,2 @@
 /** Interface publica da configuracao (variaveis de ambiente validadas). */
-export { ehProducao, obterVariaveisAmbiente, type VariaveisAmbiente } from "./variaveis-ambiente";
+export { avisoDoAmbiente, ehProducao, obterVariaveisAmbiente, type VariaveisAmbiente } from "./variaveis-ambiente";

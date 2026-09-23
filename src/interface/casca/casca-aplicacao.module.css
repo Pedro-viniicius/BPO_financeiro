@@ -36,3 +36,28 @@
     padding-bottom: calc(var(--espaco-8) + env(safe-area-inset-bottom));
   }
 }
+
+/*
+ * Faixa de ambiente (demonstracao, homologacao, desenvolvimento).
+ *
+ * Nunca aparece em producao. Cor com TEXTO junto, como no resto do sistema:
+ * quem nao distingue as cores le "Ambiente de demonstração" do mesmo jeito.
+ */
+.faixaAmbiente {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-2);
+  align-items: baseline;
+  margin: 0;
+  padding: var(--espaco-2) var(--espaco-4);
+  background: var(--superficie-atencao, #fff4e5);
+  border-bottom: 2px solid var(--cor-atencao-forte, #b26a00);
+  color: var(--cor-atencao-texto, #6b3f00);
+  font-size: var(--texto-sm);
+  text-align: center;
+  justify-content: center;
+}
+
+.faixaAmbiente strong {
+  font-weight: var(--peso-medio);
+}

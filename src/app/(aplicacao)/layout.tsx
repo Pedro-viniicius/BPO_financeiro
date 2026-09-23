@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { CascaAplicacao } from "@/interface/casca/casca-aplicacao";
 import { navegacaoVisivel } from "@/interface/casca/mapa-navegacao";
 import { NOMES_PAPEIS } from "@/nucleo/autorizacao/publico";
+import { avisoDoAmbiente } from "@/nucleo/configuracao/publico";
 import { acaoTrocarEmpresaAtiva, exigirContextoAplicacao, rotaAtualDaRequisicao, ROTAS } from "@/nucleo/empresas/publico";
 
 import { acaoSair } from "./acoes-sessao";
@@ -15,9 +16,11 @@ import { acaoSair } from "./acoes-sessao";
 export default async function LayoutAplicacao({ children }: { children: ReactNode }) {
   const rotaAtual = await rotaAtualDaRequisicao(ROTAS.inicio);
   const { sessao, empresaAtiva, empresasAcessiveis, contexto } = await exigirContextoAplicacao(rotaAtual);
+  const aviso = avisoDoAmbiente();
 
   return (
     <CascaAplicacao
+      {...(aviso ? { aviso } : {})}
       cabecalho={{
         nomeDaEmpresa: empresaAtiva.nomeFantasia ?? empresaAtiva.nome,
         nomeDoUsuario: sessao.nome,
