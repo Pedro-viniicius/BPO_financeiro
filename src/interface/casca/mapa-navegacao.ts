@@ -155,6 +155,16 @@ export const NAVEGACAO_APOIO: readonly ItemDeNavegacao[] = [
     sigla: "Cd",
     permissao: "cadastros.visualizar",
     descricao: "Clientes, fornecedores, categorias e centros de custo",
+    // Marcado como exato para que `/cadastros/plano-de-contas`, que tem item
+    // proprio, nao acenda os dois ao mesmo tempo.
+    exata: true,
+  },
+  {
+    rotulo: "Plano de contas",
+    rota: "/cadastros/plano-de-contas",
+    sigla: "Pc",
+    permissao: "plano_contas.visualizar",
+    descricao: "Como cada lançamento chega ao demonstrativo",
   },
   {
     rotulo: "Configurações",
