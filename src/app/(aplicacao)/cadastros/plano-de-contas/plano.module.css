@@ -1,0 +1,187 @@
+/*
+ * Plano de contas: arvore grupo -> conta -> categoria.
+ *
+ * Agrupado por LINHA DO DEMONSTRATIVO e nao por codigo, porque a pergunta de
+ * quem mexe aqui e "onde isso vai aparecer no Resultados?". O codigo fica
+ * visivel, menor, para quem veio da contabilidade se localizar.
+ */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-5);
+}
+
+.contador {
+  font-size: var(--texto-3xl);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  margin: var(--espaco-5) 0;
+}
+
+.grupo {
+  margin-bottom: var(--espaco-6);
+}
+
+.contas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.conta {
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.contaTopo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.codigo {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inativo nunca e so cor clara: o selo "Inativa" vai junto, escrito. */
+.inativa {
+  opacity: 0.72;
+}
+
+.categorias {
+  margin: var(--espaco-3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--espaco-2);
+}
+
+.categorias > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-3);
+  padding: var(--espaco-2) var(--espaco-3);
+  border-left: 3px solid var(--cor-borda-forte);
+  background: var(--superficie-realce);
+  border-radius: var(--raio-1);
+}
+
+.nomeCategoria {
+  flex: 1 1 12rem;
+}
+
+.usos {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.semCategoria {
+  margin: var(--espaco-3) 0 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* ------------------------------------------------------------------ dobras */
+.dobra {
+  margin: 0;
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espaco-3);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  list-style: none;
+}
+
+.gatilhoDestaque {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:hover {
+  border-color: var(--cor-marca-acao);
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.corpoDaDobra {
+  margin-top: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-pagina);
+  min-inline-size: min(22rem, 100%);
+}
+
+.formulario {
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.secundarias {
+  display: grid;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-4);
+  padding-top: var(--espaco-4);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.explicacao {
+  display: block;
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.sucesso {
+  margin: 0 0 var(--espaco-3);
+  padding: var(--espaco-2) var(--espaco-3);
+  border: 1px solid var(--cor-sucesso-forte, #1b7a3d);
+  border-radius: var(--raio-1);
+  background: var(--superficie-sucesso, #eaf7ee);
+  color: var(--cor-sucesso-texto, #10532a);
+  font-size: var(--texto-sm);
+}
+
+@media (max-width: 48rem) {
+  .contaTopo {
+    flex-direction: column;
+  }
+
+  .categorias > li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

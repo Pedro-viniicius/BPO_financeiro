@@ -139,31 +139,95 @@ export class RepositorioCadastrosDrizzle implements RepositorioCadastros {
    * plano, nao faz nada: a semente e ponto de partida, nunca sobrescreve o que
    * o cliente ja organizou.
    */
+  /**
+   * Acrescenta o que FALTA do plano padrao, sem tocar no que ja existe.
+   *
+   * Antes, a semente desistia inteira se houvesse qualquer conta. Isso
+   * trancava justamente quem mais precisa dela: quem criou duas contas a mao,
+   * percebeu que o trabalho seria longo e quis partir do plano pronto. E
+   * deixava o resultado depender de QUANDO se aperta o botao.
+   *
+   * Agora a regra e por item: conta ja existente (mesmo codigo) e mantida como
+   * esta — inclusive o nome e o grupo que o cliente tiver ajustado —, e
+   * categoria ja existente (mesmo nome) nao e recriada. Apertar duas vezes
+   * seguidas cria zero na segunda.
+   *
+   * O nome da categoria e unico por empresa no banco, entao conferir por nome
+   * e conferir pela mesma chave que o banco usa.
+   */
   async semearPlanoPadrao(escopo: EscopoEmpresa): Promise<{ contasCriadas: number; categoriasCriadas: number }> {
     return executarEmTransacao(async (transacao) => {
-      const [existente] = await transacao
-        .select({ id: contasPlano.id })
+      const contasExistentes = await transacao
+        .select({ id: contasPlano.id, codigo: contasPlano.codigo })
         .from(contasPlano)
-        .where(eq(contasPlano.empresaId, escopo.empresaId))
-        .limit(1);
-      if (existente) return { contasCriadas: 0, categoriasCriadas: 0 };
+        .where(eq(contasPlano.empresaId, escopo.empresaId));
+      const idPorCodigo = new Map(contasExistentes.map((conta) => [conta.codigo, conta.id]));
 
+      const categoriasExistentes = await transacao
+        .select({ nome: categoriasFinanceiras.nome })
+        .from(categoriasFinanceiras)
+        .where(eq(categoriasFinanceiras.empresaId, escopo.empresaId));
+      const nomesUsados = new Set(categoriasExistentes.map((categoria) => categoria.nome));
+
+      let contasCriadas = 0;
       let categoriasCriadas = 0;
+
       for (const conta of PLANO_PADRAO) {
-        const [criada] = await transacao
-          .insert(contasPlano)
-          .values({ empresaId: escopo.empresaId, codigo: conta.codigo, nome: conta.nome, grupoDre: conta.grupoDre })
-          .returning({ id: contasPlano.id });
+        let contaId = idPorCodigo.get(conta.codigo);
+        if (!contaId) {
+          const [criada] = await transacao
+            .insert(contasPlano)
+            .values({ empresaId: escopo.empresaId, codigo: conta.codigo, nome: conta.nome, grupoDre: conta.grupoDre })
+            .returning({ id: contasPlano.id });
+          contaId = criada!.id;
+          contasCriadas += 1;
+        }
 
         for (const nome of conta.categorias) {
+          if (nomesUsados.has(nome)) continue;
           await transacao
             .insert(categoriasFinanceiras)
-            .values({ empresaId: escopo.empresaId, nome, contaPlanoId: criada!.id });
+            .values({ empresaId: escopo.empresaId, nome, contaPlanoId: contaId });
+          nomesUsados.add(nome);
           categoriasCriadas += 1;
         }
       }
-      return { contasCriadas: PLANO_PADRAO.length, categoriasCriadas };
+
+      return { contasCriadas, categoriasCriadas };
     }, this.banco);
+  }
+
+  /**
+   * O que a semente acrescentaria, sem gravar nada.
+   *
+   * E o que a tela mostra antes de o usuario confirmar: "vai criar 5 contas e
+   * 11 categorias, estas aqui". Botao que altera o plano de contas sem dizer o
+   * que vai fazer e o tipo de coisa que ninguem aperta duas vezes.
+   */
+  async previaDoPlanoPadrao(escopo: EscopoEmpresa): Promise<{
+    contas: readonly { codigo: string; nome: string; grupoDre: string }[];
+    categorias: readonly string[];
+  }> {
+    const contasExistentes = await this.banco
+      .select({ codigo: contasPlano.codigo })
+      .from(contasPlano)
+      .where(eq(contasPlano.empresaId, escopo.empresaId));
+    const codigosUsados = new Set(contasExistentes.map((conta) => conta.codigo));
+
+    const categoriasExistentes = await this.banco
+      .select({ nome: categoriasFinanceiras.nome })
+      .from(categoriasFinanceiras)
+      .where(eq(categoriasFinanceiras.empresaId, escopo.empresaId));
+    const nomesUsados = new Set(categoriasExistentes.map((categoria) => categoria.nome));
+
+    return {
+      contas: PLANO_PADRAO.filter((conta) => !codigosUsados.has(conta.codigo)).map((conta) => ({
+        codigo: conta.codigo,
+        nome: conta.nome,
+        grupoDre: conta.grupoDre,
+      })),
+      categorias: PLANO_PADRAO.flatMap((conta) => conta.categorias).filter((nome) => !nomesUsados.has(nome)),
+    };
   }
 
   async listarContasPlano(escopo: EscopoEmpresa): Promise<readonly OpcaoSimples[]> {

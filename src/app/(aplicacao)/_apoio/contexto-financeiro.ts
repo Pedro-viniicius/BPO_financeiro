@@ -12,6 +12,7 @@ import { RepositorioConciliacaoDrizzle } from "@/modulos/conciliacao-bancaria/pu
 import { RepositorioFluxoCaixaDrizzle } from "@/modulos/fluxo-caixa/publico";
 import { RepositorioDreDrizzle } from "@/modulos/dre/publico";
 import { RepositorioOrcamentoDrizzle } from "@/modulos/orcamento/publico";
+import { RepositorioPlanoContasDrizzle } from "@/modulos/plano-contas/publico";
 
 /**
  * Porta de entrada das telas financeiras.
@@ -60,4 +61,5 @@ export const repositorios = {
   resultados: () => new RepositorioDreDrizzle(obterBancoDados()),
   orcamento: () => new RepositorioOrcamentoDrizzle(obterBancoDados()),
   dividas: () => new RepositorioDividasDrizzle(obterBancoDados()),
+  planoContas: () => new RepositorioPlanoContasDrizzle(obterBancoDados()),
 };
