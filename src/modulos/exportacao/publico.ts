@@ -1,6 +1,7 @@
 /**
  * Interface publica do modulo "exportacao".
- * Ainda sem exportacoes: o modulo sera implementado nos proximos gates.
- * Outros modulos so podem importar deste arquivo.
+ * Leva os dados da empresa embora, em CSV, num ZIP so.
  */
-export {};
+export { CONJUNTOS, type ConjuntoExportado } from "./dominio/conjunto-de-dados";
+export type { PacoteExportado, RepositorioExportacao } from "./aplicacao/repositorio-exportacao";
+export { RepositorioExportacaoDrizzle } from "./infraestrutura/repositorio-exportacao-drizzle";
