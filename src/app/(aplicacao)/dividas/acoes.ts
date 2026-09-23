@@ -213,12 +213,14 @@ function lerCronogramaDoFormulario(formulario: FormData): readonly ParcelaDoCron
  * Cancela a divida e as parcelas que AINDA NAO foram pagas.
  *
  * O que ja foi pago continua pago: o dinheiro saiu do banco de verdade, e
- * apagar isso deixaria o extrato sem contrapartida. Exige `dividas.editar` —
- * o catalogo nao tem `dividas.cancelar`, e nenhuma permissao e criada por
- * conta propria (ver relatorio de entrega).
+ * apagar isso deixaria o extrato sem contrapartida.
+ *
+ * Exige `dividas.cancelar`, separada de `dividas.editar` desde o Gate 9:
+ * cancelar tira do fluxo de caixa todas as parcelas em aberto de uma vez, o
+ * que e decisao de outra ordem que corrigir uma taxa.
  */
 export async function acaoCancelarDivida(_anterior: EstadoDivida, formulario: FormData): Promise<EstadoDivida> {
-  const { escopo, usuarioId } = await exigirContextoFinanceiro("dividas.editar", "/dividas");
+  const { escopo, usuarioId } = await exigirContextoFinanceiro("dividas.cancelar", "/dividas");
 
   const analise = esquemaCancelar.safeParse({
     dividaId: texto(formulario, "dividaId"),

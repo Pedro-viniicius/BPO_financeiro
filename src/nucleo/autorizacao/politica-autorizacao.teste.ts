@@ -62,3 +62,29 @@ describe("politica de autorizacao", () => {
     }
   });
 });
+
+describe("dividas.cancelar (Gate 9)", () => {
+  /**
+   * Cancelar divida ganhou permissao propria porque tira do fluxo de caixa
+   * todas as parcelas em aberto de uma vez — decisao de outra ordem que
+   * corrigir uma taxa de juros. O espelho e `contas_pagar.cancelar`.
+   */
+  it("existe no catalogo", () => {
+    expect(PERMISSOES).toContain("dividas.cancelar");
+  });
+
+  it("quem edita divida tambem cancela; quem so visualiza, nao", () => {
+    for (const papel of PAPEIS) {
+      const permissoes = PERMISSOES_POR_PAPEL[papel];
+      if (permissoes.has("dividas.cancelar")) {
+        expect(permissoes.has("dividas.editar"), `${papel} cancela divida sem poder edita-la`).toBe(true);
+        expect(permissoes.has("dividas.visualizar"), `${papel} cancela divida sem poder ve-la`).toBe(true);
+      }
+    }
+  });
+
+  it("papeis de leitura nao cancelam", () => {
+    expect(PERMISSOES_POR_PAPEL.somente_leitura.has("dividas.cancelar")).toBe(false);
+    expect(PERMISSOES_POR_PAPEL.auditor.has("dividas.cancelar")).toBe(false);
+  });
+});
