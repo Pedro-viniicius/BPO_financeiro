@@ -64,6 +64,13 @@
       "when": 1790128943951,
       "tag": "0008_convites_de_acesso",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790130188447,
+      "tag": "0009_lotes_de_importacao",
+      "breakpoints": true
     }
   ]
 }

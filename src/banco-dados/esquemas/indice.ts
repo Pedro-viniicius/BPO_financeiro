@@ -34,3 +34,4 @@ export * from "@/modulos/contas-receber/infraestrutura/esquema";
 // Tesouraria e controle gerencial
 export * from "@/modulos/credito-dividas/infraestrutura/esquema";
 export * from "@/modulos/orcamento/infraestrutura/esquema";
+export * from "@/modulos/implantacao/infraestrutura/esquema";
