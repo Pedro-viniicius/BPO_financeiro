@@ -46,10 +46,10 @@ jobs:
       - name: Obter codigo
         uses: actions/checkout@v4
 
+      # Sem `version`: a acao le `packageManager` do package.json. Informar os
+      # dois faz a acao recusar com "Multiple versions of pnpm specified".
       - name: Instalar pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 12
 
       - name: Instalar Node.js
         uses: actions/setup-node@v4
@@ -84,7 +84,7 @@ jobs:
       - name: Aplicar migracoes do zero (usuario de migracao)
         run: pnpm banco:migrar
 
-      - name: Aplicar migracoes de novo (deve ser idempotente: nada pendente)
+      - name: "Aplicar migracoes de novo (deve ser idempotente: nada pendente)"
         run: pnpm banco:migrar
 
       - name: Executar testes (unitarios + integracao com PostgreSQL)
