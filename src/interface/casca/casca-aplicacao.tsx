@@ -16,6 +16,11 @@ export interface CascaAplicacaoProps {
   /** Grupos ja filtrados pelas permissoes do usuario (`navegacaoVisivel`). */
   readonly grupos: readonly GrupoDeMenu[];
   readonly contadores?: Readonly<Record<string, number>>;
+  /**
+   * Faixa de ambiente, quando NAO e producao. Vem pronta de `app/` — a casca
+   * nao le variavel de ambiente (ADR-024).
+   */
+  readonly aviso?: { readonly rotulo: string; readonly explicacao: string };
   readonly children: ReactNode;
 }
 
@@ -28,7 +33,7 @@ const ROTAS_BARRA_INFERIOR = ["/inicio", "/contas-pagar", "/contas-receber"] as 
  *
  * A casca nao conhece sessao nem banco: recebe tudo pronto de `app/`.
  */
-export function CascaAplicacao({ cabecalho, grupos, contadores, children }: CascaAplicacaoProps) {
+export function CascaAplicacao({ cabecalho, grupos, contadores, aviso, children }: CascaAplicacaoProps) {
   const rotaAtual = usePathname();
   // O painel guarda a rota em que foi aberto: ao navegar, ele ja cumpriu o
   // papel dele e conta como fechado sem precisar de efeito.
@@ -57,6 +62,16 @@ export function CascaAplicacao({ cabecalho, grupos, contadores, children }: Casc
       <a href="#conteudo" className="pular-para-conteudo">
         Pular para o conteúdo
       </a>
+      {/*
+        ANTES do cabecalho, e nao depois: quem abre a tela precisa saber que
+        nao esta no sistema de verdade antes de olhar qualquer numero. Nao e
+        dispensavel nem fechavel, justamente porque o risco e o habito.
+      */}
+      {aviso ? (
+        <p className={estilos.faixaAmbiente} role="status">
+          <strong>{aviso.rotulo}</strong> <span>{aviso.explicacao}</span>
+        </p>
+      ) : null}
       <CabecalhoAplicacao {...cabecalho} />
       <div className={estilos.corpo}>
         <NavegacaoLateral grupos={grupos} {...(contadores ? { contadores } : {})} />

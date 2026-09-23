@@ -12,6 +12,15 @@
  *
  * E um PONTO DE PARTIDA enxuto, nao um plano contabil completo: o suficiente
  * para lancar, classificar e depois ajustar.
+ *
+ * COBRE TODAS AS LINHAS DO DEMONSTRATIVO que nascem de categoria. Uma linha
+ * sem nenhuma categoria possivel e uma linha que NUNCA vai receber valor: o
+ * usuario nao tem como classificar um custo se nao existe categoria de custo,
+ * e o resultado sai errado sem nenhum aviso. Ha teste guardando isso.
+ *
+ * Duas linhas ficam de fora de proposito, porque nao vem de categoria:
+ * `descontos_concedidos` e `descontos_obtidos` sao calculados a partir das
+ * baixas (o desconto dado ou obtido no pagamento), nao de uma classificacao.
  */
 
 export interface ContaPlanoPadrao {
@@ -61,8 +70,45 @@ export const PLANO_PADRAO: readonly ContaPlanoPadrao[] = [
   },
   {
     codigo: "4.2.01",
-    nome: "Financeiras",
+    nome: "Despesas financeiras",
     grupoDre: "resultado_financeiro",
-    categorias: ["Tarifas bancárias", "Juros e multas pagos"],
+    categorias: ["Tarifas bancárias", "Juros e multas pagos", "Juros de empréstimos"],
+  },
+  /*
+   * Mesmo grupo das despesas financeiras: o demonstrativo decide entre
+   * "receitas financeiras" e "despesas financeiras" pelo SENTIDO do
+   * lancamento (entrada ou saida), nao pela conta. Sao duas contas so para
+   * quem le o plano nao precisar adivinhar onde classificar um rendimento.
+   */
+  {
+    codigo: "3.2.01",
+    nome: "Receitas financeiras",
+    grupoDre: "resultado_financeiro",
+    categorias: ["Rendimento de aplicações", "Juros e multas recebidos"],
+  },
+  {
+    codigo: "4.0.01",
+    nome: "Custos",
+    grupoDre: "custo",
+    categorias: ["Custo dos serviços prestados", "Material aplicado"],
+  },
+  {
+    codigo: "5.1.01",
+    nome: "Não operacional",
+    grupoDre: "nao_operacional",
+    categorias: ["Venda de bens do ativo", "Outras receitas e despesas"],
+  },
+  /*
+   * Grupo `transferencia`: fica FORA do demonstrativo de proposito. Amortizar
+   * divida nao e despesa (o dinheiro sai, mas a divida cai na mesma medida), e
+   * o credito de um emprestimo nao e receita. Sem esta conta, o modulo de
+   * dividas precisa cria-la sozinho no primeiro emprestimo — o que funciona,
+   * mas deixa o plano com uma conta que ninguem colocou ali.
+   */
+  {
+    codigo: "9.9.02",
+    nome: "Movimentação de dívidas",
+    grupoDre: "transferencia",
+    categorias: ["Amortização de dívidas"],
   },
 ];

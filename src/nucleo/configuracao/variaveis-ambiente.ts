@@ -12,7 +12,7 @@ import { z } from "zod";
  * `variaveisAmbiente` a componentes de cliente.
  */
 const esquemaAmbiente = z.object({
-  AMBIENTE: z.enum(["desenvolvimento", "homologacao", "producao"]).default("desenvolvimento"),
+  AMBIENTE: z.enum(["desenvolvimento", "homologacao", "demonstracao", "producao"]).default("desenvolvimento"),
 
   // Banco de dados (usuario da aplicacao — ver docs/arquitetura/banco-dados.md)
   BANCO_URL: z.string().min(1, "BANCO_URL e obrigatoria."),
@@ -71,4 +71,35 @@ export function limparCacheVariaveisAmbiente(): void {
 
 export function ehProducao(variaveis = obterVariaveisAmbiente()): boolean {
   return variaveis.AMBIENTE === "producao";
+}
+
+/**
+ * Aviso a mostrar no topo do sistema quando o ambiente NAO e producao.
+ *
+ * Uma vitrine identica ao sistema real e um convite a lancar dado de verdade
+ * nela — e a conferir saldo num lugar que ninguem faz backup. Producao nao
+ * recebe faixa nenhuma, para nao virar ruido no uso diario.
+ */
+export function avisoDoAmbiente(
+  variaveis = obterVariaveisAmbiente(),
+): { rotulo: string; explicacao: string } | null {
+  switch (variaveis.AMBIENTE) {
+    case "producao":
+      return null;
+    case "demonstracao":
+      return {
+        rotulo: "Ambiente de demonstração",
+        explicacao: "Os dados daqui servem para conhecer o sistema e podem ser apagados a qualquer momento. Não lance informação real.",
+      };
+    case "homologacao":
+      return {
+        rotulo: "Ambiente de homologação",
+        explicacao: "Ambiente de testes antes de subir para produção. O que você lançar aqui não vale.",
+      };
+    default:
+      return {
+        rotulo: "Ambiente de desenvolvimento",
+        explicacao: "Máquina de desenvolvimento. Os dados são descartáveis.",
+      };
+  }
 }
