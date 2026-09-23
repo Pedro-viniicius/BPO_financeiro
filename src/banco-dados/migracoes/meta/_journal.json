@@ -57,6 +57,13 @@
       "when": 1790128565088,
       "tag": "0007_empresa_contato_endereco_e_data_de_corte",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790128943951,
+      "tag": "0008_convites_de_acesso",
+      "breakpoints": true
     }
   ]
 }

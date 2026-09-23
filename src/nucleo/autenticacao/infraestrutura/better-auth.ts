@@ -5,6 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import { twoFactor } from "better-auth/plugins";
 
 import { montarEnviadorEmail } from "@/composicao/email";
+import { existeConvitePendentePara } from "./convite-pendente";
 import { obterBancoDados } from "@/nucleo/banco-dados/publico";
 import { obterVariaveisAmbiente } from "@/nucleo/configuracao/publico";
 import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
@@ -116,8 +117,15 @@ function criarAutenticacao() {
     databaseHooks: {
       user: {
         create: {
-          before: async () => {
+          before: async (usuario) => {
             if (await cadastroAberto()) return;
+            /*
+             * A porta que sobra e o convite. Sem esta checagem, aceitar um
+             * convite em producao seria recusado pela propria regra que existe
+             * para proteger a instalacao — e a entrada por convite, prometida
+             * na mensagem de erro, nunca funcionaria.
+             */
+            if (typeof usuario?.email === "string" && (await existeConvitePendentePara(usuario.email))) return;
             throw new APIError("FORBIDDEN", { code: "CADASTRO_FECHADO", message: "Cadastro fechado: entrada por convite." });
           },
         },

@@ -44,7 +44,9 @@ export default async function PaginaDivida({ params }: { params: Promise<{ divid
   const divida = await repositorios.dividas().buscarPorId(escopo, dividaId, hoje);
   if (!divida) notFound();
 
-  const podeEditar = permissoes.has("dividas.editar");
+  // Cancelar e permissao propria desde o Gate 9: tira do fluxo de caixa todas
+  // as parcelas em aberto de uma vez, e por isso nao acompanha `dividas.editar`.
+  const podeCancelar = permissoes.has("dividas.cancelar");
   const encerrada = divida.situacao === "quitada" || divida.situacao === "cancelada";
   const amortizado = divida.valorPrincipal.subtrair(divida.saldoDevedor);
 
@@ -159,7 +161,7 @@ export default async function PaginaDivida({ params }: { params: Promise<{ divid
         </table>
       </section>
 
-      {podeEditar && !encerrada ? (
+      {podeCancelar && !encerrada ? (
         <section>
           <TituloSecao titulo="Cancelar dívida" nivel={2} />
           <FormularioCancelarDivida dividaId={divida.id} codigo={divida.codigo} parcelasPagas={divida.parcelasPagas} />

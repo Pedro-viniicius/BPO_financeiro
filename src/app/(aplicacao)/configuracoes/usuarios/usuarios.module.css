@@ -1,0 +1,187 @@
+/*
+ * Usuarios e acessos.
+ *
+ * O LINK do convite aparece uma vez so — o banco guarda o hash do token, nao o
+ * token. Por isso ele vem em destaque, com o aviso de que nao volta.
+ */
+.tabela {
+  width: 100%;
+  margin-bottom: var(--espaco-6);
+  border-collapse: collapse;
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela thead th {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Desativado nunca e so cor clara: o selo "Desativado" vai junto, escrito. */
+.desativado {
+  opacity: 0.72;
+}
+
+.email {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.voce {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.convites {
+  display: grid;
+  gap: var(--espaco-3);
+  margin: 0 0 var(--espaco-6);
+  padding: 0;
+  list-style: none;
+}
+
+.convites > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.vazio {
+  margin: 0 0 var(--espaco-6);
+  color: var(--cor-texto-secundario);
+}
+
+.resposta {
+  margin-bottom: var(--espaco-4);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-sucesso-forte, #1b7a3d);
+  border-radius: var(--raio-2);
+  background: var(--superficie-sucesso, #eaf7ee);
+  color: var(--cor-sucesso-texto, #10532a);
+}
+
+.resposta p {
+  margin: 0 0 var(--espaco-2);
+}
+
+.aviso {
+  font-weight: var(--peso-medio);
+}
+
+.link {
+  width: 100%;
+  padding: var(--espaco-2) var(--espaco-3);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-pagina);
+  font-family: var(--fonte-mono, monospace);
+  font-size: var(--texto-sm);
+}
+
+.dobra {
+  margin: 0 0 var(--espaco-4);
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espaco-3);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  list-style: none;
+}
+
+.gatilhoDestaque {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.corpoDaDobra {
+  margin-top: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-pagina);
+  min-inline-size: min(24rem, 100%);
+}
+
+.formulario {
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.secundaria {
+  margin-top: var(--espaco-4);
+  padding-top: var(--espaco-4);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.explicacao {
+  display: block;
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+@media (max-width: 48rem) {
+  .tabela,
+  .tabela tbody,
+  .tabela tr,
+  .tabela td {
+    display: block;
+  }
+
+  .tabela thead {
+    display: none;
+  }
+
+  .tabela tr {
+    margin-bottom: var(--espaco-3);
+    padding-bottom: var(--espaco-3);
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .tabela td {
+    border: 0;
+  }
+
+  .tabela td::before {
+    content: attr(data-rotulo);
+    display: block;
+    margin-bottom: var(--espaco-1);
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}

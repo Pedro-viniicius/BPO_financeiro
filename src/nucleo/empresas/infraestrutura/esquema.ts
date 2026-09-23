@@ -127,6 +127,50 @@ export const papelVinculo = pgEnum("papel_vinculo", [
  *
  * A politica de autorizacao (deny por padrao) esta em `nucleo/autorizacao`.
  */
+/**
+ * Convites de acesso.
+ *
+ * Um convite e um LINK de uso unico, com prazo. Ele existe porque o sistema
+ * nunca cria senha para ninguem: quem entra define a propria. Enviar senha por
+ * e-mail (ou mostra-la na tela para alguem copiar) deixa a senha em caixas de
+ * entrada e em historicos para sempre.
+ *
+ * GUARDA-SE O HASH DO TOKEN, nunca o token. Com o hash, um vazamento do banco
+ * nao da acesso a ninguem — quem tem o link continua sendo so quem o recebeu.
+ * E a mesma razao de nunca guardar senha em claro.
+ */
+export const convites = pgTable(
+  "convites",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizacaoId: uuid("organizacao_id")
+      .notNull()
+      .references(() => organizacoes.id),
+    /** Nulo = convite para a organizacao inteira, como em `vinculos_usuario`. */
+    empresaId: uuid("empresa_id").references(() => empresas.id),
+    email: text("email").notNull(),
+    papel: papelVinculo("papel").notNull(),
+    /** SHA-256 do token que viaja no link. O token em si nunca e gravado. */
+    tokenHash: text("token_hash").notNull(),
+    convidadoPor: text("convidado_por")
+      .notNull()
+      .references(() => user.id),
+    criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
+    expiraEm: timestamp("expira_em", { withTimezone: true }).notNull(),
+    /** Preenchido no uso. E o que torna o convite de uso UNICO. */
+    aceitoEm: timestamp("aceito_em", { withTimezone: true }),
+    aceitoPor: text("aceito_por").references(() => user.id),
+    canceladoEm: timestamp("cancelado_em", { withTimezone: true }),
+  },
+  (tabela) => [
+    uniqueIndex("unico_convites_token").on(tabela.tokenHash),
+    index("convites_organizacao_email_idx").on(tabela.organizacaoId, tabela.email),
+    check("verifica_convites_aceite", sql`(aceito_em IS NULL) = (aceito_por IS NULL)`),
+    check("verifica_convites_prazo", sql`expira_em > criado_em`),
+    check("verifica_convites_email", sql`position('@' in email) > 1`),
+  ],
+);
+
 export const vinculosUsuario = pgTable(
   "vinculos_usuario",
   {

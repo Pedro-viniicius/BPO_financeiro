@@ -50,6 +50,13 @@ export const PERMISSOES = [
   "previsao.editar_premissas",
   "dividas.visualizar",
   "dividas.editar",
+  /*
+   * Cancelar e separado de editar pelo mesmo motivo de
+   * `contas_pagar.cancelar`: cancelar uma divida tira do fluxo de caixa todas
+   * as parcelas ainda em aberto, de uma vez. E uma decisao de outra ordem que
+   * corrigir uma taxa de juros.
+   */
+  "dividas.cancelar",
 
   // Controle gerencial
   "plano_contas.visualizar",

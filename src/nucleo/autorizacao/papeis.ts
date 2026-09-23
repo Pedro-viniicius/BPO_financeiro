@@ -76,6 +76,13 @@ const tesouraria: Permissao[] = [
   "previsao.editar_premissas",
   "dividas.visualizar",
   "dividas.editar",
+  /*
+   * Quem edita divida tambem cancela, como em contas a pagar, onde `editar` e
+   * `cancelar` andam juntos no papel de operacao financeira. Nao vai para o
+   * papel `financeiro` porque ele nao tem nem `dividas.visualizar`: conceder
+   * o cancelamento de algo que o papel nao enxerga seria permissao morta.
+   */
+  "dividas.cancelar",
   "indicadores.visualizar",
   "relatorios.visualizar",
   "exportacao.executar",
