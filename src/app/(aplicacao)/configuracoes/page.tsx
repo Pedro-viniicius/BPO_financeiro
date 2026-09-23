@@ -71,6 +71,12 @@ export default async function PaginaConfiguracoes() {
           </Link>
         </li>
         <li>
+          <Link href="/configuracoes/exportacao">
+            <strong>Exportar dados</strong>
+            <span>Levar tudo embora em planilhas, a qualquer momento</span>
+          </Link>
+        </li>
+        <li>
           <Link href="/cadastros/plano-de-contas">
             <strong>Plano de contas</strong>
             <span>
