@@ -17,6 +17,7 @@ export {
   type PessoaImportada,
 } from "./dominio/planilhas";
 export { modeloDeContas, modeloDePessoas } from "./dominio/modelos";
+export { LoteNaoEncontrado, LoteNaoPodeSerDesfeito, MOTIVO_ITEM_EM_USO } from "./dominio/erros";
 export type {
   EtapaDaImplantacao,
   LoteDeImportacao,

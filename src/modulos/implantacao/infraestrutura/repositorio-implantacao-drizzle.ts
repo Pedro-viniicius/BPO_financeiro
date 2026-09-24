@@ -14,10 +14,20 @@ import type {
   ResultadoDaImportacao,
   SituacaoDaEtapa,
 } from "../aplicacao/repositorio-implantacao";
+import { LoteNaoEncontrado, LoteNaoPodeSerDesfeito, MOTIVO_ITEM_EM_USO } from "../dominio/erros";
 import type { ContaImportada, ErroDaLinha, PessoaImportada } from "../dominio/planilhas";
 
 /** Só dígitos, para comparar documento escrito de jeitos diferentes. */
 const soDigitos = (texto: string) => texto.replace(/\D/g, "");
+
+/** SQLSTATE de violacao de chave estrangeira. */
+const VIOLACAO_CHAVE_ESTRANGEIRA = "23503";
+
+/** Codigo SQLSTATE de um erro do driver, esteja ele solto ou embrulhado pelo Drizzle. */
+function codigoDoBanco(erro: unknown): string | undefined {
+  const qualquer = erro as { code?: string; cause?: { code?: string } } | undefined;
+  return qualquer?.cause?.code ?? qualquer?.code;
+}
 
 interface Registrador {
   entidade: string;
@@ -348,14 +358,17 @@ export class RepositorioImplantacaoDrizzle implements RepositorioImplantacao {
     return executarEmTransacao(async (transacao) => {
       const lotes = await this.listarLotes(escopo);
       const lote = lotes.find((l) => l.id === loteId);
-      if (!lote) throw new Error("Lote não encontrado.");
-      if (!lote.podeDesfazer) throw new Error(lote.motivoNaoPodeDesfazer ?? "Este lote não pode ser desfeito.");
+      if (!lote) throw new LoteNaoEncontrado();
+      if (!lote.podeDesfazer) throw new LoteNaoPodeSerDesfeito(lote.motivoNaoPodeDesfazer ?? "Este lote não pode ser desfeito.");
 
       /*
        * Ao CONTRARIO da ordem de criacao: o titulo sai antes da pessoa, senao
        * a chave estrangeira recusa. E `RESTRICT` em toda parte garante que,
        * se algo tiver passado despercebido pela checagem, o banco recusa a
        * exclusao em vez de apagar em cascata.
+       *
+       * `item.entidade` e um nome de tabela gravado por ESTE repositorio (ver
+       * `gravarLote`), nunca um texto vindo de fora — por isso `sql.raw`.
        */
       const itens = await transacao.execute<{ entidade: string; entidade_id: string }>(sql`
         SELECT entidade, entidade_id::text AS entidade_id FROM itens_lote_importacao
@@ -363,7 +376,19 @@ export class RepositorioImplantacaoDrizzle implements RepositorioImplantacao {
       `);
 
       for (const item of itens) {
-        await transacao.execute(sql`DELETE FROM ${sql.raw(item.entidade)} WHERE id = ${item.entidade_id}::uuid`);
+        try {
+          await transacao.execute(sql`DELETE FROM ${sql.raw(item.entidade)} WHERE id = ${item.entidade_id}::uuid`);
+        } catch (erro) {
+          /*
+           * O banco recusou por chave estrangeira: algo criado DEPOIS da
+           * importacao (um titulo lancado a mao para uma pessoa importada)
+           * aponta para este item. A conferencia de `listarLotes` so enxerga
+           * o que o proprio lote criou; aqui vira erro de dominio, com o que
+           * fazer, em vez da mensagem crua do PostgreSQL na tela.
+           */
+          if (codigoDoBanco(erro) === VIOLACAO_CHAVE_ESTRANGEIRA) throw new LoteNaoPodeSerDesfeito(MOTIVO_ITEM_EM_USO);
+          throw erro;
+        }
       }
 
       await transacao.execute(sql`

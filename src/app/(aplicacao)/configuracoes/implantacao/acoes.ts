@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { ehErroDominio } from "@/compartilhado/erros/indice";
 import { lerCsv } from "@/compartilhado/planilhas/indice";
 import {
   MAXIMO_BYTES,
@@ -207,7 +208,10 @@ export async function acaoDesfazerLote(_anterior: EstadoImportacao, formulario: 
     revalidatePath("/cadastros");
     return { sucesso: `Lote desfeito: ${removidos} registro(s) removido(s).` };
   } catch (erro) {
+    // So erro de DOMINIO chega a tela com a propria mensagem. O resto (banco,
+    // rede) fica no log: nome de tabela e de restricao nao sao para a pessoa.
+    if (ehErroDominio(erro)) return { mensagem: erro.message };
     logs.erro("falha ao desfazer lote", { erro });
-    return { mensagem: erro instanceof Error ? erro.message : "Não foi possível desfazer este lote." };
+    return { mensagem: "Não foi possível desfazer este lote agora. Tente novamente em instantes." };
   }
 }
