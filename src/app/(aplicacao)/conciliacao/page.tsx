@@ -57,6 +57,10 @@ export default async function PaginaConciliacao({
 
   const contas = await repositorios.bancos().listar(escopo);
   const contaEscolhida = texto("conta") ?? contas[0]?.id;
+  // Conferida contra as contas DESTA empresa antes de qualquer consulta: um
+  // "?conta=" torto (favorito antigo, link cortado) mostrava a tela de falha
+  // do sistema em vez de "Conta não encontrada".
+  const contaDaEmpresa = contas.find((conta) => conta.id === contaEscolhida);
   const aviso = texto("aviso");
   const podeImportar = permissoes.has("bancos.importar_extrato");
 
@@ -68,6 +72,19 @@ export default async function PaginaConciliacao({
           titulo="Cadastre uma conta bancária antes"
           explicacao="A conciliação compara o extrato de uma conta com os lançamentos dela. Sem conta cadastrada, não há o que comparar."
           acao={<Link className="acao-primaria" href="/bancos">Ir para Bancos e caixa</Link>}
+        />
+      </>
+    );
+  }
+
+  if (!contaDaEmpresa) {
+    return (
+      <>
+        <CabecalhoPagina titulo="Conciliação" descricao="Conferir o extrato com os seus lançamentos" />
+        <EstadoVazio
+          titulo="Conta não encontrada"
+          explicacao="O endereço aponta para uma conta bancária que não é desta empresa, ou que não existe mais."
+          acao={<Link className="acao-primaria" href={`/conciliacao?conta=${contas[0]!.id}`}>Conciliar {contas[0]!.nome}</Link>}
         />
       </>
     );
