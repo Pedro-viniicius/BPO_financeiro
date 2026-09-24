@@ -66,3 +66,59 @@
   font-weight: var(--peso-forte);
   border-top: var(--largura-borda-forte) solid var(--cor-borda-forte);
 }
+
+/*
+ * Celular: a tabela deixa de ser tabela.
+ *
+ * Uma tabela de seis colunas em 360px so cabe rolando de lado, e rolar de lado
+ * esconde justamente a coluna do valor — a que decide. Aqui cada linha vira um
+ * bloco, e o titulo da coluna aparece acima do conteudo, vindo do
+ * `data-rotulo` que o componente grava em cada celula.
+ *
+ * Este bloco existia copiado em dez telas que preferiram fazer a propria
+ * tabela. As seis que usam esta aqui — contas a pagar, contas a receber,
+ * bancos, cadastros, e os detalhamentos de resultados e fluxo — ficavam sem
+ * nada no celular, que e onde elas mais sao abertas.
+ */
+@media (max-width: 48rem) {
+  .tabela,
+  .tabela tbody,
+  .tabela tr,
+  .tabela td {
+    display: block;
+  }
+
+  .tabela thead {
+    display: none;
+  }
+
+  .tabela tr {
+    margin-bottom: var(--espaco-3);
+    padding: var(--espaco-3);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-2);
+    background: var(--superficie-cartao);
+  }
+
+  .tabela td {
+    border: 0;
+    padding: var(--espaco-1) 0;
+    /* O alinhamento a direita so faz sentido em coluna; em bloco, atrapalha. */
+    text-align: left;
+  }
+
+  .tabela td::before {
+    content: attr(data-rotulo);
+    display: block;
+    margin-bottom: 2px;
+    color: var(--cor-texto-secundario);
+    font-size: var(--texto-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Celula vazia nao merece rotulo sozinho ocupando espaco. */
+  .tabela td:empty {
+    display: none;
+  }
+}

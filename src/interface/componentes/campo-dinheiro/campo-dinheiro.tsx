@@ -8,13 +8,24 @@ import estilos from "./campo-dinheiro.module.css";
 
 export interface CampoDinheiroProps {
   readonly id: string;
-  /** Valor canonico atual ("1234.56") ou vazio. */
+  /**
+   * Nome do campo no formulario. E o que faz o valor CHEGAR ao servidor.
+   *
+   * Sem ele o componente era inutilizavel neste projeto, e foi por isso que
+   * nunca foi usado: aqui todo formulario e enviado nativamente, para
+   * funcionar sem JavaScript, e um campo sem `name` simplesmente nao viaja.
+   * O valor enviado e o TEXTO BRASILEIRO que aparece na tela ("1.234,56"),
+   * que e o que as acoes de servidor ja sabem ler.
+   */
+  readonly name: string;
+  /** Valor canonico inicial ("1234.56") ou vazio. */
   readonly valor: string;
   /**
-   * Recebe o valor canonico quando o texto digitado e valido, ou `null`
-   * enquanto nao for. A interface nunca calcula: ela apenas converte texto.
+   * Avisa a tela quando o valor muda: recebe o valor canonico se o texto for
+   * valido, ou `null` enquanto nao for. Opcional — serve a quem precisa
+   * reagir ao valor (somar parcelas, habilitar botao), nao ao envio.
    */
-  readonly aoAlterar: (valorCanonico: string | null) => void;
+  readonly aoAlterar?: (valorCanonico: string | null) => void;
   readonly "aria-describedby"?: string | undefined;
   readonly "aria-invalid"?: boolean | undefined;
   readonly required?: boolean;
@@ -40,10 +51,14 @@ function paraTextoBrasileiro(valorCanonico: string): string {
  *   mouse sobre um campo numerico altera valores financeiros sem querer;
  * - o simbolo `R$` fica fora da area editavel;
  * - aceita "1234,56", "1.234,56" e "1234.56";
- * - alinhado a direita, com algarismos de largura fixa.
+ * - alinhado a direita, com algarismos de largura fixa;
+ * - tem `name`, entao e enviado por formulario nativo e funciona sem
+ *   JavaScript: sem JS o campo apenas nao reformata ao sair, e o texto
+ *   digitado ("1234,56") e aceito do mesmo jeito pela acao de servidor.
  */
 export function CampoDinheiro({
   id,
+  name,
   valor,
   aoAlterar,
   required = false,
@@ -55,6 +70,7 @@ export function CampoDinheiro({
 
   function aoDigitar(novoTexto: string) {
     definirTexto(novoTexto);
+    if (!aoAlterar) return;
     if (novoTexto.trim() === "") {
       aoAlterar(null);
       return;
@@ -83,6 +99,7 @@ export function CampoDinheiro({
       <input
         {...acessibilidade}
         id={id}
+        name={name}
         type="text"
         inputMode="decimal"
         autoComplete="off"

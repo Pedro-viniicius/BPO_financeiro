@@ -39,10 +39,21 @@ Sistema de design e casca da aplicacao (Gate 4). Documentacao em
 | `Botao`, `Aviso`, `SeloSituacao`, `ValorFinanceiro`, `Esqueleto` | estados-interface, design-tokens |
 | `CabecalhoPagina`, `CartaoResumo` | navegacao, dashboard |
 | `TabelaDados`, `BarraFiltros`, `EstadoVazio` | tabelas-e-listagens |
-| `CampoFormulario`, `CampoDinheiro`, `SecaoFormulario`, `SeletorEntidade` | formularios |
+| `CampoFormulario`, `CampoDinheiro`, `SecaoFormulario` | formularios |
 | `FormularioSimples`, `TituloFormularioSimples`, `ControleTexto`, `AcoesFormularioSimples`, `LigacoesFormularioSimples` | telas de uma coluna: entrar, criar conta, primeiro acesso |
-| `Gaveta`, `DialogoConfirmacao` | navegacao (ADR-022), estados-interface |
-| `LinhaDoTempo` | mapa-telas (detalhe de titulo) |
+| `Gaveta`, `DialogoConfirmacao`, `Dobra` | navegacao (ADR-022), estados-interface |
+| `CartaoIndicador`, `CartaoRegistro`, `TituloSecao`, `CabecalhoPainel` | dashboard, listagens |
+
+> **Componentes removidos no Gate 9.** `SeletorEntidade`, `GraficoBarras`,
+> `BarraProporcao`, `AcaoRapida`, `CartaoProgresso`, `CartaoInsight` e
+> `LinhaDoTempo` foram escritos nos primeiros gates e nunca chegaram a ser
+> usados. Cada um foi reavaliado contra o que as telas fazem hoje: uns
+> resolviam um caso que nenhuma tela tem, outros seriam PIORES do que a solucao
+> local (a lista de baixas mostra o valor primeiro e risca o estornado, coisas
+> que a linha do tempo nao faz), e o seletor com busca so funcionaria com
+> JavaScript — o que quebraria a garantia de os formularios funcionarem sem ele.
+> Componente que ninguem usa nao e patrimonio: e divida que parece patrimonio,
+> porque envelhece junto com o resto e ninguem percebe quando quebra.
 
 ## Como a casca e usada
 

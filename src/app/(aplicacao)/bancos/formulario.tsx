@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 
-import { Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { CampoDinheiro, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
 
 import { acaoCriarContaBancaria, type EstadoFormulario } from "./acoes";
 
@@ -70,7 +70,7 @@ export function FormularioContaBancaria({ hoje }: { readonly hoje: string }) {
         dica="O saldo na data abaixo. Depois disso, o saldo é calculado pelas movimentações."
         {...erro("saldoInicial")}
       >
-        {(a) => <ControleTexto {...a} name="saldoInicial" type="text" inputMode="decimal" placeholder="0,00" />}
+        {(a) => <CampoDinheiro {...a} id="saldoInicial" name="saldoInicial" valor="" />}
       </CampoFormulario>
 
       <CampoFormulario id="dataSaldoInicial" rotulo="Data do saldo inicial" obrigatorio {...erro("dataSaldoInicial")}>

@@ -111,7 +111,18 @@ export function TabelaDados<T>({
               {...(aoAbrirLinha ? { onClick: () => aoAbrirLinha(linha) } : {})}
             >
               {colunas.map((coluna) => (
-                <td key={coluna.chave} className={coluna.alinhamento === "direita" ? estilos.direita : undefined}>
+                /*
+                 * `data-rotulo` carrega o titulo da coluna para dentro da
+                 * celula. No celular a tabela deixa de ser tabela — cada linha
+                 * vira um bloco — e e esse atributo que o CSS usa para mostrar
+                 * "Vencimento" antes do valor. Sem ele, a pessoa veria uma
+                 * coluna de numeros sem saber o que cada um e.
+                 */
+                <td
+                  key={coluna.chave}
+                  data-rotulo={coluna.titulo}
+                  className={coluna.alinhamento === "direita" ? estilos.direita : undefined}
+                >
                   {coluna.celula(linha)}
                 </td>
               ))}
