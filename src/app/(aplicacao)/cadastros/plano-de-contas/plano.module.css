@@ -98,53 +98,6 @@
   font-size: var(--texto-sm);
 }
 
-/* ------------------------------------------------------------------ dobras */
-.dobra {
-  margin: 0;
-}
-
-.gatilho {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 var(--espaco-3);
-  border: 1px solid var(--cor-borda-forte);
-  border-radius: var(--raio-1);
-  background: var(--superficie-cartao);
-  color: var(--cor-texto-primario);
-  cursor: pointer;
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  list-style: none;
-}
-
-.gatilhoDestaque {
-  border-color: var(--cor-marca-acao);
-  color: var(--cor-marca-texto);
-}
-
-.gatilho::-webkit-details-marker {
-  display: none;
-}
-
-.gatilho:hover {
-  border-color: var(--cor-marca-acao);
-}
-
-.gatilho:focus-visible {
-  outline: none;
-  box-shadow: var(--anel-foco);
-}
-
-.corpoDaDobra {
-  margin-top: var(--espaco-3);
-  padding: var(--espaco-4);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-2);
-  background: var(--superficie-pagina);
-  min-inline-size: min(22rem, 100%);
-}
-
 .formulario {
   display: grid;
   gap: var(--espaco-3);

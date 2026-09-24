@@ -2,10 +2,9 @@
 
 import { useActionState, useState } from "react";
 
-import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao, SecaoFormulario } from "@/interface/componentes/indice";
+import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao, Dobra, SecaoFormulario } from "@/interface/componentes/indice";
 
 import { acaoCancelarContaPagar, type EstadoFormulario } from "../acoes";
-import estilos from "./acoes-de-correcao.module.css";
 
 const INICIAL: EstadoFormulario = {};
 
@@ -48,8 +47,7 @@ export function FormularioCancelamento({ conta }: { readonly conta: ContaParaCan
         existe na pagina crua e cancelar nao vira a unica operacao do sistema
         que exige JavaScript.
       */}
-      <details className={estilos.dobra} open={aberto} onToggle={(e) => setAberto(e.currentTarget.open)}>
-        <summary className={estilos.gatilho}>{rotulo}</summary>
+      <Dobra rotulo={rotulo} aberta={aberto} aoAlternar={setAberto} comCaixa={false}>
         <form
           action={enviar}
           id="cancelar-conta"
@@ -121,7 +119,7 @@ export function FormularioCancelamento({ conta }: { readonly conta: ContaParaCan
             aoCancelar={() => setConfirmando(false)}
           />
         </form>
-      </details>
+      </Dobra>
     </SecaoFormulario>
   );
 }

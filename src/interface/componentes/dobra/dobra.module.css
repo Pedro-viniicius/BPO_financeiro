@@ -1,0 +1,68 @@
+/*
+ * Dobra: gatilho que revela um formulario ou detalhe.
+ *
+ * `<summary>` estilizado como botao secundario, mas continua sendo o controle
+ * nativo de `<details>`: abre e fecha sem JavaScript, com teclado, e anuncia o
+ * estado sozinho.
+ *
+ * UMA aparencia so. Antes deste componente o mesmo controle estava copiado em
+ * nove arquivos de estilo, em duas variantes — `texto-base` com `espaco-4` em
+ * cinco telas, `texto-sm` com `espaco-3` em quatro. A escolhida e a maior, por
+ * ser a que ja aparecia nas telas de dinheiro (estorno, cancelamento,
+ * transferencia), onde o alvo de toque importa mais.
+ */
+.dobra {
+  margin: 0;
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  /* 44px: alvo de toque minimo confortavel no celular. */
+  min-height: 44px;
+  padding: 0 var(--espaco-4);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  cursor: pointer;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  /* Tira o triangulo padrao: o gatilho ja parece um botao. */
+  list-style: none;
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:hover {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.destaque {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.dobra[open] .gatilho {
+  margin-bottom: var(--espaco-3);
+}
+
+.corpo {
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-pagina);
+  min-inline-size: min(24rem, 100%);
+}
+
+.corpoSemCaixa {
+  min-inline-size: min(24rem, 100%);
+}

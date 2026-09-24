@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 
-import { Aviso, CabecalhoPagina, CartaoResumo, EstadoVazio, SeloSituacao, TituloSecao, ValorFinanceiro } from "@/interface/componentes/indice";
+import { Dobra, Aviso, CabecalhoPagina, CartaoResumo, EstadoVazio, SeloSituacao, TituloSecao, ValorFinanceiro } from "@/interface/componentes/indice";
 
 import { categoriasQueClassificamContas, formatarDataBrasileira, formatarDinheiro } from "../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../_apoio/contexto-financeiro";
@@ -171,8 +171,7 @@ export default async function PaginaConciliacao({
       </div>
 
       {podeImportar ? (
-        <details className={estilos.dobra} open={!painel.temExtrato}>
-          <summary className={estilos.gatilho}>Importar extrato (.ofx)</summary>
+        <Dobra rotulo="Importar extrato (.ofx)" aberta={!painel.temExtrato} comCaixa={false}>
           <div className={estilos.corpoDobra}>
             <FormularioImportacao contas={opcoesDeConta} contaEscolhida={contaEscolhida!} />
 
@@ -206,7 +205,7 @@ export default async function PaginaConciliacao({
               </table>
             ) : null}
           </div>
-        </details>
+        </Dobra>
       ) : null}
 
       {!painel.temExtrato ? (

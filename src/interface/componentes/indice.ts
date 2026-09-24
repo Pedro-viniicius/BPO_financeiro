@@ -20,6 +20,7 @@ export { CartaoProgresso, type CartaoProgressoProps } from "./cartao-progresso/c
 export { CartaoRegistro, type CartaoRegistroProps, type DadoDoRegistro } from "./cartao-registro/cartao-registro";
 export { CartaoResumo, type CartaoResumoProps } from "./cartao-resumo/cartao-resumo";
 export { DialogoConfirmacao, type DialogoConfirmacaoProps } from "./dialogo-confirmacao/dialogo-confirmacao";
+export { Dobra, type DobraProps } from "./dobra/dobra";
 export { Esqueleto, type EsqueletoProps } from "./esqueleto/esqueleto";
 export {
   AcoesFormularioSimples,

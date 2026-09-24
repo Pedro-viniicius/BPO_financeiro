@@ -175,33 +175,6 @@
   color: var(--cor-texto-secundario);
 }
 
-.dobra {
-  margin: 0;
-}
-
-.gatilho {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 var(--espaco-3);
-  border: 1px solid var(--cor-borda-forte);
-  border-radius: var(--raio-1);
-  background: var(--superficie-cartao);
-  cursor: pointer;
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  list-style: none;
-}
-
-.gatilho::-webkit-details-marker {
-  display: none;
-}
-
-.gatilho:focus-visible {
-  outline: none;
-  box-shadow: var(--anel-foco);
-}
-
 .corpoDaDobra {
   margin-top: var(--espaco-3);
   padding: var(--espaco-4);

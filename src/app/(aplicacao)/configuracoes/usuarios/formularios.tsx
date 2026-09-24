@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
 import { NOMES_PAPEIS, PAPEIS, type Papel } from "@/nucleo/autorizacao/publico";
 
 import {
@@ -57,8 +57,7 @@ export function ConviteNovo() {
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={`${estilos.gatilho} ${estilos.gatilhoDestaque}`}>Convidar pessoa</summary>
+    <Dobra rotulo="Convidar pessoa" destaque comCaixa={false}>
       <div className={estilos.corpoDaDobra}>
         <Resposta estado={estado} />
         <form action={enviar} className={estilos.formulario}>
@@ -87,7 +86,7 @@ export function ConviteNovo() {
           </p>
         </form>
       </div>
-    </details>
+    </Dobra>
   );
 }
 
@@ -123,8 +122,7 @@ export function AcoesDoUsuario({
   const [estadoAcesso, redefinir, redefinindo] = useActionState(acaoRedefinirAcesso, INICIAL);
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={estilos.gatilho}>Gerenciar</summary>
+    <Dobra rotulo="Gerenciar" comCaixa={false}>
       <div className={estilos.corpoDaDobra}>
         <Resposta estado={estadoPapel} />
         <Resposta estado={estadoSituacao} />
@@ -180,6 +178,6 @@ export function AcoesDoUsuario({
           </form>
         )}
       </div>
-    </details>
+    </Dobra>
   );
 }

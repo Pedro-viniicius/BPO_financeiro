@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
-import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao } from "@/interface/componentes/indice";
+import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao } from "@/interface/componentes/indice";
 
 import { acaoCriarTransferencia, acaoEstornarTransferencia, type EstadoFormulario } from "./acoes";
 import estilos from "./transferencia.module.css";
@@ -182,8 +182,7 @@ export function BotaoEstornarTransferencia({ transferencia }: { readonly transfe
   const identificador = `estornar-transferencia-${transferencia.id}`;
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={estilos.gatilho}>Estornar</summary>
+    <Dobra rotulo="Estornar" comCaixa={false}>
       <form
         action={enviar}
         id={identificador}
@@ -233,6 +232,6 @@ export function BotaoEstornarTransferencia({ transferencia }: { readonly transfe
           aoCancelar={() => setConfirmando(false)}
         />
       </form>
-    </details>
+    </Dobra>
   );
 }

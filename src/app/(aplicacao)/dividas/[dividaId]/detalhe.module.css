@@ -92,43 +92,6 @@
   color: var(--cor-texto-secundario);
 }
 
-.dobra {
-  margin: 0;
-}
-
-.gatilho {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 var(--espaco-4);
-  border: 1px solid var(--cor-borda-forte);
-  border-radius: var(--raio-1);
-  background: var(--superficie-cartao);
-  color: var(--cor-texto-primario);
-  cursor: pointer;
-  font-size: var(--texto-base);
-  font-weight: var(--peso-medio);
-  list-style: none;
-}
-
-.gatilho::-webkit-details-marker {
-  display: none;
-}
-
-.gatilho:hover {
-  border-color: var(--cor-marca-acao);
-  color: var(--cor-marca-texto);
-}
-
-.gatilho:focus-visible {
-  outline: none;
-  box-shadow: var(--anel-foco);
-}
-
-.dobra[open] .gatilho {
-  margin-bottom: var(--espaco-3);
-}
-
 @media (max-width: 48rem) {
   .cronograma,
   .cronograma tbody,

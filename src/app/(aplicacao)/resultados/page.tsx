@@ -305,8 +305,8 @@ function LinhasDaTabela({
           {linha.ehSubtotal || linha.total.ehZero() ? (
             linha.rotulo
           ) : linha.categorias.length > 0 ? (
-            <details className={estilos.dobra}>
-              <summary className={estilos.gatilho}>{linha.rotulo}</summary>
+            <details className={estilos.linhaExpansivel}>
+              <summary className={estilos.gatilhoDaLinha}>{linha.rotulo}</summary>
               <span className={estilos.explicacaoLinha}>{linha.explicacao}</span>
             </details>
           ) : (

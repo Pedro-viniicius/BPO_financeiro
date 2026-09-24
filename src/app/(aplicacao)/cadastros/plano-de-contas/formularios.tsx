@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 
-import { Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
 
 import {
   acaoAlterarSituacaoCategoria,
@@ -32,22 +32,6 @@ const GRUPOS = [
   { valor: "nao_operacional", nome: "Não operacional", onde: "linha “Não operacional”" },
   { valor: "transferencia", nome: "Fora do resultado", onde: "não aparece no Resultados" },
 ] as const;
-
-/**
- * Dobra que abre um formulario.
- *
- * `<details>` em vez de estado de botao: abre e fecha e nativo do navegador,
- * entao a tela inteira continua funcionando sem JavaScript — inclusive criar,
- * inativar e excluir.
- */
-function Dobra({ rotulo, children, destaque }: { rotulo: string; children: React.ReactNode; destaque?: boolean }) {
-  return (
-    <details className={estilos.dobra}>
-      <summary className={destaque ? `${estilos.gatilho} ${estilos.gatilhoDestaque}` : estilos.gatilho}>{rotulo}</summary>
-      <div className={estilos.corpoDaDobra}>{children}</div>
-    </details>
-  );
-}
 
 function Resposta({ estado }: { estado: EstadoPlano }) {
   if (estado.mensagem) {

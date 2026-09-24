@@ -2,10 +2,9 @@
 
 import { useActionState, useState } from "react";
 
-import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao, SecaoFormulario } from "@/interface/componentes/indice";
+import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao, Dobra, SecaoFormulario } from "@/interface/componentes/indice";
 
 import { acaoCancelarDivida, type EstadoDivida } from "../acoes";
-import estilos from "./detalhe.module.css";
 
 const INICIAL: EstadoDivida = {};
 
@@ -39,8 +38,7 @@ export function FormularioCancelarDivida({
       titulo="Cancelar dívida"
       explicacao="As parcelas ainda não pagas deixam de ser cobradas. O que já foi pago continua registrado."
     >
-      <details className={estilos.dobra} open={aberto} onToggle={(e) => setAberto(e.currentTarget.open)}>
-        <summary className={estilos.gatilho}>Cancelar esta dívida</summary>
+      <Dobra rotulo="Cancelar esta dívida" aberta={aberto} aoAlternar={setAberto} comCaixa={false}>
         <form
           action={enviar}
           id="cancelar-divida"
@@ -99,7 +97,7 @@ export function FormularioCancelarDivida({
             aoCancelar={() => setConfirmando(false)}
           />
         </form>
-      </details>
+      </Dobra>
     </SecaoFormulario>
   );
 }

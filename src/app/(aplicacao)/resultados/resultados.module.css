@@ -172,20 +172,32 @@
 }
 
 /* Dobra nativa por grupo: abre e fecha sem JavaScript. */
-.dobra {
+/*
+ * Expansao INLINE da linha do demonstrativo — NAO e a `Dobra` do sistema.
+ *
+ * Aqui o gatilho e o proprio nome da linha, dentro de uma celula de cabecalho
+ * de tabela. A `Dobra` desenha um botao de 44px, que ali empurraria a coluna e
+ * quebraria a leitura de cima para baixo. Mesmo comportamento nativo de
+ * `<details>`, aparencia de texto.
+ *
+ * As classes se chamavam `.dobra` e `.gatilho`, iguais as do controle do
+ * sistema, o que fazia parecer duplicacao do mesmo componente. Sao coisas
+ * diferentes, e agora os nomes dizem isso.
+ */
+.linhaExpansivel {
   margin: 0;
 }
 
-.gatilho {
+.gatilhoDaLinha {
   cursor: pointer;
   list-style: none;
 }
 
-.gatilho::-webkit-details-marker {
+.gatilhoDaLinha::-webkit-details-marker {
   display: none;
 }
 
-.gatilho:focus-visible {
+.gatilhoDaLinha:focus-visible {
   outline: none;
   box-shadow: var(--anel-foco);
 }

@@ -2,10 +2,9 @@
 
 import { useActionState, useState } from "react";
 
-import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao } from "@/interface/componentes/indice";
+import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao, Dobra } from "@/interface/componentes/indice";
 
 import { acaoEstornarRecebimento, type EstadoFormulario } from "../acoes";
-import estilos from "./acoes-de-correcao.module.css";
 
 const INICIAL: EstadoFormulario = {};
 
@@ -38,17 +37,15 @@ export function BotaoEstornar({ recebimento }: { readonly recebimento: Recebimen
   const identificador = `estornar-${recebimento.recebimentoId}`;
 
   /*
-   * `<details>` em vez de um botao que troca estado.
+   * `Dobra` usa `<details>` de verdade, e nao um botao que troca estado: o
+   * formulario de estorno existe na pagina crua, sem JavaScript. Estornar e
+   * justamente a operacao que alguem precisa quando algo ja deu errado.
    *
-   * Abrir e fechar e comportamento nativo do navegador: funciona sem
-   * JavaScript, ja vem com o papel de divulgacao para leitores de tela e
-   * responde ao teclado sozinho. Com um `<button onClick>`, o formulario de
-   * estorno simplesmente nao existiria na pagina crua — e estornar viraria a
-   * unica operacao do sistema que exige JavaScript.
+   * A abertura e CONTROLADA para poder fechar sozinha ao terminar — senao a
+   * dobra ficaria aberta com o formulario ja enviado a vista.
    */
   return (
-    <details className={estilos.dobra} open={aberto} onToggle={(e) => setAberto(e.currentTarget.open)}>
-      <summary className={estilos.gatilho}>Estornar</summary>
+    <Dobra rotulo="Estornar" aberta={aberto} aoAlternar={setAberto} comCaixa={false}>
       <form
       action={enviar}
       id={identificador}
@@ -116,6 +113,6 @@ export function BotaoEstornar({ recebimento }: { readonly recebimento: Recebimen
         aoCancelar={() => setConfirmando(false)}
       />
       </form>
-    </details>
+    </Dobra>
   );
 }

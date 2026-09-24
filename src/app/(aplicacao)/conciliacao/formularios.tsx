@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
 
 import { NOMES_FORMA_PAGAMENTO, FORMAS_DE_PAGAMENTO } from "../_apoio/formas-de-pagamento";
 import {
@@ -150,8 +150,7 @@ export function FormularioVarios({
   const [estado, enviar, pendente] = useActionState(acaoConciliarVarios, INICIAL);
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={estilos.gatilho}>Conciliar com vários</summary>
+    <Dobra rotulo="Conciliar com vários" comCaixa={false}>
       <form action={enviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
@@ -178,7 +177,7 @@ export function FormularioVarios({
           </Botao>
         </p>
       </form>
-    </details>
+    </Dobra>
   );
 }
 
@@ -194,8 +193,7 @@ export function FormularioLancamento({
   const [estado, enviar, pendente] = useActionState(acaoCriarLancamento, INICIAL);
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={estilos.gatilho}>Criar lançamento</summary>
+    <Dobra rotulo="Criar lançamento" comCaixa={false}>
       <form action={enviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
@@ -224,7 +222,7 @@ export function FormularioLancamento({
           </Botao>
         </p>
       </form>
-    </details>
+    </Dobra>
   );
 }
 
@@ -243,8 +241,7 @@ export function FormularioBaixa({
   const rotulo = area === "pagar" ? "Dar baixa numa conta a pagar" : "Dar baixa numa conta a receber";
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={estilos.gatilho}>{rotulo}</summary>
+    <Dobra rotulo={rotulo} comCaixa={false}>
       <form action={enviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
@@ -279,7 +276,7 @@ export function FormularioBaixa({
           </Botao>
         </p>
       </form>
-    </details>
+    </Dobra>
   );
 }
 
@@ -293,8 +290,7 @@ export function FormularioIgnorar({
   const [estado, enviar, pendente] = useActionState(acaoIgnorarItem, INICIAL);
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={estilos.gatilho}>Ignorar</summary>
+    <Dobra rotulo="Ignorar" comCaixa={false}>
       <form action={enviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
@@ -317,7 +313,7 @@ export function FormularioIgnorar({
           </Botao>
         </p>
       </form>
-    </details>
+    </Dobra>
   );
 }
 
@@ -331,8 +327,7 @@ export function FormularioDesconciliar({
   const [estado, enviar, pendente] = useActionState(acaoDesconciliar, INICIAL);
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={estilos.gatilho}>Desconciliar</summary>
+    <Dobra rotulo="Desconciliar" comCaixa={false}>
       <form action={enviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="conciliacaoId" value={conciliacaoId} />
@@ -355,6 +350,6 @@ export function FormularioDesconciliar({
           </Botao>
         </p>
       </form>
-    </details>
+    </Dobra>
   );
 }

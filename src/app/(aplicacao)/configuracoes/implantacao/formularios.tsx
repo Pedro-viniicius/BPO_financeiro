@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
 
 import {
   acaoConferirContas,
@@ -141,8 +141,7 @@ export function DesfazerLote({
   const [estado, enviar, pendente] = useActionState(acaoDesfazerLote, INICIAL);
 
   return (
-    <details className={estilos.dobra}>
-      <summary className={estilos.gatilho}>Desfazer</summary>
+    <Dobra rotulo="Desfazer" comCaixa={false}>
       <div className={estilos.corpoDaDobra}>
         <Resultado estado={estado} />
         <p className={estilos.detalhe}>
@@ -166,6 +165,6 @@ export function DesfazerLote({
           </p>
         </form>
       </div>
-    </details>
+    </Dobra>
   );
 }
