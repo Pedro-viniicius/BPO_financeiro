@@ -57,7 +57,7 @@ export async function acaoInstalarPrimeiraEmpresa(
   } catch (erro) {
     // Falha tecnica (banco fora, etc.): nada foi gravado; nunca expor o erro cru.
     logs.erro("falha ao instalar primeira empresa", { usuarioId: sessao.usuarioId, erro: erro instanceof Error ? erro.message : String(erro) });
-    return { mensagem: "Nao foi possivel criar a empresa agora. Tente novamente em instantes.", valores };
+    return { mensagem: "Não foi possível criar a empresa agora. Tente novamente em instantes.", valores };
   }
 
   if (!resultado.sucesso) {

@@ -32,16 +32,16 @@ export function montarMensagemRedefinicaoSenha(dados: DadosRedefinicaoSenha): Me
   // imagens. A ultima linha importa tanto quanto a primeira — quem NAO pediu
   // precisa saber que nao ha nada a fazer.
   const texto = [
-    `Ola, ${primeiroNome}.`,
+    `Olá, ${primeiroNome}.`,
     "",
     "Recebemos um pedido para redefinir a senha da sua conta no Financeiro.",
-    "Abra o endereco abaixo para escolher uma nova senha:",
+    "Abra o endereço abaixo para escolher uma nova senha:",
     "",
     ligacao,
     "",
-    `O link vale por ${dados.validadeEmMinutos} minutos e so pode ser usado uma vez.`,
+    `O link vale por ${dados.validadeEmMinutos} minutos e só pode ser usado uma vez.`,
     "",
-    "Se nao foi voce que pediu, ignore esta mensagem: sua senha continua a mesma.",
+    "Se não foi você que pediu, ignore esta mensagem: sua senha continua a mesma.",
   ].join("\n");
 
   return {

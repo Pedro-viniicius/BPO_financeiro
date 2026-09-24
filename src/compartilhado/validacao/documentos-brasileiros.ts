@@ -40,7 +40,7 @@ export function normalizarCpfOuCnpj(texto: string): { tipo: "cpf" | "cnpj"; digi
   const digitos = somenteDigitos(texto);
   if (digitos.length === 11 && validarCpf(digitos)) return { tipo: "cpf", digitos };
   if (digitos.length === 14 && validarCnpj(digitos)) return { tipo: "cnpj", digitos };
-  throw new SyntaxError("CPF ou CNPJ invalido.");
+  throw new SyntaxError("CPF ou CNPJ inválido.");
 }
 
 export function formatarCpf(digitos: string): string {

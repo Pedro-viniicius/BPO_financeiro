@@ -18,6 +18,6 @@ describe("mensagem de redefinicao de acesso", () => {
   it("diz quem pediu, quanto tempo vale e o que fazer se nao esperava", () => {
     expect(mensagem.texto).toContain("Empresa Exemplo");
     expect(mensagem.texto).toMatch(/48 horas/);
-    expect(mensagem.texto).toMatch(/nao esperava/i);
+    expect(mensagem.texto).toMatch(/não esperava/i);
   });
 });

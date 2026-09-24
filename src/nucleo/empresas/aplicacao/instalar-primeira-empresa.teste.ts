@@ -63,7 +63,7 @@ describe("instalarPrimeiraEmpresa", () => {
     expect(resultado.sucesso).toBe(false);
     if (resultado.sucesso) return;
     expect(resultado.erro.codigo).toBe("validacao");
-    expect(resultado.erro.detalhes).toEqual({ campos: { nome: ["Campo obrigatorio."], cnpj: ["CNPJ invalido."] } });
+    expect(resultado.erro.detalhes).toEqual({ campos: { nome: ["Campo obrigatório."], cnpj: ["CNPJ inválido."] } });
     expect(acesso.empresas).toHaveLength(0);
     expect(acesso.vinculos).toHaveLength(0);
   });

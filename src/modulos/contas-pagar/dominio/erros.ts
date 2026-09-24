@@ -4,7 +4,7 @@ export class ContaPagarNaoEncontrada extends RegistroNaoEncontrado {
   readonly codigo = "conta_pagar_nao_encontrada";
 
   constructor(id: string) {
-    super("Conta a pagar nao encontrada.", { id });
+    super("Conta a pagar não encontrada.", { id });
   }
 }
 
@@ -13,7 +13,7 @@ export class PagamentoJaRegistrado extends ErroDominio {
   readonly categoria: CategoriaErro = "regra_negocio";
 
   constructor(id: string) {
-    super("Esta conta ja esta marcada como paga.", { id });
+    super("Esta conta já está marcada como paga.", { id });
   }
 }
 
@@ -22,7 +22,7 @@ export class ContaPagarJaCancelada extends ErroDominio {
   readonly categoria: CategoriaErro = "regra_negocio";
 
   constructor(id: string) {
-    super("Esta conta ja foi cancelada e nao pode ser alterada.", { id });
+    super("Esta conta já foi cancelada e não pode ser alterada.", { id });
   }
 }
 
@@ -31,7 +31,7 @@ export class TransicaoSituacaoInvalida extends ErroDominio {
   readonly categoria: CategoriaErro = "regra_negocio";
 
   constructor(de: string, para: string) {
-    super("Esta acao nao e possivel na situacao atual da conta.", { de, para });
+    super("Esta ação não é possível na situação atual da conta.", { de, para });
   }
 }
 
@@ -40,7 +40,7 @@ export class AprovacaoPeloProprioAutor extends ErroDominio {
   readonly categoria: CategoriaErro = "regra_negocio";
 
   constructor() {
-    super("Quem registrou a conta nao pode aprova-la. Outra pessoa precisa aprovar.");
+    super("Quem registrou a conta não pode aprová-la. Outra pessoa precisa aprovar.");
   }
 }
 

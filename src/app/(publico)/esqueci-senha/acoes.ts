@@ -30,7 +30,7 @@ export async function acaoPedirRedefinicao(
     if (!resultado.sucesso) return { mensagem: resultado.erro.message, email };
   } catch (erro) {
     logs.erro("falha tecnica ao pedir redefinicao", { erro: erro instanceof Error ? erro.message : String(erro) });
-    return { mensagem: "Nao foi possivel enviar o e-mail agora. Tente novamente em instantes.", email };
+    return { mensagem: "Não foi possível enviar o e-mail agora. Tente novamente em instantes.", email };
   }
   return { enviado: true, email };
 }

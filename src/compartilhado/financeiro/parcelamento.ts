@@ -100,7 +100,7 @@ export interface PlanoDeParcelamento {
  */
 export function gerarParcelas(plano: PlanoDeParcelamento): readonly ParcelaPlanejada[] {
   if (!Number.isInteger(plano.quantidade) || plano.quantidade < 1) {
-    throw new RangeError(`Quantidade de parcelas invalida: ${plano.quantidade}.`);
+    throw new RangeError(`Quantidade de parcelas inválida: ${plano.quantidade}.`);
   }
   if (!plano.total.ehPositivo()) {
     throw new RangeError("O total precisa ser maior que zero.");

@@ -15,7 +15,7 @@ export const PAPEL_DO_INSTALADOR = "administrador" as const;
 /** O que o formulario de primeiro acesso envia. Nada financeiro entra aqui. */
 export const esquemaInstalacaoEmpresa = z.object({
   nome: esquemaTextoCurto,
-  nomeFantasia: z.string().trim().max(200, "Maximo de 200 caracteres.").optional(),
+  nomeFantasia: z.string().trim().max(200, "Máximo de 200 caracteres.").optional(),
   /** Aceita com ou sem mascara; guardamos so os digitos. */
   cnpj: z
     .string()

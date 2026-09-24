@@ -8,7 +8,7 @@ export class UsuarioSemPermissao extends ErroDominio {
   readonly categoria: CategoriaErro = "sem_permissao";
 
   constructor(permissao: Permissao) {
-    super("Voce nao tem permissao para realizar esta acao.", { permissao });
+    super("Você não tem permissão para realizar esta ação.", { permissao });
   }
 }
 
@@ -18,6 +18,6 @@ export class UsuarioSemAcessoAEmpresa extends ErroDominio {
   readonly categoria: CategoriaErro = "sem_permissao";
 
   constructor() {
-    super("Voce nao tem acesso a esta empresa.");
+    super("Você não tem acesso a esta empresa.");
   }
 }

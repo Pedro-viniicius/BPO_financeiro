@@ -34,7 +34,7 @@ describe("montarMensagemRedefinicaoSenha", () => {
   });
 
   it("trata a pessoa pelo primeiro nome", () => {
-    expect(montarMensagemRedefinicaoSenha(BASE).texto).toContain("Ola, Ana.");
+    expect(montarMensagemRedefinicaoSenha(BASE).texto).toContain("Olá, Ana.");
   });
 
   it("contem o link e diz por quanto tempo ele vale", () => {
@@ -46,7 +46,7 @@ describe("montarMensagemRedefinicaoSenha", () => {
 
   it("diz a quem NAO pediu que nao ha nada a fazer", () => {
     // Sem esta linha, o e-mail parece um aviso de invasao e gera panico/suporte.
-    expect(montarMensagemRedefinicaoSenha(BASE).texto).toContain("Se nao foi voce que pediu");
+    expect(montarMensagemRedefinicaoSenha(BASE).texto).toContain("Se não foi você que pediu");
   });
 
   it("nao promete nada que o sistema nao faz (sem anexo, sem HTML obrigatorio)", () => {

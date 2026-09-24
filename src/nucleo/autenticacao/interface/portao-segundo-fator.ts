@@ -30,7 +30,7 @@ const CAMINHOS_DE_ATIVACAO: readonly string[] = [
 ];
 
 export const MOTIVO_ATIVACAO_INDISPONIVEL =
-  "A verificacao em duas etapas ainda nao pode ser ativada nesta versao: a tela que mostra o QR Code e os codigos de recuperacao ainda nao existe.";
+  "A verificação em duas etapas ainda não pode ser ativada nesta versão: a tela que mostra o QR Code e os códigos de recuperação ainda não existe.";
 
 /**
  * Verdadeiro quando o caminho pedido ativa (ou prepara a ativacao do) segundo

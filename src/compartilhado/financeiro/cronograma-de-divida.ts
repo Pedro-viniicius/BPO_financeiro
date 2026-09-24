@@ -118,10 +118,10 @@ export function gerarCronograma(plano: PlanoDoEmprestimo): readonly ParcelaDoCro
   const { valorPrincipal, taxaMensal, quantidadeParcelas, primeiroVencimento, sistema } = plano;
 
   if (!Number.isInteger(quantidadeParcelas) || quantidadeParcelas < MINIMO_PARCELAS_DIVIDA || quantidadeParcelas > MAXIMO_PARCELAS_DIVIDA) {
-    throw new RangeError(`Quantidade de parcelas invalida: ${quantidadeParcelas}.`);
+    throw new RangeError(`Quantidade de parcelas inválida: ${quantidadeParcelas}.`);
   }
   if (!valorPrincipal.ehPositivo()) throw new RangeError("O valor contratado precisa ser maior que zero.");
-  if (taxaMensal < 0) throw new RangeError("A taxa de juros nao pode ser negativa.");
+  if (taxaMensal < 0) throw new RangeError("A taxa de juros não pode ser negativa.");
 
   const parcelas: ParcelaDoCronograma[] = [];
   const taxa = taxaMensal / 100;

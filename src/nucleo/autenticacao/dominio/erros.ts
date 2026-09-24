@@ -30,7 +30,7 @@ export class CadastroFechado extends ErroDominio {
   readonly categoria: CategoriaErro = "sem_permissao";
 
   constructor() {
-    super("Esta instalacao ja tem usuarios. Peca um convite a quem administra o sistema.");
+    super("Esta instalação já tem usuários. Peça um convite a quem administra o sistema.");
   }
 }
 
@@ -40,7 +40,7 @@ export class EmailJaCadastrado extends ErroDominio {
   readonly categoria: CategoriaErro = "conflito";
 
   constructor() {
-    super("Ja existe uma conta com este e-mail. Entre com a sua senha ou use \"Esqueci minha senha\".");
+    super("Já existe uma conta com este e-mail. Entre com a sua senha ou use “Esqueci minha senha”.");
   }
 }
 
@@ -50,7 +50,7 @@ export class CodigoSegundoFatorInvalido extends ErroDominio {
   readonly categoria: CategoriaErro = "nao_autenticado";
 
   constructor() {
-    super("Codigo incorreto. Confira o aplicativo de autenticacao e tente de novo.");
+    super("Código incorreto. Confira o aplicativo de autenticação e tente de novo.");
   }
 }
 
@@ -63,7 +63,7 @@ export class DesafioSegundoFatorExpirado extends ErroDominio {
   readonly categoria: CategoriaErro = "nao_autenticado";
 
   constructor() {
-    super("Esta verificacao expirou. Entre com e-mail e senha novamente.");
+    super("Esta verificação expirou. Entre com e-mail e senha novamente.");
   }
 }
 
@@ -76,7 +76,7 @@ export class AtivacaoSegundoFatorIndisponivel extends ErroDominio {
   readonly categoria: CategoriaErro = "regra_negocio";
 
   constructor() {
-    super("A verificacao em duas etapas ainda nao pode ser ativada nesta versao.");
+    super("A verificação em duas etapas ainda não pode ser ativada nesta versão.");
   }
 }
 
@@ -86,7 +86,7 @@ export class TokenRedefinicaoInvalido extends ErroDominio {
   readonly categoria: CategoriaErro = "nao_autenticado";
 
   constructor() {
-    super("Este link de redefinicao expirou ou ja foi usado. Peca um novo.");
+    super("Este link de redefinição expirou ou já foi usado. Peça um novo.");
   }
 }
 
@@ -99,6 +99,6 @@ export class FalhaAoEnviarEmail extends ErroDominio {
   readonly categoria: CategoriaErro = "regra_negocio";
 
   constructor() {
-    super("Nao foi possivel enviar o e-mail agora. Tente novamente em instantes ou fale com quem administra o sistema.");
+    super("Não foi possível enviar o e-mail agora. Tente novamente em instantes ou fale com quem administra o sistema.");
   }
 }

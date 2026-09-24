@@ -20,10 +20,10 @@ const esquemaNovaConta = z
   .object({
     nome: esquemaTextoCurto,
     email: esquemaEmail,
-    senha: z.string().min(TAMANHO_MINIMO_SENHA, `A senha precisa ter ao menos ${TAMANHO_MINIMO_SENHA} caracteres.`).max(TAMANHO_MAXIMO_SENHA, `Maximo de ${TAMANHO_MAXIMO_SENHA} caracteres.`),
+    senha: z.string().min(TAMANHO_MINIMO_SENHA, `A senha precisa ter ao menos ${TAMANHO_MINIMO_SENHA} caracteres.`).max(TAMANHO_MAXIMO_SENHA, `Máximo de ${TAMANHO_MAXIMO_SENHA} caracteres.`),
     confirmacao: z.string(),
   })
-  .refine((dados) => dados.senha === dados.confirmacao, { path: ["confirmacao"], message: "As senhas nao conferem." });
+  .refine((dados) => dados.senha === dados.confirmacao, { path: ["confirmacao"], message: "As senhas não conferem." });
 
 /** Server action: cria a conta (primeiro usuario) e segue para o primeiro acesso. */
 export async function acaoCriarConta(_anterior: EstadoFormularioCriarConta, formulario: FormData): Promise<EstadoFormularioCriarConta> {
@@ -47,7 +47,7 @@ export async function acaoCriarConta(_anterior: EstadoFormularioCriarConta, form
     resultado = await criarContaComEmail({ nome: validacao.data.nome, email: validacao.data.email, senha: validacao.data.senha });
   } catch (erro) {
     logs.erro("falha tecnica ao criar conta", { erro: erro instanceof Error ? erro.message : String(erro) });
-    return { mensagem: "Nao foi possivel criar a conta agora. Tente novamente em instantes.", valores: { nome: valores.nome, email: valores.email } };
+    return { mensagem: "Não foi possível criar a conta agora. Tente novamente em instantes.", valores: { nome: valores.nome, email: valores.email } };
   }
   if (!resultado.sucesso) {
     return { mensagem: resultado.erro.message, valores: { nome: valores.nome, email: valores.email } };

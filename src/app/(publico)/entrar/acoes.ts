@@ -31,7 +31,7 @@ export async function acaoEntrar(_anterior: EstadoFormularioEntrar, formulario: 
     resultado = await entrarComEmail({ email, senha });
   } catch (erro) {
     logs.erro("falha tecnica ao entrar", { erro: erro instanceof Error ? erro.message : String(erro) });
-    return { mensagem: "Nao foi possivel entrar agora. Tente novamente em instantes.", email };
+    return { mensagem: "Não foi possível entrar agora. Tente novamente em instantes.", email };
   }
   if (!resultado.sucesso) {
     return { mensagem: resultado.erro.message, email };

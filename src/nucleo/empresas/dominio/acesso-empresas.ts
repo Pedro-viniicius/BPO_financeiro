@@ -48,7 +48,7 @@ export class UsuarioJaPossuiEmpresa extends ErroDominio {
   readonly categoria: CategoriaErro = "regra_negocio";
 
   constructor(usuarioId: IdUsuario) {
-    super("Voce ja tem acesso a uma empresa. O primeiro acesso so vale para quem ainda nao tem nenhuma.", { usuarioId });
+    super("Você já tem acesso a uma empresa. O primeiro acesso só vale para quem ainda não tem nenhuma.", { usuarioId });
   }
 }
 
@@ -58,6 +58,6 @@ export class CnpjJaCadastrado extends ErroDominio {
   readonly categoria: CategoriaErro = "conflito";
 
   constructor() {
-    super("Ja existe uma empresa cadastrada com este CNPJ. Peca acesso a quem a administra.");
+    super("Já existe uma empresa cadastrada com este CNPJ. Peça acesso a quem a administra.");
   }
 }

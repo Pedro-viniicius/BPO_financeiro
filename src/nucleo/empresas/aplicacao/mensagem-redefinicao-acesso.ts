@@ -21,16 +21,16 @@ export function montarMensagemRedefinicaoAcesso(dados: DadosRedefinicaoAcesso): 
   const ligacao = linkDoConvite(dados.aplicacaoUrl, dados.token);
 
   const texto = [
-    "Ola.",
+    "Olá.",
     "",
-    `Quem administra ${dados.nomeDaEmpresa} no Financeiro pediu que voce defina uma nova senha de acesso.`,
-    "Abra o endereco abaixo para escolher a nova senha:",
+    `Quem administra ${dados.nomeDaEmpresa} no Financeiro pediu que você defina uma nova senha de acesso.`,
+    "Abra o endereço abaixo para escolher a nova senha:",
     "",
     ligacao,
     "",
-    `O link vale por ${PRAZO_DO_CONVITE_HORAS} horas e so pode ser usado uma vez. Ao ser usado, as sessoes abertas da sua conta sao encerradas.`,
+    `O link vale por ${PRAZO_DO_CONVITE_HORAS} horas e só pode ser usado uma vez. Ao ser usado, as sessões abertas da sua conta são encerradas.`,
     "",
-    "Se voce nao esperava este e-mail, ignore-o: sua senha continua a mesma. Em caso de duvida, fale com quem administra a empresa.",
+    "Se você não esperava este e-mail, ignore-o: sua senha continua a mesma. Em caso de dúvida, fale com quem administra a empresa.",
   ].join("\n");
 
   return {
