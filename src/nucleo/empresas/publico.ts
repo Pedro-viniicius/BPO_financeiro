@@ -29,8 +29,11 @@ export {
 } from "./dominio/convite";
 export {
   NaoPodeAlterarOProprioAcesso,
+  RedefinicaoNaoPermitida,
   UltimoAdministrador,
+  UsuarioNaoEncontradoNaEmpresa,
 } from "./dominio/regras-de-acesso";
+export { montarMensagemRedefinicaoAcesso, type DadosRedefinicaoAcesso } from "./aplicacao/mensagem-redefinicao-acesso";
 export { AcessoEmpresasEmMemoria } from "./infraestrutura/acesso-empresas-em-memoria";
 export { decidirDestino, destinoPadrao, retornoSeguro, ROTAS, type EstadoAcesso } from "./interface/destino";
 export {

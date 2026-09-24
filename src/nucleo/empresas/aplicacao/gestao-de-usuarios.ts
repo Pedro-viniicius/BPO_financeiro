@@ -24,6 +24,12 @@ export interface UsuarioDaEmpresa {
   readonly ultimoAcesso: Date | null;
   /** Para a tela saber que nao deve oferecer "desativar" a quem esta olhando. */
   readonly ehVoce: boolean;
+  /**
+   * Verdadeiro quando o acesso vem de um vinculo "toda a organizacao"
+   * (`empresa_id` nulo). Esse vinculo nao pertence a esta empresa, e por isso
+   * nao e alterado por esta tela — a lista o mostra, as acoes nao o alcancam.
+   */
+  readonly vinculoDeOrganizacao: boolean;
 }
 
 export interface ConvitePendente {
@@ -65,8 +71,20 @@ export interface RepositorioGestaoDeUsuarios {
   /** Desativar encerra as sessoes do alvo na mesma operacao. */
   alterarSituacao(escopo: EscopoEmpresa, alvoUsuarioId: string, ativo: boolean, autorUsuarioId: string): Promise<void>;
 
-  /** Novo link para quem ja tem conta, nas mesmas regras do convite. */
-  redefinirAcesso(escopo: EscopoEmpresa, alvoUsuarioId: string, autorUsuarioId: string): Promise<{ readonly token: string }>;
+  /**
+   * Novo link para quem ja tem conta, nas mesmas regras do convite.
+   *
+   * O token volta em claro para ser ENVIADO AO E-MAIL do alvo — nunca para
+   * ser mostrado a quem pediu. Um link que troca a senha de outra pessoa e
+   * uma credencial dessa pessoa; entregue ao administrador, ele entraria
+   * como ela. Recusa quando a conta serve tambem a outra organizacao
+   * (`RedefinicaoNaoPermitida`) e quando o alvo nao esta nesta empresa.
+   */
+  redefinirAcesso(
+    escopo: EscopoEmpresa,
+    alvoUsuarioId: string,
+    autorUsuarioId: string,
+  ): Promise<{ readonly token: string; readonly email: string }>;
 
   /** Dados do convite para a tela de aceite. Nao revela nada alem do necessario. */
   lerConvitePeloToken(token: string): Promise<ConviteParaAceite | null>;

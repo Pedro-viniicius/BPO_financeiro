@@ -150,7 +150,8 @@ export function AcoesDoUsuario({
             Redefinir acesso
           </Botao>
           <span className={estilos.explicacao}>
-            Gera um link novo para {usuario.nome} definir outra senha. Ao ser usado, encerra as sessões abertas.
+            Envia ao e-mail de {usuario.nome} um link para definir outra senha. Ao ser usado, encerra as sessões abertas.
+            O link vai só para a pessoa: ele abre a conta dela.
           </span>
         </form>
 

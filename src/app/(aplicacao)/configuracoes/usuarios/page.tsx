@@ -51,9 +51,11 @@ export default async function PaginaUsuarios() {
 
       {semSmtp ? (
         <Aviso tom="informacao" titulo="O envio de e-mail ainda não está configurado">
-          Por isso o convite aparece como um <strong>link para copiar</strong>, e você o repassa pelo canal que preferir.
-          Assim que o SMTP for configurado, o mesmo convite passa a ser enviado por e-mail também. O sistema nunca
-          mostra nem envia senhas — quem entra define a própria.
+          Por isso o convite de uma pessoa <strong>nova</strong> aparece como um <strong>link para copiar</strong>, e você o
+          repassa pelo canal que preferir. Já “Redefinir acesso” de quem <strong>já tem conta</strong> só funciona com
+          e-mail configurado: esse link abre a conta da pessoa e vai apenas para ela. Enquanto isso, quem perdeu a senha
+          usa “Esqueci minha senha” na tela de entrada. O sistema nunca mostra nem envia senhas — quem entra define a
+          própria.
         </Aviso>
       ) : null}
 
@@ -97,15 +99,24 @@ export default async function PaginaUsuarios() {
                 {usuario.ultimoAcesso ? FORMATO_DATA.format(usuario.ultimoAcesso) : "nunca entrou"}
               </td>
               <td data-rotulo="Ações">
-                <AcoesDoUsuario
-                  usuario={{
-                    usuarioId: usuario.usuarioId,
-                    nome: usuario.nome,
-                    papel: usuario.papel,
-                    ativo: usuario.ativo,
-                    ehVoce: usuario.ehVoce,
-                  }}
-                />
+                {usuario.vinculoDeOrganizacao ? (
+                  /*
+                   * Acesso a TODA a organizacao: nao pertence a esta empresa, e
+                   * por isso esta tela nao o altera. Gerencia-se no nivel da
+                   * organizacao (tela propria, quando existir).
+                   */
+                  <span className={estilos.email}>Acesso a toda a organização — não é alterado por esta tela.</span>
+                ) : (
+                  <AcoesDoUsuario
+                    usuario={{
+                      usuarioId: usuario.usuarioId,
+                      nome: usuario.nome,
+                      papel: usuario.papel,
+                      ativo: usuario.ativo,
+                      ehVoce: usuario.ehVoce,
+                    }}
+                  />
+                )}
               </td>
             </tr>
           ))}

@@ -1,4 +1,4 @@
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 
 import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
@@ -20,9 +20,11 @@ import {
   hashDoToken,
 } from "../dominio/convite";
 import {
+  RedefinicaoNaoPermitida,
+  type SituacaoDoAcesso,
+  UsuarioNaoEncontradoNaEmpresa,
   verificarAlteracaoDePapel,
   verificarDesativacao,
-  type SituacaoDoAcesso,
 } from "../dominio/regras-de-acesso";
 import { convites, vinculosUsuario } from "./esquema";
 
@@ -33,8 +35,27 @@ interface LinhaUsuario extends Record<string, unknown> {
   papel: string;
   ativo: boolean;
   ultimo_acesso: string | null;
+  vinculo_de_organizacao: boolean;
 }
 
+/**
+ * Gestao de usuarios contra PostgreSQL.
+ *
+ * ESCOPO POR EMPRESA em toda escrita. Um vinculo e por empresa
+ * (`unico_vinculos_usuario_escopo`), e quem administra a empresa A so mexe
+ * no vinculo que a pessoa tem COM A: alterar papel, desativar e redefinir
+ * acesso filtram por `empresa_id = escopo.empresaId`, nunca so pela
+ * organizacao. Um vinculo em B, empresa irma, fica intocado — e a resposta
+ * para quem tenta e "nao encontrado nesta empresa", sem confirmar que existe
+ * em B.
+ *
+ * Vinculos "toda a organizacao" (`empresa_id` nulo) aparecem na lista, porque
+ * dao acesso a esta empresa, mas nao sao alterados por esta tela: eles nao
+ * pertencem a empresa alguma. Hoje a interface nao cria vinculos assim (o
+ * convite e sempre por empresa); se um dia criar, a gestao deles pede tela
+ * propria, no nivel da organizacao. Decisao registrada aqui para nao ser
+ * tomada em silencio.
+ */
 export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUsuarios {
   constructor(
     private readonly banco: ExecutorBancoDados,
@@ -47,7 +68,8 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
         SELECT u.id AS usuario_id, u.name AS nome, u.email, v.papel::text AS papel, v.ativo,
                -- Ultimo acesso pela sessao mais recentemente USADA, nao criada:
                -- a biblioteca atualiza updated_at a cada renovacao.
-               (SELECT max(s.updated_at)::text FROM session s WHERE s.user_id = u.id) AS ultimo_acesso
+               (SELECT max(s.updated_at)::text FROM session s WHERE s.user_id = u.id) AS ultimo_acesso,
+               (v.empresa_id IS NULL) AS vinculo_de_organizacao
         FROM vinculos_usuario v
         JOIN "user" u ON u.id = v.usuario_id
         WHERE v.organizacao_id = ${escopo.organizacaoId}
@@ -75,6 +97,7 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
       ativo: linha.ativo,
       ultimoAcesso: linha.ultimo_acesso ? new Date(linha.ultimo_acesso) : null,
       ehVoce: linha.usuario_id === usuarioAtualId,
+      vinculoDeOrganizacao: linha.vinculo_de_organizacao,
     }));
 
     const convitesPendentes: ConvitePendente[] = pendentes.map((linha) => ({
@@ -90,50 +113,7 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
   }
 
   async convidar(escopo: EscopoEmpresa, dados: { email: string; papel: Papel; autorUsuarioId: string }) {
-    const email = dados.email.trim().toLowerCase();
-    const token = gerarTokenDeConvite();
-
-    return executarEmTransacao(async (transacao) => {
-      /*
-       * Um convite pendente por e-mail. Dois links validos ao mesmo tempo
-       * significam que o primeiro, ja enviado, continua servindo depois de a
-       * pessoa receber o segundo — e "cancelei e mandei outro" deixaria de ser
-       * verdade.
-       */
-      await transacao
-        .update(convites)
-        .set({ canceladoEm: new Date() })
-        .where(
-          and(
-            eq(convites.organizacaoId, escopo.organizacaoId),
-            sql`lower(${convites.email}) = ${email}`,
-            isNull(convites.aceitoEm),
-            isNull(convites.canceladoEm),
-          ),
-        );
-
-      const agora = new Date();
-      const [criado] = await transacao
-        .insert(convites)
-        .values({
-          organizacaoId: escopo.organizacaoId,
-          empresaId: escopo.empresaId,
-          email,
-          papel: dados.papel,
-          tokenHash: hashDoToken(token),
-          convidadoPor: dados.autorUsuarioId,
-          expiraEm: expiracaoDoConvite(agora),
-        })
-        .returning({ id: convites.id });
-
-      await this.registrar(transacao, escopo, dados.autorUsuarioId, "convite.criado", criado!.id, {
-        email,
-        papel: dados.papel,
-        expiraEm: expiracaoDoConvite(agora).toISOString(),
-      });
-
-      return { conviteId: criado!.id, token };
-    }, this.banco);
+    return executarEmTransacao((transacao) => this.criarConvite(transacao, escopo, dados), this.banco);
   }
 
   async cancelarConvite(escopo: EscopoEmpresa, conviteId: string, autorUsuarioId: string): Promise<void> {
@@ -142,7 +122,13 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
         .update(convites)
         .set({ canceladoEm: new Date() })
         .where(
-          and(eq(convites.id, conviteId), eq(convites.organizacaoId, escopo.organizacaoId), isNull(convites.aceitoEm)),
+          and(
+            eq(convites.id, conviteId),
+            eq(convites.organizacaoId, escopo.organizacaoId),
+            // So os convites que esta tela lista: os desta empresa e os da organizacao inteira.
+            or(eq(convites.empresaId, escopo.empresaId), isNull(convites.empresaId)),
+            isNull(convites.aceitoEm),
+          ),
         );
       await this.registrar(transacao, escopo, autorUsuarioId, "convite.cancelado", conviteId, null);
     }, this.banco);
@@ -150,21 +136,26 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
 
   async alterarPapel(escopo: EscopoEmpresa, alvoUsuarioId: string, papel: Papel, autorUsuarioId: string): Promise<void> {
     await executarEmTransacao(async (transacao) => {
+      const antes = await this.vinculo(transacao, escopo, alvoUsuarioId);
+      if (!antes) throw new UsuarioNaoEncontradoNaEmpresa();
+
       const situacao = await this.situacaoDoAcesso(transacao, escopo, alvoUsuarioId, autorUsuarioId);
       verificarAlteracaoDePapel(situacao, papel === "administrador");
 
-      const antes = await this.vinculo(transacao, escopo, alvoUsuarioId);
       await transacao
         .update(vinculosUsuario)
         .set({ papel, atualizadoEm: new Date() })
-        .where(and(eq(vinculosUsuario.usuarioId, alvoUsuarioId), eq(vinculosUsuario.organizacaoId, escopo.organizacaoId)));
+        .where(this.condicaoDoVinculo(escopo, alvoUsuarioId));
 
-      await this.registrar(transacao, escopo, autorUsuarioId, "usuario.papel_alterado", alvoUsuarioId, { papel }, { papel: antes?.papel });
+      await this.registrar(transacao, escopo, autorUsuarioId, "usuario.papel_alterado", alvoUsuarioId, { papel }, { papel: antes.papel });
     }, this.banco);
   }
 
   async alterarSituacao(escopo: EscopoEmpresa, alvoUsuarioId: string, ativo: boolean, autorUsuarioId: string): Promise<void> {
     await executarEmTransacao(async (transacao) => {
+      const antes = await this.vinculo(transacao, escopo, alvoUsuarioId);
+      if (!antes) throw new UsuarioNaoEncontradoNaEmpresa();
+
       if (!ativo) {
         const situacao = await this.situacaoDoAcesso(transacao, escopo, alvoUsuarioId, autorUsuarioId);
         verificarDesativacao(situacao);
@@ -173,7 +164,7 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
       await transacao
         .update(vinculosUsuario)
         .set({ ativo, atualizadoEm: new Date() })
-        .where(and(eq(vinculosUsuario.usuarioId, alvoUsuarioId), eq(vinculosUsuario.organizacaoId, escopo.organizacaoId)));
+        .where(this.condicaoDoVinculo(escopo, alvoUsuarioId));
 
       await this.registrar(transacao, escopo, autorUsuarioId, ativo ? "usuario.reativado" : "usuario.desativado", alvoUsuarioId, { ativo });
     }, this.banco);
@@ -191,20 +182,35 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
   }
 
   async redefinirAcesso(escopo: EscopoEmpresa, alvoUsuarioId: string, autorUsuarioId: string) {
-    const [alvo] = await this.banco.execute<{ email: string; papel: string }>(sql`
-      SELECT u.email, v.papel::text AS papel
-      FROM vinculos_usuario v JOIN "user" u ON u.id = v.usuario_id
-      WHERE v.usuario_id = ${alvoUsuarioId} AND v.organizacao_id = ${escopo.organizacaoId}
-      LIMIT 1
-    `);
-    if (!alvo) throw new Error("Usuário não encontrado nesta organização.");
+    return executarEmTransacao(async (transacao) => {
+      const [alvo] = await transacao.execute<{ email: string; papel: string; outras: string }>(sql`
+        SELECT u.email, v.papel::text AS papel,
+               -- Vinculos ATIVOS do alvo em OUTRAS organizacoes: a conta serve a mais gente do que esta empresa.
+               (SELECT count(*)::text FROM vinculos_usuario o
+                 WHERE o.usuario_id = u.id AND o.ativo = true AND o.organizacao_id <> ${escopo.organizacaoId}) AS outras
+        FROM vinculos_usuario v JOIN "user" u ON u.id = v.usuario_id
+        WHERE v.usuario_id = ${alvoUsuarioId}
+          AND v.organizacao_id = ${escopo.organizacaoId}
+          AND v.empresa_id = ${escopo.empresaId}
+        LIMIT 1
+      `);
+      if (!alvo) throw new UsuarioNaoEncontradoNaEmpresa();
+      if (Number(alvo.outras) > 0) throw new RedefinicaoNaoPermitida("conta_compartilhada");
 
-    const { token } = await this.convidar(escopo, {
-      email: alvo.email,
-      papel: alvo.papel as Papel,
-      autorUsuarioId,
-    });
-    return { token };
+      const { token } = await this.criarConvite(transacao, escopo, {
+        email: alvo.email,
+        papel: alvo.papel as Papel,
+        autorUsuarioId,
+      });
+
+      // Quem pediu a redefinicao fica na trilha, junto do alvo: e um ato sobre a conta de outra pessoa.
+      await this.registrar(transacao, escopo, autorUsuarioId, "usuario.acesso_redefinido", alvoUsuarioId, {
+        email: alvo.email,
+        autorUsuarioId,
+      });
+
+      return { token, email: alvo.email };
+    }, this.banco);
   }
 
   async lerConvitePeloToken(token: string): Promise<ConviteParaAceite | null> {
@@ -324,11 +330,72 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
 
   // ------------------------------------------------------------------ apoio
 
+  /**
+   * O vinculo que ESTA empresa pode administrar: o da pessoa com a propria
+   * empresa. Nem o de uma empresa irma, nem o de "toda a organizacao".
+   */
+  private condicaoDoVinculo(escopo: EscopoEmpresa, usuarioId: string) {
+    return and(
+      eq(vinculosUsuario.usuarioId, usuarioId),
+      eq(vinculosUsuario.organizacaoId, escopo.organizacaoId),
+      eq(vinculosUsuario.empresaId, escopo.empresaId),
+    );
+  }
+
+  private async criarConvite(
+    transacao: ExecutorBancoDados,
+    escopo: EscopoEmpresa,
+    dados: { email: string; papel: Papel; autorUsuarioId: string },
+  ): Promise<{ conviteId: string; token: string }> {
+    const email = dados.email.trim().toLowerCase();
+    const token = gerarTokenDeConvite();
+
+    /*
+     * Um convite pendente por e-mail. Dois links validos ao mesmo tempo
+     * significam que o primeiro, ja enviado, continua servindo depois de a
+     * pessoa receber o segundo — e "cancelei e mandei outro" deixaria de ser
+     * verdade.
+     */
+    await transacao
+      .update(convites)
+      .set({ canceladoEm: new Date() })
+      .where(
+        and(
+          eq(convites.organizacaoId, escopo.organizacaoId),
+          sql`lower(${convites.email}) = ${email}`,
+          isNull(convites.aceitoEm),
+          isNull(convites.canceladoEm),
+        ),
+      );
+
+    const agora = new Date();
+    const [criado] = await transacao
+      .insert(convites)
+      .values({
+        organizacaoId: escopo.organizacaoId,
+        empresaId: escopo.empresaId,
+        email,
+        papel: dados.papel,
+        tokenHash: hashDoToken(token),
+        convidadoPor: dados.autorUsuarioId,
+        expiraEm: expiracaoDoConvite(agora),
+      })
+      .returning({ id: convites.id });
+
+    await this.registrar(transacao, escopo, dados.autorUsuarioId, "convite.criado", criado!.id, {
+      email,
+      papel: dados.papel,
+      expiraEm: expiracaoDoConvite(agora).toISOString(),
+    });
+
+    return { conviteId: criado!.id, token };
+  }
+
   private async vinculo(executor: ExecutorBancoDados, escopo: EscopoEmpresa, usuarioId: string) {
     const [linha] = await executor
       .select({ papel: vinculosUsuario.papel, ativo: vinculosUsuario.ativo })
       .from(vinculosUsuario)
-      .where(and(eq(vinculosUsuario.usuarioId, usuarioId), eq(vinculosUsuario.organizacaoId, escopo.organizacaoId)))
+      .where(this.condicaoDoVinculo(escopo, usuarioId))
       .limit(1);
     return linha ?? null;
   }
@@ -340,9 +407,11 @@ export class RepositorioGestaoDeUsuariosDrizzle implements RepositorioGestaoDeUs
     autorUsuarioId: string,
   ): Promise<SituacaoDoAcesso> {
     const alvo = await this.vinculo(executor, escopo, alvoUsuarioId);
+    // Administradores que alcancam ESTA empresa: os dela e os de "toda a organizacao".
     const [contagem] = await executor.execute<{ n: string }>(sql`
       SELECT count(*)::text AS n FROM vinculos_usuario
       WHERE organizacao_id = ${escopo.organizacaoId} AND papel = 'administrador' AND ativo = true
+        AND (empresa_id = ${escopo.empresaId} OR empresa_id IS NULL)
     `);
 
     return {

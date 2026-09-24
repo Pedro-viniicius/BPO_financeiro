@@ -75,3 +75,45 @@ export function verificarDesativacao(situacao: SituacaoDoAcesso): void {
     throw new UltimoAdministrador("desativar");
   }
 }
+
+/**
+ * O alvo nao tem vinculo com a EMPRESA ATIVA de quem esta alterando.
+ *
+ * Um vinculo e por empresa. Administrar a empresa A nao da direito de mexer
+ * no acesso que alguem tem a empresa B do mesmo grupo — nem de descobrir,
+ * pela mensagem, que esse alguem existe em B. Por isso a resposta e a mesma
+ * de "nao existe": nao encontrado nesta empresa.
+ */
+export class UsuarioNaoEncontradoNaEmpresa extends ErroDominio {
+  readonly codigo = "usuario_nao_encontrado_na_empresa";
+  readonly categoria: CategoriaErro = "nao_encontrado";
+
+  constructor() {
+    super("Esta pessoa não tem acesso a esta empresa.");
+  }
+}
+
+/**
+ * A redefinicao de acesso trocaria a senha de uma conta que serve TAMBEM a
+ * outra organizacao.
+ *
+ * A conta e da pessoa, nao da empresa. Quem administra a organizacao X nao
+ * pode receber um link que abre a conta de alguem em Y e Z — seria entrar,
+ * como essa pessoa, em lugares que nunca concederam acesso a X. Para quem
+ * esta nessa situacao o caminho e "Esqueci minha senha", que so o dono do
+ * e-mail recebe.
+ */
+export class RedefinicaoNaoPermitida extends ErroDominio {
+  readonly codigo = "redefinicao_nao_permitida";
+  readonly categoria: CategoriaErro = "regra_negocio";
+
+  constructor(motivo: "conta_compartilhada") {
+    super(
+      {
+        conta_compartilhada:
+          "Esta pessoa também tem acesso a outra organização. Por segurança, só ela pode redefinir a própria senha, em “Esqueci minha senha”.",
+      }[motivo],
+      { motivo },
+    );
+  }
+}

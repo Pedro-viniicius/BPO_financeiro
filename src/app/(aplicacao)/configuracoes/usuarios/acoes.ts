@@ -4,11 +4,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { ehErroDominio } from "@/compartilhado/erros/indice";
+import { montarEnviadorEmail } from "@/composicao/email";
 import { CredenciaisBetterAuth } from "@/nucleo/autenticacao/publico";
 import { PAPEIS, type Papel } from "@/nucleo/autorizacao/publico";
 import { obterBancoDados } from "@/nucleo/banco-dados/publico";
 import { obterVariaveisAmbiente } from "@/nucleo/configuracao/publico";
-import { linkDoConvite, RepositorioGestaoDeUsuariosDrizzle } from "@/nucleo/empresas/publico";
+import { linkDoConvite, montarMensagemRedefinicaoAcesso, RepositorioGestaoDeUsuariosDrizzle } from "@/nucleo/empresas/publico";
 import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
 
 import { exigirContextoFinanceiro } from "../../_apoio/contexto-financeiro";
@@ -137,18 +138,39 @@ export async function acaoAlterarSituacao(_anterior: EstadoUsuarios, formulario:
   };
 }
 
-/** Gera um link novo para quem ja tem conta, nas mesmas regras do convite. */
+/**
+ * Redefine o acesso de quem ja tem conta: um link novo, nas regras do convite,
+ * ENVIADO AO E-MAIL DA PESSOA.
+ *
+ * O link nunca volta para esta tela. Quem o tem define a senha da conta e
+ * entra como a pessoa — inclusive nas outras organizacoes a que ela tiver
+ * acesso. Entregue ao administrador, seria uma credencial de outra pessoa
+ * nas maos dele: a trilha de auditoria passaria a registrar acoes suas em
+ * nome de outro, e a separacao "quem registra nao aprova" cairia. Por isso,
+ * sem servidor de e-mail nao ha redefinicao por aqui: o caminho e a propria
+ * pessoa pedir em "Esqueci minha senha".
+ */
 export async function acaoRedefinirAcesso(_anterior: EstadoUsuarios, formulario: FormData): Promise<EstadoUsuarios> {
-  const { escopo, usuarioId } = await exigirContextoFinanceiro("usuarios.gerenciar", "/configuracoes/usuarios");
+  const { escopo, usuarioId, nomeEmpresa } = await exigirContextoFinanceiro("usuarios.gerenciar", "/configuracoes/usuarios");
   const alvo = texto(formulario, "usuarioId");
   if (!alvo) return { mensagem: "Pedido inválido." };
 
+  const variaveis = obterVariaveisAmbiente();
+  if (variaveis.EMAIL_PROVEDOR === "console") {
+    return {
+      mensagem:
+        "Sem servidor de e-mail configurado, o link de redefinição não pode ser entregue à pessoa. Peça que ela use “Esqueci minha senha” na tela de entrada.",
+    };
+  }
+
   try {
-    const { token } = await repositorio().redefinirAcesso(escopo, alvo, usuarioId);
+    const { token, email } = await repositorio().redefinirAcesso(escopo, alvo, usuarioId);
+    await montarEnviadorEmail().enviar(
+      montarMensagemRedefinicaoAcesso({ para: email, token, aplicacaoUrl: variaveis.APLICACAO_URL, nomeDaEmpresa: nomeEmpresa }),
+    );
     atualizar();
     return {
-      sucesso: "Link de redefinição criado. Vale por 48 horas, serve uma vez e encerra as sessões abertas ao ser usado.",
-      link: linkDoConvite(obterVariaveisAmbiente().APLICACAO_URL, token),
+      sucesso: `Link de redefinição enviado para ${email}. Vale por 48 horas, serve uma vez e encerra as sessões abertas ao ser usado.`,
     };
   } catch (erro) {
     return { mensagem: mensagemDoErro(erro, "Não foi possível redefinir o acesso.") };

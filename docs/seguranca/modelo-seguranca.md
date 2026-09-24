@@ -35,6 +35,11 @@
   (sair, redefinir senha, remover vinculo) vale na hora. *Verificado:
   `get-session` devolve `null` imediatamente apos `sign-out`.*
 - Redefinicao de senha revoga todas as sessoes.
+- "Redefinir acesso" (tela de usuarios) gera um link que troca a senha de
+  outra pessoa: ele vai SO para o e-mail dela, nunca para a tela do
+  administrador, e e recusado quando a conta serve tambem a outra
+  organizacao (`RedefinicaoNaoPermitida`). Sem servidor de e-mail, a pessoa
+  usa "Esqueci minha senha".
 - Sair revoga a sessao no banco e apaga o cookie de empresa ativa.
 - **(gate de usuarios)** lista de sessoes ativas na tela do usuario, com "encerrar".
 
@@ -52,6 +57,11 @@
   [`../arquitetura/autenticacao-e-empresa-ativa.md`](../arquitetura/autenticacao-e-empresa-ativa.md).
 - Segregacao de funcoes: papel Financeiro nao aprova; regra de dominio
   `AprovacaoPeloProprioAutor` impede aprovar o que se registrou.
+- Gestao de usuarios com escopo POR EMPRESA: alterar papel, desativar e
+  redefinir acesso so alcancam o vinculo da pessoa com a empresa ativa
+  (`condicaoDoVinculo`); a contagem de "ultimo administrador" e por empresa.
+  Vinculos "toda a organizacao" aparecem na lista mas nao sao alterados por
+  essa tela (`repositorio-gestao-usuarios.escopo.teste.ts`).
 - Isolamento entre empresas coberto por testes unitarios
   (`trocar-empresa-ativa.teste.ts`) e de integracao no PostgreSQL
   (`acesso-empresas.teste.ts`): A nao enxerga, nao ativa e nao opera a
