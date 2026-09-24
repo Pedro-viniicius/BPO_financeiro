@@ -34,6 +34,31 @@ describe("campo de texto", () => {
   it("quebra de linha tambem e protegida", () => {
     expect(campoCsv("linha1\nlinha2")).toBe('"linha1\nlinha2"');
   });
+
+  /*
+   * Injecao de formula: texto digitado por um usuario nunca pode virar codigo
+   * no Excel de quem exporta. O apostrofo na frente e o que a planilha entende
+   * como "isto e texto" — aspas em volta nao bastam.
+   */
+  it.each(["=1+1", "+1", "-1", "@SUM(A1)", "\tcmd", "\r=x", '=HYPERLINK("https://x.exemplo";"clique")', "=cmd|'/C calc'!A0"])(
+    "neutraliza celula que comeca como formula: %j",
+    (entrada) => {
+      const saida = campoCsv(entrada);
+      // Com ou sem aspas em volta, o primeiro caractere do CONTEUDO e o apostrofo.
+      expect(saida.replace(/^"/, "")).toMatch(/^'/);
+      expect(saida.replace(/^"/, "").slice(1)).toContain(entrada[0]!);
+    },
+  );
+
+  it("texto comum, inclusive com sinal no MEIO, nao muda", () => {
+    expect(campoCsv("Aluguel de dezembro")).toBe("Aluguel de dezembro");
+    expect(campoCsv("Parcela 3/10 - juros")).toBe("Parcela 3/10 - juros");
+    expect(campoCsv("Compra 100% a vista")).toBe("Compra 100% a vista");
+  });
+
+  it("apostrofo que ja existia no texto continua protegido pelas aspas", () => {
+    expect(campoCsv("D'Avila")).toBe('"D\'Avila"');
+  });
 });
 
 describe("arquivo completo", () => {

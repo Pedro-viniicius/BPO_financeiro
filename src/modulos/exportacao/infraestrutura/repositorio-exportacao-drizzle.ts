@@ -27,8 +27,13 @@ function celula(valor: unknown): string {
   if (typeof valor === "object") return campoCsv(JSON.stringify(valor));
 
   const texto = String(valor);
-  // NUMERIC chega como texto ("1234.56"): vira formato brasileiro.
-  if (/^-?\d+\.\d+$/.test(texto)) return texto.replace(".", ",");
+  /*
+   * NUMERIC e BIGINT chegam como texto ("1234.56", "-12"): viram formato
+   * brasileiro e escapam de `campoCsv`. SO o que e numero de verdade passa
+   * por aqui — qualquer outro texto, inclusive um que comece com `-`, `+`,
+   * `=` ou `@`, vai para `campoCsv`, que neutraliza formula.
+   */
+  if (/^-?\d+(\.\d+)?$/.test(texto)) return texto.replace(".", ",");
   return campoCsv(texto);
 }
 

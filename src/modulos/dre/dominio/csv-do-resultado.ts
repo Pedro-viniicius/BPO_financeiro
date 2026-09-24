@@ -28,14 +28,33 @@ export function numeroParaPlanilha(valor: Dinheiro): string {
 }
 
 /**
- * Protege um campo de texto.
+ * O que uma planilha le como FORMULA quando esta no inicio da celula.
  *
- * Aspas quando ha separador, aspas ou quebra de linha. E uma aspa dentro do
- * texto vira duas, como manda o formato.
+ * `=` e o obvio; `+`, `-` e `@` tambem disparam o interpretador do Excel e do
+ * LibreOffice; tabulacao e retorno de carro no inicio sao truques conhecidos
+ * para esconder o `=` do olho de quem abre o arquivo num editor de texto.
+ */
+const INICIO_DE_FORMULA = /^[=+\-@\t\r]/;
+
+/**
+ * Protege um campo de TEXTO.
+ *
+ * Duas protecoes, nesta ordem:
+ *
+ * 1. Uma celula que comeca como formula ganha um apostrofo na frente. E o que
+ *    a planilha usa para dizer "isto e texto", e e a unica defesa que vale:
+ *    aspas em volta NAO impedem o Excel de executar `="..."`. Sem isto, uma
+ *    descricao de titulo digitada por qualquer usuario viraria codigo no
+ *    computador de quem exporta — `=HYPERLINK(...)` que leva dados embora, ou
+ *    pior. Numeros do demonstrativo nao passam por aqui (`numeroParaPlanilha`),
+ *    entao um valor negativo continua sendo numero.
+ * 2. Aspas quando ha separador, aspas, quebra de linha ou o apostrofo
+ *    recem-adicionado. Uma aspa dentro do texto vira duas, como manda o formato.
  */
 export function campoCsv(texto: string): string {
-  if (!/[;"\n\r]/.test(texto)) return texto;
-  return `"${texto.replace(/"/g, '""')}"`;
+  const neutralizado = INICIO_DE_FORMULA.test(texto) ? `'${texto}` : texto;
+  if (!/[;"\n\r']/.test(neutralizado)) return neutralizado;
+  return `"${neutralizado.replace(/"/g, '""')}"`;
 }
 
 export interface LinhaParaCsv {

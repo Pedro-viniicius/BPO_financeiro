@@ -162,9 +162,10 @@
 - Contrato `ArmazenamentoArquivos`: tipos permitidos (PDF, PNG, JPEG, CSV,
   TXT, OFX, XLSX), tamanho maximo 15 MB, chave opaca gerada pelo sistema
   (nome original nunca vira caminho), hash SHA-256.
-- **(Gate 5)** verificacao do tipo pelo conteudo (assinatura de bytes), nao
-  so pela extensao; XLSX lido sem macros/formulas; CSV sem execucao de formulas
-  ao exportar (prefixo `'` em celulas que comecam com `=`, `+`, `-`, `@`).
+- Verificacao do tipo pelo conteudo (assinatura de bytes), nao so pela
+  extensao (ADR-032). CSV exportado sem execucao de formulas: `campoCsv`
+  prefixa `'` em celulas que comecam com `=`, `+`, `-`, `@`, tabulacao ou
+  retorno de carro (demonstrativo e pacote completo).
 - Anexos servidos com `Content-Disposition: attachment` e sem execucao.
 
 ## 14. Integracoes externas
