@@ -171,3 +171,19 @@ Ver [`acessibilidade.md`](acessibilidade.md). Minimos obrigatorios:
 - erro associado ao campo por `aria-describedby`;
 - ordem de tabulacao igual a ordem visual;
 - nenhum campo depende de mouse (calendario e opcional, sempre digitavel).
+
+## Erro do servidor nao apaga o que foi digitado
+
+Com `<form action={acao}>`, o React 19 reinicia o formulario sempre que a acao
+termina. No sucesso isso e desejado (o cadastro esvazia para o proximo; um
+pagamento registrado nao deixa os mesmos valores prontos para um segundo
+envio). No erro, apagava tudo: a pessoa corrigia um campo e redigitava os
+outros.
+
+Todo formulario de acao usa `useGuardaDoFormulario(estado)`
+(`src/interface/formularios/guarda-do-formulario.ts`) e espalha o retorno no
+`<form>`. Ela guarda o que foi enviado e, so quando o estado devolvido e de
+erro (`mensagem`, `campos` ou `erros`), devolve cada valor ao seu campo.
+Senhas nao voltam. Formulario novo com `useActionState` usa a guarda desde o
+primeiro commit.
+

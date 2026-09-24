@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoCriarTransferencia, acaoEstornarTransferencia, type EstadoFormulario } from "./acoes";
 import estilos from "./transferencia.module.css";
@@ -44,6 +45,7 @@ export function FormularioTransferencia({
   readonly hoje: string;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoCriarTransferencia, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [confirmando, setConfirmando] = useState(false);
   const [origemId, setOrigemId] = useState(contas[0]?.id ?? "");
   const [destinoId, setDestinoId] = useState(contas[1]?.id ?? "");
@@ -63,8 +65,10 @@ export function FormularioTransferencia({
   return (
     <form
       action={enviar}
+      {...guardaEnviar}
       id="nova-transferencia"
       onSubmit={(evento) => {
+        guardaEnviar.onSubmit(evento);
         if (!confirmando) {
           evento.preventDefault();
           setConfirmando(true);
@@ -178,6 +182,7 @@ export interface TransferenciaParaEstorno {
 /** Estorno de transferencia: devolve o dinheiro nas DUAS contas. */
 export function BotaoEstornarTransferencia({ transferencia }: { readonly transferencia: TransferenciaParaEstorno }) {
   const [estado, enviar, pendente] = useActionState(acaoEstornarTransferencia, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [confirmando, setConfirmando] = useState(false);
   const identificador = `estornar-transferencia-${transferencia.id}`;
 
@@ -185,9 +190,11 @@ export function BotaoEstornarTransferencia({ transferencia }: { readonly transfe
     <Dobra rotulo="Estornar" comCaixa={false}>
       <form
         action={enviar}
+        {...guardaEnviar}
         id={identificador}
         className={estilos.corpoDobra}
         onSubmit={(evento) => {
+          guardaEnviar.onSubmit(evento);
           if (!confirmando) {
             evento.preventDefault();
             setConfirmando(true);

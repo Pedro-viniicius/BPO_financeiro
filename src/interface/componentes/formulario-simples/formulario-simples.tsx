@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from "react";
+import type { FormEventHandler, InputHTMLAttributes, ReactNode, Ref } from "react";
 
 import estilos from "./formulario-simples.module.css";
 
@@ -17,10 +17,25 @@ export function TituloFormularioSimples({ titulo, descricao }: { readonly titulo
   );
 }
 
-export function FormularioSimples(props: { readonly action: (formulario: FormData) => void; readonly children: ReactNode }) {
+/**
+ * `ref` e `onSubmit` sao opcionais e existem para a guarda do formulario
+ * (`useGuardaDoFormulario`): quem usa a guarda repassa o que ela devolve, e o
+ * que foi digitado volta aos campos quando o servidor recusa o envio.
+ */
+export function FormularioSimples({
+  action,
+  children,
+  ref,
+  onSubmit,
+}: {
+  readonly action: (formulario: FormData) => void;
+  readonly children: ReactNode;
+  readonly ref?: Ref<HTMLFormElement>;
+  readonly onSubmit?: FormEventHandler<HTMLFormElement>;
+}) {
   return (
-    <form action={props.action} className={estilos.formulario} noValidate>
-      {props.children}
+    <form action={action} ref={ref} onSubmit={onSubmit} className={estilos.formulario} noValidate>
+      {children}
     </form>
   );
 }

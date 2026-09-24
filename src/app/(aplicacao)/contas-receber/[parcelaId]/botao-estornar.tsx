@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao, Dobra } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoEstornarRecebimento, type EstadoFormulario } from "../acoes";
 
@@ -30,6 +31,7 @@ export interface RecebimentoParaEstorno {
  */
 export function BotaoEstornar({ recebimento }: { readonly recebimento: RecebimentoParaEstorno }) {
   const [estado, enviar, pendente] = useActionState(acaoEstornarRecebimento, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [aberto, setAberto] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -48,8 +50,10 @@ export function BotaoEstornar({ recebimento }: { readonly recebimento: Recebimen
     <Dobra rotulo="Estornar" aberta={aberto} aoAlternar={setAberto} comCaixa={false}>
       <form
       action={enviar}
+      {...guardaEnviar}
       id={identificador}
       onSubmit={(evento) => {
+        guardaEnviar.onSubmit(evento);
         if (!confirmando) {
           evento.preventDefault();
           setConfirmando(true);

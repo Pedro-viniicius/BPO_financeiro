@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { NOMES_FORMA_PAGAMENTO, FORMAS_DE_PAGAMENTO } from "../_apoio/formas-de-pagamento";
 import {
@@ -45,9 +46,10 @@ export interface ParcelaParaBaixar {
 
 export function FormularioImportacao({ contas, contaEscolhida }: { readonly contas: readonly Opcao[]; readonly contaEscolhida: string }) {
   const [estado, enviar, pendente] = useActionState(acaoImportarExtrato, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       {estado.mensagem ? (
         <Aviso tom={estado.pedeConfirmacaoDeConta ? "atencao" : "perigo"} titulo={estado.mensagem} urgente={!estado.pedeConfirmacaoDeConta}>
           {estado.pedeConfirmacaoDeConta
@@ -101,9 +103,10 @@ export function BotaoConciliar({
   readonly rotulo: string;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoConciliar, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
       <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
       <input type="hidden" name="movimentacaoId" value={movimentacaoId} />
@@ -123,9 +126,10 @@ export function BotaoAceitarExatas({
   readonly quantidade: number;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoAceitarSugestoesExatas, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
       {estado.mensagem ? <Aviso tom="perigo" titulo={estado.mensagem} urgente /> : null}
       <Botao type="submit" variante="secundario" ocupado={pendente} rotuloOcupado="Conciliando...">
@@ -148,10 +152,11 @@ export function FormularioVarios({
   readonly movimentacoes: readonly MovimentacaoParaEscolher[];
 }) {
   const [estado, enviar, pendente] = useActionState(acaoConciliarVarios, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
     <Dobra rotulo="Conciliar com vários" comCaixa={false}>
-      <form action={enviar} className={estilos.corpoDobra}>
+      <form action={enviar} {...guardaEnviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
 
@@ -191,10 +196,11 @@ export function FormularioLancamento({
   readonly categorias: readonly Opcao[];
 }) {
   const [estado, enviar, pendente] = useActionState(acaoCriarLancamento, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
     <Dobra rotulo="Criar lançamento" comCaixa={false}>
-      <form action={enviar} className={estilos.corpoDobra}>
+      <form action={enviar} {...guardaEnviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
 
@@ -238,11 +244,12 @@ export function FormularioBaixa({
   readonly parcelas: readonly ParcelaParaBaixar[];
 }) {
   const [estado, enviar, pendente] = useActionState(acaoCriarBaixa, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const rotulo = area === "pagar" ? "Dar baixa numa conta a pagar" : "Dar baixa numa conta a receber";
 
   return (
     <Dobra rotulo={rotulo} comCaixa={false}>
-      <form action={enviar} className={estilos.corpoDobra}>
+      <form action={enviar} {...guardaEnviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
         <input type="hidden" name="area" value={area} />
@@ -288,10 +295,11 @@ export function FormularioIgnorar({
   readonly itemExtratoId: string;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoIgnorarItem, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
     <Dobra rotulo="Ignorar" comCaixa={false}>
-      <form action={enviar} className={estilos.corpoDobra}>
+      <form action={enviar} {...guardaEnviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="itemExtratoId" value={itemExtratoId} />
 
@@ -325,10 +333,11 @@ export function FormularioDesconciliar({
   readonly conciliacaoId: string;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoDesconciliar, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
     <Dobra rotulo="Desconciliar" comCaixa={false}>
-      <form action={enviar} className={estilos.corpoDobra}>
+      <form action={enviar} {...guardaEnviar} className={estilos.corpoDobra}>
         <input type="hidden" name="contaBancariaId" value={contaBancariaId} />
         <input type="hidden" name="conciliacaoId" value={conciliacaoId} />
 

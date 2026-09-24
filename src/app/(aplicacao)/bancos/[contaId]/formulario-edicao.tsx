@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoEditarContaBancaria, type EstadoFormulario } from "../acoes";
 import { NOMES_TIPO_CONTA, TIPOS_DE_CONTA } from "../tipos-de-conta";
@@ -36,12 +37,13 @@ export interface ContaParaEdicao {
  */
 export function FormularioEdicaoConta({ conta }: { readonly conta: ContaParaEdicao }) {
   const [estado, enviar, pendente] = useActionState(acaoEditarContaBancaria, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [tipo, setTipo] = useState(conta.tipo);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
   const ehCaixa = tipo === "caixa";
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       <input type="hidden" name="contaId" value={conta.contaId} />
 
       {estado.mensagem ? <Aviso tom="perigo" titulo={estado.mensagem} urgente /> : null}

@@ -5,6 +5,7 @@ import { useActionState } from "react";
 
 import type { CamposEditaveis } from "@/compartilhado/financeiro/indice";
 import { Aviso, Botao, CampoFormulario, ControleTexto, SecaoFormulario } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoEditarContaPagar, type EstadoFormulario } from "../../acoes";
 import estilos from "./formulario.module.css";
@@ -80,10 +81,11 @@ export function FormularioEdicaoContaPagar({
   readonly categorias: readonly OpcaoSelecao[];
 }) {
   const [estado, enviar, pendente] = useActionState(acaoEditarContaPagar, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       <input type="hidden" name="parcelaId" value={conta.parcelaId} />
 
       {estado.mensagem ? (

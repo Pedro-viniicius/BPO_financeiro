@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoAjustarSaldo, type EstadoFormulario } from "../acoes";
 import estilos from "./formulario-ajuste.module.css";
@@ -37,6 +38,7 @@ function lerDinheiro(texto: string): Dinheiro {
  */
 export function FormularioAjusteDeSaldo({ conta }: { readonly conta: ContaParaAjuste }) {
   const [estado, enviar, pendente] = useActionState(acaoAjustarSaldo, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [confirmando, setConfirmando] = useState(false);
   const [tipo, setTipo] = useState<"entrada" | "saida">("entrada");
   const [valor, setValor] = useState("");
@@ -51,8 +53,10 @@ export function FormularioAjusteDeSaldo({ conta }: { readonly conta: ContaParaAj
   return (
     <form
       action={enviar}
+      {...guardaEnviar}
       id="ajustar-saldo"
       onSubmit={(evento) => {
+        guardaEnviar.onSubmit(evento);
         if (!confirmando) {
           evento.preventDefault();
           setConfirmando(true);

@@ -11,6 +11,7 @@ import {
   FormularioSimples,
   TituloFormularioSimples,
 } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 import { acaoAceitarConvite, type EstadoConvite } from "./acoes";
 
 const INICIAL: EstadoConvite = {};
@@ -42,10 +43,11 @@ export function FormularioConvite({
   readonly dicaSenha: string;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoAceitarConvite, INICIAL);
+  const guarda = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
 
   return (
-    <FormularioSimples action={enviar}>
+    <FormularioSimples action={enviar} {...guarda}>
       <TituloFormularioSimples
         titulo={jaTemConta ? "Definir uma nova senha" : "Criar seu acesso"}
         descricao={

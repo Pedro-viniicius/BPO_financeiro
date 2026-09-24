@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao, Dobra, SecaoFormulario } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoCancelarContaReceber, type EstadoFormulario } from "../acoes";
 
@@ -27,6 +28,7 @@ export interface ContaParaCancelamento {
  */
 export function FormularioCancelamento({ conta }: { readonly conta: ContaParaCancelamento }) {
   const [estado, enviar, pendente] = useActionState(acaoCancelarContaReceber, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [aberto, setAberto] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -50,8 +52,10 @@ export function FormularioCancelamento({ conta }: { readonly conta: ContaParaCan
       <Dobra rotulo={rotulo} aberta={aberto} aoAlternar={setAberto} comCaixa={false}>
         <form
           action={enviar}
+          {...guardaEnviar}
           id="cancelar-conta"
           onSubmit={(evento) => {
+            guardaEnviar.onSubmit(evento);
             if (!confirmando) {
               evento.preventDefault();
               setConfirmando(true);

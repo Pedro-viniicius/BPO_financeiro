@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import {
   acaoConferirContas,
@@ -69,7 +70,9 @@ export function ImportarPlanilha({ tipo }: { readonly tipo: "pessoas" | "contas"
   const importar = tipo === "pessoas" ? acaoImportarPessoas : acaoImportarContas;
 
   const [conferencia, enviarConferencia, conferindo] = useActionState(conferir, INICIAL);
+  const guardaEnviarConferencia = useGuardaDoFormulario(conferencia);
   const [importacao, enviarImportacao, importando] = useActionState(importar, INICIAL);
+  const guardaEnviarImportacao = useGuardaDoFormulario(importacao);
 
   // Depois de importar, a prévia não vale mais: o arquivo já entrou.
   const previa = importacao.sucesso ? undefined : conferencia.previa;
@@ -83,7 +86,7 @@ export function ImportarPlanilha({ tipo }: { readonly tipo: "pessoas" | "contas"
         <>
           <Resultado estado={conferencia} />
           <Erros estado={conferencia} />
-          <form action={enviarConferencia} className={estilos.formulario}>
+          <form action={enviarConferencia} {...guardaEnviarConferencia} className={estilos.formulario}>
             <CampoFormulario
               id="arquivo"
               rotulo="Planilha preenchida (CSV)"
@@ -112,7 +115,7 @@ export function ImportarPlanilha({ tipo }: { readonly tipo: "pessoas" | "contas"
             {previa.amostra.map((linha, indice) => <li key={indice}>{linha}</li>)}
             {previa.total > previa.amostra.length ? <li>…e mais {previa.total - previa.amostra.length}.</li> : null}
           </ul>
-          <form action={enviarImportacao}>
+          <form action={enviarImportacao} {...guardaEnviarImportacao}>
             {/*
               O conteúdo volta ao servidor para ser validado OUTRA VEZ. Nada
               do que o navegador devolve é aceito como já conferido.
@@ -139,6 +142,7 @@ export function DesfazerLote({
   readonly quantidade: number;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoDesfazerLote, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
     <Dobra rotulo="Desfazer" comCaixa={false}>
@@ -148,7 +152,7 @@ export function DesfazerLote({
           Remove os {quantidade} registro(s) que <strong>{arquivoNome}</strong> criou. Só é possível porque nada deles
           foi usado ainda.
         </p>
-        <form action={enviar} className={estilos.formulario}>
+        <form action={enviar} {...guardaEnviar} className={estilos.formulario}>
           <input type="hidden" name="loteId" value={loteId} />
           <CampoFormulario
             id={`motivo-${loteId}`}

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 import { NOMES_PAPEIS, PAPEIS, type Papel } from "@/nucleo/autorizacao/publico";
 
 import {
@@ -54,13 +55,14 @@ function Resposta({ estado }: { estado: EstadoUsuarios }) {
 
 export function ConviteNovo() {
   const [estado, enviar, pendente] = useActionState(acaoConvidar, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
 
   return (
     <Dobra rotulo="Convidar pessoa" destaque comCaixa={false}>
       <div className={estilos.corpoDaDobra}>
         <Resposta estado={estado} />
-        <form action={enviar} className={estilos.formulario}>
+        <form action={enviar} {...guardaEnviar} className={estilos.formulario}>
           <CampoFormulario
             id="email-convite"
             rotulo="E-mail"
@@ -92,11 +94,12 @@ export function ConviteNovo() {
 
 export function LinhaDeConvite({ conviteId }: { readonly conviteId: string }) {
   const [estado, enviar, pendente] = useActionState(acaoCancelarConvite, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
     <div>
       <Resposta estado={estado} />
-      <form action={enviar}>
+      <form action={enviar} {...guardaEnviar}>
         <input type="hidden" name="conviteId" value={conviteId} />
         <Botao type="submit" variante="secundario" ocupado={pendente} rotuloOcupado="Cancelando...">
           Cancelar convite
@@ -118,8 +121,11 @@ export function AcoesDoUsuario({
   };
 }) {
   const [estadoPapel, alterarPapel, alterandoPapel] = useActionState(acaoAlterarPapel, INICIAL);
+  const guardaAlterarPapel = useGuardaDoFormulario(estadoPapel);
   const [estadoSituacao, alterarSituacao, alterandoSituacao] = useActionState(acaoAlterarSituacao, INICIAL);
+  const guardaAlterarSituacao = useGuardaDoFormulario(estadoSituacao);
   const [estadoAcesso, redefinir, redefinindo] = useActionState(acaoRedefinirAcesso, INICIAL);
+  const guardaRedefinir = useGuardaDoFormulario(estadoAcesso);
 
   return (
     <Dobra rotulo="Gerenciar" comCaixa={false}>
@@ -128,7 +134,7 @@ export function AcoesDoUsuario({
         <Resposta estado={estadoSituacao} />
         <Resposta estado={estadoAcesso} />
 
-        <form action={alterarPapel} className={estilos.formulario}>
+        <form action={alterarPapel} {...guardaAlterarPapel} className={estilos.formulario}>
           <input type="hidden" name="usuarioId" value={usuario.usuarioId} />
           <CampoFormulario id={`papel-${usuario.usuarioId}`} rotulo="Papel">
             {(a) => (
@@ -144,7 +150,7 @@ export function AcoesDoUsuario({
           </p>
         </form>
 
-        <form action={redefinir} className={estilos.secundaria}>
+        <form action={redefinir} {...guardaRedefinir} className={estilos.secundaria}>
           <input type="hidden" name="usuarioId" value={usuario.usuarioId} />
           <Botao type="submit" variante="secundario" ocupado={redefinindo} rotuloOcupado="Gerando...">
             Redefinir acesso
@@ -160,7 +166,7 @@ export function AcoesDoUsuario({
             Você não pode desativar a si mesmo nem retirar a própria administração. Peça a outro administrador.
           </p>
         ) : (
-          <form action={alterarSituacao} className={estilos.secundaria}>
+          <form action={alterarSituacao} {...guardaAlterarSituacao} className={estilos.secundaria}>
             <input type="hidden" name="usuarioId" value={usuario.usuarioId} />
             <input type="hidden" name="ativo" value={usuario.ativo ? "nao" : "sim"} />
             <Botao

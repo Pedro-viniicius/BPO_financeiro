@@ -4,6 +4,7 @@ import { useActionState } from "react";
 
 import { svgDoQr } from "@/compartilhado/qr/indice";
 import { Aviso, Botao, CodigoQr, Dobra } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoDefinirLimite, acaoGerarQr, acaoRevogarQr, type EstadoQr } from "./acoes";
 import estilos from "./captura.module.css";
@@ -24,8 +25,11 @@ export interface SituacaoDoQrNaTela {
  */
 export function FormularioQr({ situacao }: { readonly situacao: SituacaoDoQrNaTela }) {
   const [gerado, gerar, gerando] = useActionState(acaoGerarQr, INICIAL);
+  const guardaGerar = useGuardaDoFormulario(gerado);
   const [revogado, revogar, revogando] = useActionState(acaoRevogarQr, INICIAL);
+  const guardaRevogar = useGuardaDoFormulario(revogado);
   const [limite, definirLimite, definindoLimite] = useActionState(acaoDefinirLimite, INICIAL);
+  const guardaDefinirLimite = useGuardaDoFormulario(limite);
   const rotulo = `QR code de envio de documentos da ${situacao.nomeEmpresa}`;
   const temAtivo = situacao.ativoDesde !== null;
 
@@ -62,7 +66,7 @@ export function FormularioQr({ situacao }: { readonly situacao: SituacaoDoQrNaTe
         </section>
       ) : null}
 
-      <form action={gerar} className={estilos.formulario}>
+      <form action={gerar} {...guardaGerar} className={estilos.formulario}>
         <p>
           {temAtivo
             ? `Há um QR code ativo desde ${situacao.ativoDesde}. Gerar outro revoga o atual na hora — o impresso deixa de valer.`
@@ -75,7 +79,7 @@ export function FormularioQr({ situacao }: { readonly situacao: SituacaoDoQrNaTe
 
       {temAtivo ? (
         <Dobra rotulo="Limite de envios por hora" comCaixa={false}>
-          <form action={definirLimite} className={estilos.formulario}>
+          <form action={definirLimite} {...guardaDefinirLimite} className={estilos.formulario}>
             <p>
               Quantos envios este QR aceita por hora. Hoje: <strong>{situacao.limiteEnviosHora}</strong>. Serve para
               conter um QR que vazou; um cliente normal manda poucos documentos por dia.
@@ -93,7 +97,7 @@ export function FormularioQr({ situacao }: { readonly situacao: SituacaoDoQrNaTe
 
       {temAtivo ? (
         <Dobra rotulo="Revogar o QR code atual" comCaixa={false}>
-          <form action={revogar} className={estilos.formulario}>
+          <form action={revogar} {...guardaRevogar} className={estilos.formulario}>
             <p>
               Quem escanear o QR impresso passará a ver que ele não vale mais. Nenhum documento já recebido é
               afetado.

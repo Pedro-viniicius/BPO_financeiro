@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoPreencherLinha, acaoSalvarPlanejamento, acaoUsarComoBase, type EstadoOrcamento } from "../acoes";
 import estilos from "../orcamento.module.css";
@@ -30,9 +31,10 @@ const MESES_CURTOS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "s
  */
 export function FormularioBase({ ano }: { readonly ano: number }) {
   const [estado, enviar, pendente] = useActionState(acaoUsarComoBase, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
-    <form action={enviar} className={estilos.atalhos}>
+    <form action={enviar} {...guardaEnviar} className={estilos.atalhos}>
       <input type="hidden" name="ano" value={ano} />
 
       {estado.mensagem ? <Aviso tom="atencao" titulo={estado.mensagem} /> : null}
@@ -76,9 +78,10 @@ export function FormularioBase({ ano }: { readonly ano: number }) {
  */
 export function GradeDoOrcamento({ ano, linhas }: { readonly ano: number; readonly linhas: readonly LinhaParaPlanejar[] }) {
   const [estado, enviar, pendente] = useActionState(acaoSalvarPlanejamento, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       <input type="hidden" name="ano" value={ano} />
 
       {estado.mensagem ? <Aviso tom="perigo" titulo={estado.mensagem} urgente /> : null}
@@ -140,9 +143,10 @@ export function AtalhoDaLinha({
   readonly categoriaNome: string;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoPreencherLinha, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
-    <form action={enviar} className={estilos.atalhos}>
+    <form action={enviar} {...guardaEnviar} className={estilos.atalhos}>
       <input type="hidden" name="ano" value={ano} />
       <input type="hidden" name="categoriaId" value={categoriaId} />
 

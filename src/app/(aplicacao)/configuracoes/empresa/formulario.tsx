@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Aviso, Botao, CampoFormulario, ControleTexto, SecaoFormulario } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 import type { DadosDaEmpresa } from "@/nucleo/empresas/publico";
 
 import { acaoSalvarEmpresa, type EstadoEmpresa } from "./acoes";
@@ -28,10 +29,11 @@ function formatarCep(digitos: string | null): string {
 
 export function FormularioEmpresa({ dados, hoje }: { readonly dados: DadosDaEmpresa; readonly hoje: string }) {
   const [estado, enviar, pendente] = useActionState(acaoSalvarEmpresa, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       {estado.mensagem ? (
         <Aviso tom="perigo" titulo={estado.mensagem} urgente>Corrija o que está indicado e envie de novo.</Aviso>
       ) : null}

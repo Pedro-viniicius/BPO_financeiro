@@ -17,6 +17,7 @@ import {
   type SistemaAmortizacao,
 } from "@/compartilhado/financeiro/indice";
 import { Aviso, Botao, CampoFormulario, ControleTexto, SecaoFormulario } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoCriarDivida, type EstadoDivida } from "../acoes";
 import estilos from "./formulario.module.css";
@@ -87,6 +88,7 @@ export function FormularioNovaDivida({
   readonly hoje: string;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoCriarDivida, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
 
   const [valorPrincipal, setValorPrincipal] = useState("");
@@ -145,7 +147,7 @@ export function FormularioNovaDivida({
   const refazer = () => setAjustes({});
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       {estado.mensagem ? (
         <Aviso tom="perigo" titulo={estado.mensagem} urgente>
           Corrija o que está indicado e envie de novo.

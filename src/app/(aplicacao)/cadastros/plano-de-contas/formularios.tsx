@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Dobra, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import {
   acaoAlterarSituacaoCategoria,
@@ -58,13 +59,14 @@ export function FormularioConta({
   };
 }) {
   const [estado, enviar, pendente] = useActionState(acaoSalvarConta, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
   const editando = Boolean(conta);
 
   return (
     <Dobra rotulo={editando ? "Editar conta" : "Nova conta"} destaque={!editando}>
       <Resposta estado={estado} />
-      <form action={enviar} className={estilos.formulario}>
+      <form action={enviar} {...guardaEnviar} className={estilos.formulario}>
         {conta ? <input type="hidden" name="contaId" value={conta.id} /> : null}
 
         <CampoFormulario
@@ -117,14 +119,16 @@ function AcoesDaConta({
   readonly conta: { readonly id: string; readonly nome: string; readonly ativa: boolean; readonly podeExcluir: boolean };
 }) {
   const [estadoSituacao, alterarSituacao, alterando] = useActionState(acaoAlterarSituacaoConta, INICIAL);
+  const guardaAlterarSituacao = useGuardaDoFormulario(estadoSituacao);
   const [estadoExclusao, excluir, excluindo] = useActionState(acaoExcluirConta, INICIAL);
+  const guardaExcluir = useGuardaDoFormulario(estadoExclusao);
 
   return (
     <div className={estilos.secundarias}>
       <Resposta estado={estadoSituacao} />
       <Resposta estado={estadoExclusao} />
 
-      <form action={alterarSituacao}>
+      <form action={alterarSituacao} {...guardaAlterarSituacao}>
         <input type="hidden" name="id" value={conta.id} />
         <input type="hidden" name="ativa" value={conta.ativa ? "nao" : "sim"} />
         <Botao type="submit" variante="secundario" ocupado={alterando} rotuloOcupado="Alterando...">
@@ -138,7 +142,7 @@ function AcoesDaConta({
       </form>
 
       {conta.podeExcluir ? (
-        <form action={excluir}>
+        <form action={excluir} {...guardaExcluir}>
           <input type="hidden" name="id" value={conta.id} />
           <Botao type="submit" variante="perigo" ocupado={excluindo} rotuloOcupado="Excluindo...">
             Excluir conta
@@ -169,13 +173,14 @@ export function FormularioCategoria({
   };
 }) {
   const [estado, enviar, pendente] = useActionState(acaoSalvarCategoria, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
   const editando = Boolean(categoria);
 
   return (
     <Dobra rotulo={editando ? "Editar" : "Nova categoria"} destaque={!editando}>
       <Resposta estado={estado} />
-      <form action={enviar} className={estilos.formulario}>
+      <form action={enviar} {...guardaEnviar} className={estilos.formulario}>
         {categoria ? <input type="hidden" name="categoriaId" value={categoria.id} /> : null}
 
         <CampoFormulario id={`nome-categoria-${categoria?.id ?? "nova"}`} rotulo="Nome" obrigatorio {...erro("nome")}>
@@ -221,14 +226,16 @@ function AcoesDaCategoria({
   readonly categoria: { readonly id: string; readonly ativa: boolean; readonly podeExcluir: boolean; readonly usos: number };
 }) {
   const [estadoSituacao, alterarSituacao, alterando] = useActionState(acaoAlterarSituacaoCategoria, INICIAL);
+  const guardaAlterarSituacao = useGuardaDoFormulario(estadoSituacao);
   const [estadoExclusao, excluir, excluindo] = useActionState(acaoExcluirCategoria, INICIAL);
+  const guardaExcluir = useGuardaDoFormulario(estadoExclusao);
 
   return (
     <div className={estilos.secundarias}>
       <Resposta estado={estadoSituacao} />
       <Resposta estado={estadoExclusao} />
 
-      <form action={alterarSituacao}>
+      <form action={alterarSituacao} {...guardaAlterarSituacao}>
         <input type="hidden" name="id" value={categoria.id} />
         <input type="hidden" name="ativa" value={categoria.ativa ? "nao" : "sim"} />
         <Botao type="submit" variante="secundario" ocupado={alterando} rotuloOcupado="Alterando...">
@@ -242,7 +249,7 @@ function AcoesDaCategoria({
       </form>
 
       {categoria.podeExcluir ? (
-        <form action={excluir}>
+        <form action={excluir} {...guardaExcluir}>
           <input type="hidden" name="id" value={categoria.id} />
           <Botao type="submit" variante="perigo" ocupado={excluindo} rotuloOcupado="Excluindo...">
             Excluir
@@ -262,6 +269,7 @@ function AcoesDaCategoria({
 /** Botao do plano padrao, com a previa do que sera criado. */
 export function PlanoPadrao() {
   const [estado, enviar, pendente] = useActionState(acaoUsarPlanoPadrao, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [confirmado, setConfirmado] = useState(false);
 
   return (
@@ -271,7 +279,14 @@ export function PlanoPadrao() {
         Acrescenta as contas e categorias que ainda não existem, cobrindo todas as linhas do demonstrativo. O que você
         já criou ou renomeou fica exatamente como está, e apertar duas vezes não duplica nada.
       </p>
-      <form action={enviar} onSubmit={() => setConfirmado(true)}>
+      <form
+        action={enviar}
+        {...guardaEnviar}
+        onSubmit={(evento) => {
+          guardaEnviar.onSubmit(evento);
+          setConfirmado(true);
+        }}
+      >
         <Botao type="submit" variante="primario" ocupado={pendente || confirmado} rotuloOcupado="Aplicando...">
           Aplicar o plano padrão
         </Botao>

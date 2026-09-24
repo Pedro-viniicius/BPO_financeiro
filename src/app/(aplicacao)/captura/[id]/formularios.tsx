@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Aviso, Botao, CampoDinheiro, CampoFormulario, ControleTexto, Dobra, SecaoFormulario } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoAprovar, acaoReabrir, acaoRejeitar, type EstadoConferencia } from "../acoes";
 import estilos from "../captura.module.css";
@@ -41,11 +42,12 @@ function Erro({ estado }: { estado: EstadoConferencia }) {
  */
 export function FormularioAprovacao({ dados }: { readonly dados: DadosParaAprovar }) {
   const [estado, enviar, pendente] = useActionState(acaoAprovar, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
 
   return (
     <SecaoFormulario titulo="Aprovar: classificar e criar a conta a pagar" explicacao="A conta nasce em aberto, como qualquer outra. Aprovar o título para pagamento continua sendo etapa do Contas a pagar.">
-      <form action={enviar} className={estilos.formulario}>
+      <form action={enviar} {...guardaEnviar} className={estilos.formulario}>
         <input type="hidden" name="documentoId" value={dados.documentoId} />
         <Erro estado={estado} />
 
@@ -110,9 +112,10 @@ export function FormularioAprovacao({ dados }: { readonly dados: DadosParaAprova
 
 export function FormularioRejeicao({ documentoId }: { readonly documentoId: string }) {
   const [estado, enviar, pendente] = useActionState(acaoRejeitar, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   return (
     <Dobra rotulo="Rejeitar este documento" comCaixa={false}>
-      <form action={enviar} className={estilos.formulario}>
+      <form action={enviar} {...guardaEnviar} className={estilos.formulario}>
         <input type="hidden" name="documentoId" value={documentoId} />
         <Erro estado={estado} />
         <CampoFormulario id="motivo" rotulo="Motivo" dica="Quem enviou vai precisar entender: ilegível, duplicado, não é desta empresa..." obrigatorio>
@@ -128,8 +131,9 @@ export function FormularioRejeicao({ documentoId }: { readonly documentoId: stri
 
 export function FormularioReabertura({ documentoId }: { readonly documentoId: string }) {
   const [estado, enviar, pendente] = useActionState(acaoReabrir, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   return (
-    <form action={enviar} className={estilos.formulario}>
+    <form action={enviar} {...guardaEnviar} className={estilos.formulario}>
       <input type="hidden" name="documentoId" value={documentoId} />
       <Erro estado={estado} />
       <div className={estilos.acoes}>

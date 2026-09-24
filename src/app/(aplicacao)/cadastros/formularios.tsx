@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoCriarCategoria, acaoCriarPessoa, acaoSemearPlanoPadrao, type EstadoFormulario } from "./acoes";
 
@@ -21,10 +22,11 @@ function usarErro(estado: EstadoFormulario) {
  */
 export function FormularioPessoa() {
   const [estado, enviar, pendente] = useActionState(acaoCriarPessoa, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = usarErro(estado);
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       {estado.sucesso ? <Aviso tom="sucesso" titulo={estado.sucesso} /> : null}
       {estado.mensagem ? <Aviso tom="perigo" titulo={estado.mensagem} urgente /> : null}
 
@@ -79,6 +81,7 @@ export function FormularioPessoa() {
 
 export function FormularioCategoria({ contasPlano }: { readonly contasPlano: readonly { id: string; nome: string }[] }) {
   const [estado, enviar, pendente] = useActionState(acaoCriarCategoria, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = usarErro(estado);
 
   if (contasPlano.length === 0) {
@@ -86,7 +89,7 @@ export function FormularioCategoria({ contasPlano }: { readonly contasPlano: rea
   }
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       {estado.sucesso ? <Aviso tom="sucesso" titulo={estado.sucesso} /> : null}
       {estado.mensagem ? <Aviso tom="perigo" titulo={estado.mensagem} urgente /> : null}
 
@@ -122,9 +125,10 @@ export function FormularioCategoria({ contasPlano }: { readonly contasPlano: rea
  */
 function SemearPlano() {
   const [estado, enviar, pendente] = useActionState(acaoSemearPlanoPadrao, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       {estado.sucesso ? <Aviso tom="sucesso" titulo={estado.sucesso} /> : null}
       {estado.mensagem ? <Aviso tom="perigo" titulo={estado.mensagem} urgente /> : null}
 

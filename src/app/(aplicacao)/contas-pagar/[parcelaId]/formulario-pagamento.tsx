@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { abatimentoDaBaixa, saldoRestante, valorQueMovimentaOBanco } from "@/compartilhado/financeiro/indice";
 import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { FORMAS_DE_PAGAMENTO, NOMES_FORMA_PAGAMENTO } from "../../_apoio/formas-de-pagamento";
 import { acaoRegistrarPagamento, type EstadoFormulario } from "../acoes";
@@ -46,6 +47,7 @@ function lerDinheiro(texto: string): Dinheiro {
  */
 export function FormularioPagamento({ conta }: { readonly conta: ContaParaPagamento }) {
   const [estado, enviar, pendente] = useActionState(acaoRegistrarPagamento, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [confirmando, setConfirmando] = useState(false);
   const [valor, setValor] = useState(conta.saldoCanonico.replace(".", ","));
   const [juros, setJuros] = useState("");
@@ -72,8 +74,10 @@ export function FormularioPagamento({ conta }: { readonly conta: ContaParaPagame
   return (
     <form
       action={enviar}
+      {...guardaEnviar}
       id="registrar-pagamento"
       onSubmit={(evento) => {
+        guardaEnviar.onSubmit(evento);
         // A confirmacao acontece antes do envio, nunca depois.
         if (!confirmando) {
           evento.preventDefault();

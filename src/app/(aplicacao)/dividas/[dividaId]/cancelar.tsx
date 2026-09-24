@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Aviso, Botao, CampoFormulario, ControleTexto, DialogoConfirmacao, Dobra, SecaoFormulario } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoCancelarDivida, type EstadoDivida } from "../acoes";
 
@@ -30,6 +31,7 @@ export function FormularioCancelarDivida({
   readonly parcelasPagas: number;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoCancelarDivida, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [aberto, setAberto] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
 
@@ -41,8 +43,10 @@ export function FormularioCancelarDivida({
       <Dobra rotulo="Cancelar esta dívida" aberta={aberto} aoAlternar={setAberto} comCaixa={false}>
         <form
           action={enviar}
+          {...guardaEnviar}
           id="cancelar-divida"
           onSubmit={(evento) => {
+            guardaEnviar.onSubmit(evento);
             if (!confirmando) {
               evento.preventDefault();
               setConfirmando(true);

@@ -15,6 +15,7 @@ import {
   type Periodicidade,
 } from "@/compartilhado/financeiro/indice";
 import { Aviso, Botao, CampoFormulario, ControleTexto, SecaoFormulario } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoCriarContaPagar, type EstadoFormulario } from "../acoes";
 import estilos from "./formulario.module.css";
@@ -70,6 +71,7 @@ export function FormularioNovaContaPagar({
   readonly hoje: string;
 }) {
   const [estado, enviar, pendente] = useActionState(acaoCriarContaPagar, INICIAL);
+  const guarda = useGuardaDoFormulario(estado);
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
 
   const [parcelado, setParcelado] = useState(false);
@@ -114,7 +116,7 @@ export function FormularioNovaContaPagar({
     setAjustes((atual) => ({ ...atual, [numero]: { ...atual[numero], [campo]: texto } }));
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guarda}>
       {estado.mensagem ? (
         <Aviso tom="perigo" titulo={estado.mensagem} urgente>
           Corrija o que está indicado e envie de novo.

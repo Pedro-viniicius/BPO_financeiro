@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { CampoDinheiro, Aviso, Botao, CampoFormulario, ControleTexto } from "@/interface/componentes/indice";
+import { useGuardaDoFormulario } from "@/interface/formularios/guarda-do-formulario";
 
 import { acaoCriarContaBancaria, type EstadoFormulario } from "./acoes";
 
@@ -25,12 +26,13 @@ const TIPOS = [
  */
 export function FormularioContaBancaria({ hoje }: { readonly hoje: string }) {
   const [estado, enviar, pendente] = useActionState(acaoCriarContaBancaria, INICIAL);
+  const guardaEnviar = useGuardaDoFormulario(estado);
   const [tipo, setTipo] = useState<string>("conta_corrente");
   const erro = (campo: string) => (estado.campos?.[campo]?.[0] ? { erro: estado.campos[campo]![0]! } : {});
   const ehCaixa = tipo === "caixa";
 
   return (
-    <form action={enviar}>
+    <form action={enviar} {...guardaEnviar}>
       {estado.sucesso ? <Aviso tom="sucesso" titulo={estado.sucesso} /> : null}
       {estado.mensagem ? <Aviso tom="perigo" titulo={estado.mensagem} urgente /> : null}
 
