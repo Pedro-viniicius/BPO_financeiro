@@ -7,7 +7,7 @@ import { filtroDaUrl } from "../_apoio/filtros-da-url";
 import { Paginador, paginaDaUrl, TAMANHO_DA_PAGINA } from "../_apoio/paginador";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { NOMES_SITUACAO_PAGAR, type SituacaoDerivada } from "@/compartilhado/financeiro/indice";
-import { Botao, CabecalhoPagina, CartaoRegistro, EstadoVazio, SeloSituacao } from "@/interface/componentes/indice";
+import { Botao, CabecalhoPagina, CartaoRegistro, EstadoVazio, MaisFiltros, SeloSituacao } from "@/interface/componentes/indice";
 
 import { TabelaSimples } from "../_apoio/tabela-simples";
 import estilos from "./lista.module.css";
@@ -96,32 +96,34 @@ export default async function PaginaContasPagar({
           Buscar
           <input type="search" name="busca" defaultValue={texto("busca") ?? ""} placeholder="Descrição, código ou fornecedor" />
         </label>
-        <label className={estilos.campo}>
-          Situação
-          <select name="situacao" defaultValue={situacao ?? ""}>
-            <option value="">Todas</option>
-            {SITUACOES.map((s) => (
-              <option key={s} value={s}>{NOMES_SITUACAO_PAGAR[s]}</option>
-            ))}
-          </select>
-        </label>
-        <label className={estilos.campo}>
-          Vence de
-          <input type="date" name="de" defaultValue={texto("de") ?? ""} />
-        </label>
-        <label className={estilos.campo}>
-          até
-          <input type="date" name="ate" defaultValue={texto("ate") ?? ""} />
-        </label>
-        <label className={estilos.campo}>
-          Fornecedor
-          <select name="fornecedor" defaultValue={texto("fornecedor") ?? ""}>
-            <option value="">Todos</option>
-            {fornecedores.map((f) => (
-              <option key={f.id} value={f.id}>{f.nome}</option>
-            ))}
-          </select>
-        </label>
+        <MaisFiltros ativos={["situacao", "de", "ate", "fornecedor"].filter((chave) => texto(chave)).length}>
+          <label className={estilos.campo}>
+            Situação
+            <select name="situacao" defaultValue={situacao ?? ""}>
+              <option value="">Todas</option>
+              {SITUACOES.map((s) => (
+                <option key={s} value={s}>{NOMES_SITUACAO_PAGAR[s]}</option>
+              ))}
+            </select>
+          </label>
+          <label className={estilos.campo}>
+            Vence de
+            <input type="date" name="de" defaultValue={texto("de") ?? ""} />
+          </label>
+          <label className={estilos.campo}>
+            Vence até
+            <input type="date" name="ate" defaultValue={texto("ate") ?? ""} />
+          </label>
+          <label className={estilos.campo}>
+            Fornecedor
+            <select name="fornecedor" defaultValue={texto("fornecedor") ?? ""}>
+              <option value="">Todos</option>
+              {fornecedores.map((f) => (
+                <option key={f.id} value={f.id}>{f.nome}</option>
+              ))}
+            </select>
+          </label>
+        </MaisFiltros>
         <Botao type="submit" variante="secundario">Filtrar</Botao>
         {temFiltro ? <Link className="acao-secundaria" href="/contas-pagar">Limpar</Link> : null}
       </form>

@@ -70,6 +70,7 @@ Regras:
 | `Limpar filtros` | Aparece so quando ha algo a limpar |
 | URL | Todo filtro esta na *query string*: recarregar, compartilhar e voltar funcionam |
 | Valor invalido na URL | Conta como filtro ausente (`_apoio/filtros-da-url.ts`); nunca derruba a lista nem a esvazia em silencio |
+| Celular (< 768px) | So a busca fica a vista. O resto vai para `Mais filtros` (componente `MaisFiltros`), que fica fechado mesmo com filtro aplicado e mostra quantos estao ativos, em destaque, ao lado de `Limpar`. Com todos os campos abertos, a lista de Contas a pagar comecava no rodape da tela |
 | Persistencia | O ultimo conjunto de filtros por tela e lembrado na sessao; `Limpar` volta ao padrao |
 | Padrao de periodo | Contas a pagar/receber: `Próximos 30 dias`. Movimentacoes: `Mês atual`. DRE: `Mês fechado anterior` |
 

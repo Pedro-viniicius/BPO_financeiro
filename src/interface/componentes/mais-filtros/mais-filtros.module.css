@@ -1,0 +1,92 @@
+/*
+ * Mais filtros: recolhe os filtros secundarios de uma lista no celular.
+ *
+ * O gatilho segue a aparencia da Dobra (botao secundario de 44px) para que
+ * "abrir algo" tenha uma cara so no produto.
+ */
+.grupo {
+  margin: 0;
+}
+
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-4);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  cursor: pointer;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  list-style: none;
+}
+
+.gatilho::-webkit-details-marker {
+  display: none;
+}
+
+.gatilho:hover {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.gatilho:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+.gatilhoAtivo {
+  border-color: var(--cor-marca-acao);
+  color: var(--cor-marca-texto);
+}
+
+.contagem {
+  padding: 0 var(--espaco-2);
+  border-radius: var(--raio-completo);
+  background: var(--cor-marca-suave);
+  border: var(--largura-borda) solid var(--cor-marca-borda);
+  color: var(--cor-marca-forte);
+  font-size: var(--texto-xs);
+}
+
+/* Aberto, o grupo ocupa a linha inteira e os campos vem em duas colunas. */
+.grupo[open] {
+  flex-basis: 100%;
+}
+
+.grupo[open] .gatilho {
+  margin-bottom: var(--espaco-3);
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  align-items: end;
+  gap: var(--espaco-3);
+}
+
+/*
+ * Computador: sem gatilho, campos sempre a vista e na mesma linha da busca.
+ * `display: contents` tira o grupo e a caixa dos campos do caminho, e cada
+ * campo volta a ser item da barra, como era antes deste componente.
+ */
+@media (min-width: 768px) {
+  @supports selector(::details-content) {
+    .grupo,
+    .grupo::details-content,
+    .campos {
+      display: contents;
+    }
+
+    .grupo::details-content {
+      content-visibility: visible;
+    }
+
+    .gatilho {
+      display: none;
+    }
+  }
+}

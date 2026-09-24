@@ -27,6 +27,7 @@ export {
 } from "./formulario-simples/formulario-simples";
 export { EstadoVazio, type EstadoVazioProps } from "./estado-vazio/estado-vazio";
 export { Gaveta, type GavetaProps } from "./gaveta/gaveta";
+export { MaisFiltros, type MaisFiltrosProps } from "./mais-filtros/mais-filtros";
 export { SecaoFormulario, type SecaoFormularioProps } from "./secao-formulario/secao-formulario";
 export { SeloSituacao, type SeloSituacaoProps, type TomSemantico } from "./selo-situacao/selo-situacao";
 export {

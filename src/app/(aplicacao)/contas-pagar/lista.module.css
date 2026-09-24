@@ -25,7 +25,12 @@
   font: inherit;
 }
 
-.crescer { flex: 1 1 14rem; }
+/*
+ * A busca pode encolher ate 10rem: sem `min-width: 0` o input nao desce da
+ * largura natural dele e empurra "Filtrar" para outra linha no computador de
+ * 1280px, onde a busca, os quatro filtros e o botao cabem numa linha so.
+ */
+.crescer { flex: 1 1 10rem; min-width: 0; }
 
 .resumo {
   display: flex;
@@ -48,6 +53,8 @@
 .cartoes { display: none; }
 
 @media (max-width: 767px) {
+  /* Busca na linha dela; "Mais filtros" e "Filtrar" lado a lado embaixo. */
+  .crescer { flex-basis: 100%; }
   .tabela { display: none; }
   .cartoes { display: grid; gap: var(--espaco-3); }
 }
