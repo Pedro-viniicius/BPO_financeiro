@@ -228,3 +228,20 @@
     text-align: right;
   }
 }
+
+/*
+ * Os atalhos do planejamento ("usar como base", "preencher linha") sao acoes,
+ * nao filtros GET, mas tem os mesmos controles compactos: mesma altura e
+ * aparencia dos filtros das demais telas.
+ */
+.atalhos select,
+.atalhos input:not([type="hidden"], [type="checkbox"], [type="radio"]) {
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-3);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  font: inherit;
+}
+

@@ -172,3 +172,25 @@ textarea {
   outline: none;
   box-shadow: var(--anel-foco);
 }
+
+/*
+ * Controles nativos dos FILTROS de lista (formularios GET).
+ *
+ * Cada tela desenhava a propria barra de filtros, e so as listas de contas
+ * estilizavam os campos: em Documentos recebidos, Conciliacao, Fluxo de
+ * caixa, Resultados e Orcamento, seletor e data ficavam com a aparencia crua
+ * do navegador, 22 px de altura — abaixo do alvo de toque de 44 px e
+ * visivelmente diferentes do botao "Aplicar" ao lado.
+ *
+ * `:where()` zera a especificidade: qualquer classe de modulo continua
+ * mandando. A regra so preenche o que a tela nao definiu.
+ */
+:where(form[method="get"]) :where(select, input:not([type="checkbox"], [type="radio"], [type="hidden"], [type="file"], [type="submit"])) {
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-3);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  color: var(--cor-texto-primario);
+  font: inherit;
+}
