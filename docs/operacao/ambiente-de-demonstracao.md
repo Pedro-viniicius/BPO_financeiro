@@ -45,17 +45,31 @@ IA_PROVEDOR=desligado
 
 `BANCO_URL_TESTE` **nao** deve existir aqui: os testes apagam dados.
 
-## Por que os deploys ficavam bloqueados
+## Por que os deploys ficavam bloqueados, e o que resolveu
 
 A Vercel recusa um deploy quando o autor do commit nao pertence ao time:
 
 > Git author projetoagropcp-afk must have access to the project on Vercel to
 > create deployments.
 
-Os commits deste repositorio sao assinados por `projetoagropcp-afk`, e o time e
-`Pedro Queiroz's projects`. Enquanto essa conta nao for membro do time
-(Vercel -> Settings -> Members), todo push continua bloqueado — foi a causa
-dos deploys falhados de 20/09 e dos checks eternamente "queued".
+Foi a causa dos deploys falhados de 20/09 e dos checks eternamente "queued":
+os commits vinham assinados por `projetoagropcp-afk`, e o time e
+`Pedro Queiroz's projects`.
+
+**Resolvido em 2026-09-23** trocando o autor dos commits DESTE repositorio:
+
+```sh
+git config user.name "Pedro-viniicius"
+git config user.email "pedro.navez.ns@gmail.com"
+```
+
+Configuracao LOCAL, de proposito: o `--global` continua apontando para a outra
+conta, e mexer nele mudaria a autoria de todos os outros projetos da maquina.
+Quem clonar este repositorio em outra maquina precisa repetir os dois comandos
+— senao os deploys voltam a ser bloqueados, com a mesma mensagem.
+
+Os commits ANTERIORES a essa troca continuam com o autor antigo; isso nao
+atrapalha, porque a Vercel olha o autor do commit que dispara o deploy.
 
 ## Migracoes
 
