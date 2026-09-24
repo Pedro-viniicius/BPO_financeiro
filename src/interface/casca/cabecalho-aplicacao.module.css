@@ -10,6 +10,7 @@
 }
 
 .marca {
+  flex: none;
   font-weight: var(--peso-forte);
   color: var(--cor-marca-forte);
 }
@@ -20,6 +21,8 @@
   align-items: flex-start;
   justify-content: center;
   gap: 0;
+  /* Pode encolher: nome de empresa longo vira reticencias, nunca rolagem lateral. */
+  min-width: 0;
   min-height: 40px;
   padding: 0 var(--espaco-3);
   background: var(--cor-marca-suave);
@@ -63,6 +66,10 @@
 }
 
 .nomeEmpresa {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--texto-sm);
   font-weight: var(--peso-forte);
   color: var(--cor-marca-forte);
@@ -88,7 +95,7 @@
   display: flex;
   align-items: center;
   gap: var(--espaco-2);
-  min-height: 36px;
+  min-height: var(--alvo-toque-minimo);
   padding: 0 var(--espaco-3);
   background: none;
   border: var(--largura-borda) solid transparent;
@@ -105,12 +112,18 @@
 .usuario {
   flex-direction: column;
   align-items: flex-end;
+  justify-content: center;
   gap: 0;
+  min-width: 0;
   margin-left: auto;
   cursor: default;
 }
 
 .nomeUsuario {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: var(--peso-medio);
 }
 
@@ -119,18 +132,20 @@
   color: var(--cor-texto-secundario);
 }
 
-.contador {
-  min-width: 18px;
-  padding: 0 4px;
-  border-radius: var(--raio-completo);
-  background: var(--cor-perigo-forte);
-  color: var(--cor-texto-invertido);
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-forte);
-  font-variant-numeric: tabular-nums;
-}
-
+/*
+ * Celular: tudo cabe em 320px. Sem busca (a barra inferior e o menu "Mais"
+ * cobrem a navegacao) e sem o bloco do usuario, com espacos menores. O espaco
+ * vai para a empresa ativa, que precisa ficar legivel — lancar na empresa
+ * errada e o erro mais caro do produto; quem esta usando sabe quem e.
+ */
 @media (max-width: 767px) {
+  .cabecalho {
+    gap: var(--espaco-2);
+    padding: 0 var(--espaco-3);
+  }
   .busca { display: none; }
-  .papel { display: none; }
+  .usuario { display: none; }
+  .empresa { margin-right: auto; }
+  .selectEmpresa { max-width: 100%; }
+  .acao { padding: 0 var(--espaco-2); }
 }

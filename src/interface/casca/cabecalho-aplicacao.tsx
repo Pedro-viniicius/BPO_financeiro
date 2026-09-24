@@ -13,7 +13,6 @@ export interface CabecalhoAplicacaoProps {
   readonly nomeDoUsuario: string;
   /** Papel na empresa ativa; mostrado para explicar acoes ausentes. */
   readonly papelDoUsuario: string;
-  readonly pontosDeAtencao?: number;
   /** Empresas que o usuario pode ativar. Com mais de uma, o seletor aparece. */
   readonly empresas?: readonly EmpresaDoCabecalho[];
   readonly empresaAtivaId?: string;
@@ -24,7 +23,12 @@ export interface CabecalhoAplicacaoProps {
 }
 
 /**
- * Cabecalho fixo: empresa ativa, busca, avisos e usuario.
+ * Cabecalho fixo: empresa ativa, busca e usuario.
+ *
+ * Nao ha botao de avisos: o sino da especificacao (docs/ux/navegacao.md) so
+ * entra quando existir o painel de pontos de atencao. Um botao que parece
+ * clicavel e nao faz nada ensina a pessoa a desconfiar da tela inteira — e
+ * ocupava, no celular, a largura que fazia a pagina rolar para o lado.
  *
  * O seletor de empresa fica no primeiro lugar do cabecalho porque lancar na
  * empresa errada e o erro mais caro do produto (Carlos, BPO). A troca e um
@@ -35,7 +39,6 @@ export function CabecalhoAplicacao({
   nomeDaEmpresa,
   nomeDoUsuario,
   papelDoUsuario,
-  pontosDeAtencao = 0,
   empresas = [],
   empresaAtivaId,
   aoTrocarEmpresa,
@@ -91,11 +94,6 @@ export function CabecalhoAplicacao({
           placeholder="Buscar (Ctrl+K)"
         />
       </div>
-
-      <button type="button" className={estilos.acao} aria-label={`Avisos: ${pontosDeAtencao} pontos de atenção`}>
-        <span aria-hidden="true">Avisos</span>
-        {pontosDeAtencao > 0 ? <span className={estilos.contador}>{pontosDeAtencao}</span> : null}
-      </button>
 
       <div className={estilos.usuario}>
         <span className={estilos.nomeUsuario}>{nomeDoUsuario}</span>
