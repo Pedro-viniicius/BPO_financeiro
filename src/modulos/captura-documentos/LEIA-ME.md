@@ -10,7 +10,7 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
 
 | Pasta | Conteudo |
 |---|---|
-| `dominio/` | `token-captura.ts` (token de 16 bytes, hash, formato, link) e `envio.ts` (limites do envio, tipos aceitos, mensagens de recusa, formato do protocolo) |
+| `dominio/` | `token-captura.ts` (token, hash, formato, link), `envio.ts` (limites do envio, tipos aceitos, mensagens de recusa, protocolo) e `limite-tentativas.ts` (janela de uma hora, dois limites, identificadores) |
 | `aplicacao/` | `repositorio-captura.ts` (contrato), `casos-de-uso-qr.ts` (gerar, revogar, situacao) e `receber-envio.ts` (resolver token, validar, guardar, criar o documento) |
 | `infraestrutura/` | `esquema.ts` (migracao 0010) e `repositorio-captura-drizzle.ts` |
 
@@ -41,6 +41,15 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
    foto de 12 MB. O tamanho e conferido pelo `Content-Length` antes de ler.
 8. A trilha do envio (`documento.recebido`) tem origem `captura_publica`, sem
    usuario, com o IP so como HMAC (`AUDITORIA_SAL_IP`).
+9. **O tipo do arquivo e decidido pelos primeiros bytes** (ADR-032), pelo
+   `detectarTipoPorConteudo` de `nucleo/arquivos`. O `Content-Type` declarado
+   pelo cliente nem entra no caso de uso. PDF nunca e interpretado no servidor.
+10. **Dois limites em Postgres** (ADR-031): por token, em envios validos,
+    configuravel por empresa (padrao 20/h); por IP, so em tentativas com token
+    invalido (10/h). Conferidos antes de ler o corpo. Sem
+    `AUDITORIA_SAL_IP` nao ha limite por IP, porque nao se conta pelo IP em
+    claro. O Caddy corta o corpo em 41 MB so na rota de recebimento e loga a
+    URL com o token apagado.
 
 ## Entregue ate agora
 
@@ -53,7 +62,12 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
   `/enviar/<token>/receber`, confirmacao com protocolo, 404 unico para token
   invalido ou revogado (ADR-033). Ensaiada de ponta a ponta sem JavaScript.
   Na Vercel (`AMBIENTE=demonstracao`) a captura fica desligada, com aviso.
+- Fatia 4: validacao por conteudo, limites por token e por IP, limite
+  configuravel na tela do QR, compressao das fotos no navegador (melhoria
+  progressiva, remove EXIF), `request_body` e filtro de log no Caddy.
+  Ensaiada por HTTP: `.exe` declarado como JPEG recusado, PDF com nome `.jpg`
+  gravado como PDF, 21o envio da hora barrado, 11o token invalido do mesmo IP
+  em 429.
 
-Proximas fatias: validacao por conteudo e limites,
-fila de conferencia, extracao da chave de acesso, backup e exportacao dos
+Proximas fatias: fila de conferencia, extracao da chave de acesso, backup e exportacao dos
 anexos.

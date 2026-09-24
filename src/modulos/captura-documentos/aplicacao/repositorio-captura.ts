@@ -56,6 +56,14 @@ export interface RepositorioCaptura {
   /** Cria o documento pendente, seus anexos e o evento `documento.recebido`, numa transacao. */
   receberDocumento(escopo: EscopoEmpresa, dados: DadosDoEnvio): Promise<{ readonly id: string; readonly codigo: string }>;
   contarPendentes(escopo: EscopoEmpresa): Promise<number>;
+  /** Limite de envios por hora do token ativo. Auditado como `configuracao.alterada`. */
+  definirLimiteDeEnvios(escopo: EscopoEmpresa, dados: { readonly limite: number; readonly autorUsuarioId: string }): Promise<boolean>;
+  /**
+   * Conta UMA tentativa para (identificador, janela) e devolve o total da
+   * janela, ja com esta. Uma ida ao banco, uma linha (ADR-031). Sem escopo:
+   * quem falhou na porta nao tem empresa — ver o cabecalho da migracao 0010.
+   */
+  registrarTentativa(identificador: string, janela: Date): Promise<number>;
   /** Revoga o token ativo (se houver) e cria o novo, na MESMA transacao: o QR antigo morre no instante em que o novo nasce. */
   gerarToken(
     escopo: EscopoEmpresa,

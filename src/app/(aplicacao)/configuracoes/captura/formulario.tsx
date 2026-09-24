@@ -5,13 +5,14 @@ import { useActionState } from "react";
 import { svgDoQr } from "@/compartilhado/qr/indice";
 import { Aviso, Botao, CodigoQr, Dobra } from "@/interface/componentes/indice";
 
-import { acaoGerarQr, acaoRevogarQr, type EstadoQr } from "./acoes";
+import { acaoDefinirLimite, acaoGerarQr, acaoRevogarQr, type EstadoQr } from "./acoes";
 import estilos from "./captura.module.css";
 
 const INICIAL: EstadoQr = {};
 
 export interface SituacaoDoQrNaTela {
   readonly ativoDesde: string | null;
+  readonly limiteEnviosHora: number | null;
   readonly nomeEmpresa: string;
 }
 
@@ -24,6 +25,7 @@ export interface SituacaoDoQrNaTela {
 export function FormularioQr({ situacao }: { readonly situacao: SituacaoDoQrNaTela }) {
   const [gerado, gerar, gerando] = useActionState(acaoGerarQr, INICIAL);
   const [revogado, revogar, revogando] = useActionState(acaoRevogarQr, INICIAL);
+  const [limite, definirLimite, definindoLimite] = useActionState(acaoDefinirLimite, INICIAL);
   const rotulo = `QR code de envio de documentos da ${situacao.nomeEmpresa}`;
   const temAtivo = situacao.ativoDesde !== null;
 
@@ -32,6 +34,8 @@ export function FormularioQr({ situacao }: { readonly situacao: SituacaoDoQrNaTe
       {gerado.mensagem ? <Aviso tom="perigo" titulo={gerado.mensagem} urgente>Tente de novo.</Aviso> : null}
       {revogado.mensagem ? <Aviso tom="perigo" titulo={revogado.mensagem} urgente>Tente de novo.</Aviso> : null}
       {revogado.sucesso && !gerado.link ? <Aviso tom="sucesso" titulo={revogado.sucesso} /> : null}
+      {limite.mensagem ? <Aviso tom="perigo" titulo={limite.mensagem} urgente>Corrija e tente de novo.</Aviso> : null}
+      {limite.sucesso ? <Aviso tom="sucesso" titulo={limite.sucesso} /> : null}
 
       {gerado.link && gerado.matriz ? (
         <section className={estilos.resposta} aria-live="polite">
@@ -68,6 +72,24 @@ export function FormularioQr({ situacao }: { readonly situacao: SituacaoDoQrNaTe
           {temAtivo ? "Gerar novo QR code (revoga o atual)" : "Gerar QR code"}
         </Botao>
       </form>
+
+      {temAtivo ? (
+        <Dobra rotulo="Limite de envios por hora" comCaixa={false}>
+          <form action={definirLimite} className={estilos.formulario}>
+            <p>
+              Quantos envios este QR aceita por hora. Hoje: <strong>{situacao.limiteEnviosHora}</strong>. Serve para
+              conter um QR que vazou; um cliente normal manda poucos documentos por dia.
+            </p>
+            <label className={estilos.confirmacao}>
+              <span>Envios por hora (1 a 500)</span>
+              <input type="number" name="limite" min={1} max={500} step={1} defaultValue={situacao.limiteEnviosHora ?? 20} required className={estilos.numero} />
+            </label>
+            <Botao type="submit" variante="secundario" ocupado={definindoLimite} rotuloOcupado="Salvando...">
+              Salvar limite
+            </Botao>
+          </form>
+        </Dobra>
+      ) : null}
 
       {temAtivo ? (
         <Dobra rotulo="Revogar o QR code atual" comCaixa={false}>

@@ -4,7 +4,7 @@ import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
 
 import { FORMATO_TOKEN_CAPTURA, hashDoTokenDeCaptura } from "../dominio/token-captura";
-import { gerarQrDeCaptura, revogarQrDeCaptura, situacaoDoQr } from "./casos-de-uso-qr";
+import { definirLimiteDeEnvios, gerarQrDeCaptura, revogarQrDeCaptura, situacaoDoQr } from "./casos-de-uso-qr";
 import type { EscopoResolvidoPorToken, RepositorioCaptura, TokenDeCapturaAtivo } from "./repositorio-captura";
 
 const escopo: EscopoEmpresa = {
@@ -39,6 +39,12 @@ class RepositorioEmMemoria implements RepositorioCaptura {
   async procurarArquivoPorImpressao() { return null; }
   async receberDocumento(): Promise<{ id: string; codigo: string }> { throw new Error("nao usado aqui"); }
   async contarPendentes() { return 0; }
+  async definirLimiteDeEnvios(_e: EscopoEmpresa, dados: { limite: number }) {
+    if (!this.ativo) return false;
+    this.ativo = { ...this.ativo, limiteEnviosHora: dados.limite };
+    return true;
+  }
+  async registrarTentativa() { return 1; }
 }
 
 describe("casos de uso do QR de captura", () => {
@@ -72,5 +78,16 @@ describe("casos de uso do QR de captura", () => {
     expect(await situacaoDoQr(dependencias, escopo)).not.toBeNull();
     expect(await revogarQrDeCaptura(dependencias, escopo, "u1")).toBe(true);
     expect(await situacaoDoQr(dependencias, escopo)).toBeNull();
+  });
+
+  it("o limite por hora e configuravel por empresa, dentro de 1..500, e so com token ativo", async () => {
+    const repositorio = new RepositorioEmMemoria();
+    const dependencias = { repositorio, aplicacaoUrl: "https://exemplo.com.br" };
+    expect(await definirLimiteDeEnvios(dependencias, escopo, 50, "u1")).toBe(false); // sem token ativo
+    await gerarQrDeCaptura(dependencias, escopo, "u1");
+    expect(await definirLimiteDeEnvios(dependencias, escopo, 0, "u1")).toBe(false);
+    expect(await definirLimiteDeEnvios(dependencias, escopo, 501, "u1")).toBe(false);
+    expect(await definirLimiteDeEnvios(dependencias, escopo, 50, "u1")).toBe(true);
+    expect((await situacaoDoQr(dependencias, escopo))?.limiteEnviosHora).toBe(50);
   });
 });

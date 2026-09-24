@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { Aviso, TituloFormularioSimples } from "@/interface/componentes/indice";
-import { MENSAGENS_DE_RECUSA, resolverEnvio, type MotivoRecusa } from "@/modulos/captura-documentos/publico";
+import { LimiteDeTentativasExcedido, MENSAGENS_DE_RECUSA, resolverEnvio, type MotivoRecusa } from "@/modulos/captura-documentos/publico";
 import { capturaDisponivelNesteAmbiente } from "@/composicao/arquivos";
 import { montarDependenciasEnvio } from "@/composicao/captura";
 
@@ -43,10 +44,19 @@ export default async function PaginaEnvio({
     );
   }
 
+  // O IP so do cabecalho do proxy confiavel (ver receber/route.ts); vira HMAC antes de qualquer uso.
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || null;
   let nomeEmpresa: string;
   try {
-    ({ nomeEmpresa } = await resolverEnvio(montarDependenciasEnvio(), token));
-  } catch {
+    ({ nomeEmpresa } = await resolverEnvio(montarDependenciasEnvio(), token, ip));
+  } catch (erro) {
+    if (erro instanceof LimiteDeTentativasExcedido) {
+      return (
+        <Aviso tom="atencao" titulo="Muitas tentativas" urgente>
+          {erro.message}
+        </Aviso>
+      );
+    }
     notFound();
   }
 

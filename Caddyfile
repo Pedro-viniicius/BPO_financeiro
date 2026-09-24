@@ -15,6 +15,15 @@
 {$DOMINIO} {
 	encode zstd gzip
 
+	# Envio de documentos pela pagina publica (Gate 10): o corpo e cortado AQUI,
+	# antes de chegar a aplicacao, com 413. So nesta rota — o resto do site nao
+	# recebe arquivo por formulario nativo. 41 MB = 40 MB de envio + folga do
+	# multipart; a aplicacao confere de novo pelo Content-Length.
+	@recebimento path_regexp ^/enviar/[A-Za-z0-9_-]{22}/receber$
+	request_body @recebimento {
+		max_size 41MB
+	}
+
 	# A aplicacao so e alcancavel por aqui — ela nao publica porta no host.
 	reverse_proxy aplicacao:3000
 
@@ -31,6 +40,18 @@
 		output file /data/acesso.log {
 			roll_size 10MiB
 			roll_keep 5
+			# Marco Civil, art. 15: registros de acesso guardados por 6 meses.
+			# Passado isso, sao descartados — nao rotacionados para sempre.
+			roll_keep_for 4380h
+		}
+		# A URL de /enviar carrega o token da empresa: fica no log com o token
+		# apagado, mantendo IP, porta de origem e horario. Nao se pula a rota:
+		# o acesso a ela e justamente o que se quer poder auditar.
+		format filter {
+			fields {
+				request>uri regexp "/enviar/[A-Za-z0-9_-]{22}" "/enviar/<token>"
+			}
+			wrap json
 		}
 	}
 }

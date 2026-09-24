@@ -56,6 +56,15 @@
   align-items: flex-start;
 }
 
+.numero {
+  width: 7rem;
+  padding: var(--espaco-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  font: inherit;
+  text-align: right;
+}
+
 @media print {
   .formulario,
   .acoes,

@@ -1,4 +1,4 @@
-import { and, count, eq, isNull } from "drizzle-orm";
+import { and, count, eq, isNull, sql } from "drizzle-orm";
 
 import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
@@ -8,7 +8,7 @@ import { executarEmTransacao, type ExecutorBancoDados } from "@/nucleo/banco-dad
 import { GeradorCodigoPostgres, PREFIXOS_CODIGO } from "@/nucleo/codigos/publico";
 
 import type { DadosDoEnvio, EscopoResolvidoPorToken, RepositorioCaptura, TokenDeCapturaAtivo } from "../aplicacao/repositorio-captura";
-import { anexosDocumentosCapturados, documentosCapturados, tokensCaptura } from "./esquema";
+import { anexosDocumentosCapturados, documentosCapturados, tentativasCaptura, tokensCaptura } from "./esquema";
 
 /**
  * Tokens de captura contra PostgreSQL.
@@ -168,6 +168,41 @@ export class RepositorioCapturaDrizzle implements RepositorioCaptura {
       .from(documentosCapturados)
       .where(and(eq(documentosCapturados.empresaId, escopo.empresaId), eq(documentosCapturados.situacao, "pendente_conferencia")));
     return linha?.total ?? 0;
+  }
+
+  async definirLimiteDeEnvios(escopo: EscopoEmpresa, dados: { readonly limite: number; readonly autorUsuarioId: string }): Promise<boolean> {
+    return executarEmTransacao(async (transacao) => {
+      const alterados = await transacao
+        .update(tokensCaptura)
+        .set({ limiteEnviosHora: dados.limite })
+        .where(and(eq(tokensCaptura.empresaId, escopo.empresaId), isNull(tokensCaptura.revogadoEm)))
+        .returning({ id: tokensCaptura.id });
+      const [token] = alterados;
+      if (!token) return false;
+      await new RegistradorAuditoriaDrizzle(transacao).registrar({
+        acao: ACOES_AUDITORIA.configuracaoAlterada,
+        entidade: "token_captura",
+        entidadeId: token.id,
+        organizacaoId: escopo.organizacaoId,
+        empresaId: escopo.empresaId,
+        usuarioId: comoIdentificador<"Usuario">(dados.autorUsuarioId),
+        origem: "interface",
+        dadosDepois: { limiteEnviosHora: dados.limite },
+      });
+      return true;
+    }, this.banco);
+  }
+
+  async registrarTentativa(identificador: string, janela: Date): Promise<number> {
+    const [linha] = await this.banco
+      .insert(tentativasCaptura)
+      .values({ identificador, janelaIniciadaEm: janela, contador: 1 })
+      .onConflictDoUpdate({
+        target: [tentativasCaptura.identificador, tentativasCaptura.janelaIniciadaEm],
+        set: { contador: sql`${tentativasCaptura.contador} + 1` },
+      })
+      .returning({ contador: tentativasCaptura.contador });
+    return linha?.contador ?? 1;
   }
 
   /** O hash nunca vai para a trilha: so o id do token. */

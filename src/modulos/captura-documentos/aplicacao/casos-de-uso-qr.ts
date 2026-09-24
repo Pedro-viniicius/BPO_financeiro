@@ -1,5 +1,6 @@
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
 
+import { limiteDeEnviosValido } from "../dominio/limite-tentativas";
 import { gerarTokenDeCaptura, hashDoTokenDeCaptura, linkDeEnvio } from "../dominio/token-captura";
 import type { RepositorioCaptura, TokenDeCapturaAtivo } from "./repositorio-captura";
 
@@ -48,4 +49,15 @@ export async function revogarQrDeCaptura(
 
 export async function situacaoDoQr(dependencias: DependenciasQr, escopo: EscopoEmpresa): Promise<TokenDeCapturaAtivo | null> {
   return dependencias.repositorio.obterTokenAtivo(escopo);
+}
+
+/** Falso se o limite e invalido ou se nao ha token ativo para receber a configuracao. */
+export async function definirLimiteDeEnvios(
+  dependencias: DependenciasQr,
+  escopo: EscopoEmpresa,
+  limite: number,
+  autorUsuarioId: string,
+): Promise<boolean> {
+  if (!limiteDeEnviosValido(limite)) return false;
+  return dependencias.repositorio.definirLimiteDeEnvios(escopo, { limite, autorUsuarioId });
 }

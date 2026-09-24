@@ -1,5 +1,6 @@
 import { MAXIMO_ARQUIVOS_POR_ENVIO, TAMANHO_MAXIMO_OBSERVACAO, TIPOS_ACEITOS_NA_CAPTURA } from "@/modulos/captura-documentos/publico";
 
+import { CompressaoDeFotos } from "./compressao-de-fotos";
 import estilos from "./envio.module.css";
 
 const ACEITA = TIPOS_ACEITOS_NA_CAPTURA.join(",");
@@ -22,11 +23,13 @@ const ACEITA = TIPOS_ACEITOS_NA_CAPTURA.join(",");
 export function FormularioEnvio({ token }: { readonly token: string }) {
   return (
     <form
+      id="formulario-envio"
       method="post"
       action={`/enviar/${token}/receber`}
       encType="multipart/form-data"
       className={estilos.formulario}
     >
+      <CompressaoDeFotos formularioId="formulario-envio" />
       <div className={estilos.campo}>
         <label htmlFor="fotos" className={estilos.rotulo}>
           Fotografar

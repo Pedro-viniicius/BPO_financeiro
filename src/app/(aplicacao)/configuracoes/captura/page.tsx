@@ -47,6 +47,7 @@ export default async function PaginaCaptura() {
       <FormularioQr
         situacao={{
           ativoDesde: ativo ? FORMATO_DATA.format(ativo.criadoEm) : null,
+          limiteEnviosHora: ativo?.limiteEnviosHora ?? null,
           nomeEmpresa,
         }}
       />

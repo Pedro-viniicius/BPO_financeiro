@@ -34,6 +34,8 @@ escolha meses depois.
 | [025](ADR-025-contexto-organizacional.md) | Contexto organizacional autenticado e empresa ativa | Aceita |
 | [026](ADR-026-guarda-de-autorizacao.md) | Guarda unica de autorizacao no servidor | Aceita |
 | [028](ADR-028-qr-code-incorporado.md) | Geracao de QR code por codigo incorporado (qrcodegen, MIT) | Aceita |
+| [031](ADR-031-limite-de-tentativas-em-postgres.md) | Limite de tentativas da pagina publica em Postgres | Aceita |
+| [032](ADR-032-validacao-por-conteudo.md) | Arquivo recebido de fora: validacao pelo conteudo, nunca interpretado | Aceita |
 | [033](ADR-033-escopo-por-token.md) | Escopo de empresa fabricado a partir de token, sem sessao | Aceita |
 
 Status possiveis: Proposta, Aceita, Substituida (por outra ADR), Rejeitada.

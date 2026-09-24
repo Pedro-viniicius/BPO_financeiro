@@ -141,6 +141,28 @@ describe.skipIf(!urlBancoTeste)("tokens de captura: isolamento entre empresas (P
     expect(evento).toEqual({ origem: "captura_publica", ip: "v1:" + "b".repeat(64), usuario_id: null });
   });
 
+  it("o limite por hora e alterado so no token ativo de A, e a trilha registra configuracao.alterada", async () => {
+    expect(await repositorio.definirLimiteDeEnvios(escopoB, { limite: 5, autorUsuarioId: usuarioId })).toBe(false);
+    expect(await repositorio.definirLimiteDeEnvios(escopoA, { limite: 5, autorUsuarioId: usuarioId })).toBe(true);
+    expect((await repositorio.obterTokenAtivo(escopoA))?.limiteEnviosHora).toBe(5);
+    const [evento] = await banco.execute<{ dados_depois: { limiteEnviosHora: number } }>(sql`
+      SELECT dados_depois FROM eventos_auditoria WHERE acao = 'configuracao.alterada' AND empresa_id = ${escopoA.empresaId} ORDER BY ocorrido_em DESC LIMIT 1
+    `);
+    expect(evento?.dados_depois).toEqual({ limiteEnviosHora: 5 });
+  });
+
+  it("registrar tentativa e um UPSERT que devolve o total da janela — uma linha por (identificador, janela)", async () => {
+    const janela = new Date("2026-09-24T13:00:00Z");
+    const id = `teste:${usuarioId}`;
+    expect(await repositorio.registrarTentativa(id, janela)).toBe(1);
+    expect(await repositorio.registrarTentativa(id, janela)).toBe(2);
+    expect(await repositorio.registrarTentativa(id, janela)).toBe(3);
+    expect(await repositorio.registrarTentativa(id, new Date("2026-09-24T14:00:00Z"))).toBe(1);
+    const [linhas] = await banco.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM tentativas_captura WHERE identificador = ${id}`);
+    expect(linhas?.n).toBe(2);
+    await banco.execute(sql`DELETE FROM tentativas_captura WHERE identificador = ${id}`);
+  });
+
   it("revogar em A mata o token: nada resolve, nada ativo", async () => {
     expect(await repositorio.revogarToken(escopoA, { autorUsuarioId: usuarioId })).toBe(true);
     expect(await repositorio.obterTokenAtivo(escopoA)).toBeNull();

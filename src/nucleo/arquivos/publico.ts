@@ -7,3 +7,4 @@ export {
   type ArquivoParaGuardar,
 } from "./armazenamento-arquivos";
 export { ArmazenamentoArquivosLocal } from "./infraestrutura/armazenamento-arquivos-local";
+export { detectarTipoPorConteudo, type TipoDetectavel } from "./assinatura-conteudo";

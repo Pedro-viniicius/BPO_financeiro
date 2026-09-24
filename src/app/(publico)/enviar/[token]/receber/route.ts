@@ -1,6 +1,6 @@
 import {
-  EnvioRecusado, receberEnvio, resolverEnvio, TAMANHO_MAXIMO_ENVIO_BYTES, temFormatoDeToken, TokenDeCapturaInvalido,
-  type ArquivoEnviado,
+  autorizarEnvio, EnvioRecusado, LimiteDeTentativasExcedido, receberEnvio, TAMANHO_MAXIMO_ENVIO_BYTES,
+  TokenDeCapturaInvalido, type ArquivoEnviado, type EscopoResolvidoPorToken,
 } from "@/modulos/captura-documentos/publico";
 import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
 import { capturaDisponivelNesteAmbiente } from "@/composicao/arquivos";
@@ -11,6 +11,11 @@ const logs = criarRegistradorLogs("captura-publica");
 /** `303 See Other` com Location relativo: funciona atras de qualquer proxy e sem JavaScript. */
 function irPara(caminho: string): Response {
   return new Response(null, { status: 303, headers: { Location: caminho } });
+}
+
+/** 429 seco, sem numeros: o limite por IP so vale para quem insiste com token invalido (ADR-031). */
+function muitasTentativas(mensagem: string): Response {
+  return new Response(mensagem, { status: 429, headers: { "Content-Type": "text/plain; charset=utf-8", "Retry-After": "3600" } });
 }
 
 function naoVale(): Response {
@@ -39,14 +44,18 @@ function ipDoRemetente(cabecalhos: Headers): string | null {
  */
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  if (!temFormatoDeToken(token)) return naoVale();
   if (!capturaDisponivelNesteAmbiente()) return irPara(`/enviar/${token}`);
 
   const dependencias = montarDependenciasEnvio();
+  const ip = ipDoRemetente(request.headers);
+  let autorizado: EscopoResolvidoPorToken;
   try {
-    await resolverEnvio(dependencias, token);
+    autorizado = await autorizarEnvio(dependencias, token, ip);
   } catch (erro) {
     if (erro instanceof TokenDeCapturaInvalido) return naoVale();
+    if (erro instanceof LimiteDeTentativasExcedido) {
+      return erro.alvo === "token" ? irPara(`/enviar/${token}?erro=limite_excedido`) : muitasTentativas(erro.message);
+    }
     throw erro;
   }
 
@@ -73,16 +82,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   for (const campo of ["fotos", "arquivos"]) {
     for (const valor of formulario.getAll(campo)) {
       if (!(valor instanceof File) || valor.size === 0) continue;
-      arquivos.push({ nomeOriginal: valor.name, tipoConteudo: valor.type, conteudo: new Uint8Array(await valor.arrayBuffer()) });
+      // `valor.type` e o que o cliente DECLAROU; nao entra: o tipo vem do conteudo (ADR-032).
+      arquivos.push({ nomeOriginal: valor.name, conteudo: new Uint8Array(await valor.arrayBuffer()) });
     }
   }
   const observacao = formulario.get("observacao");
 
   try {
-    const { codigo } = await receberEnvio(dependencias, token, {
+    const { codigo } = await receberEnvio(dependencias, autorizado, {
       arquivos,
       observacao: typeof observacao === "string" ? observacao : null,
-      remetente: { ip: ipDoRemetente(request.headers), agenteUsuario: request.headers.get("user-agent") },
+      remetente: { ip, agenteUsuario: request.headers.get("user-agent") },
     });
     return irPara(`/enviar/${token}/recebido?protocolo=${codigo}`);
   } catch (erro) {
