@@ -44,7 +44,13 @@ export interface ParcelaParaBaixar {
  * que ser elegante.
  */
 
-export function FormularioImportacao({ contas, contaEscolhida }: { readonly contas: readonly Opcao[]; readonly contaEscolhida: string }) {
+/**
+ * O extrato vai SEMPRE para a conta que a tela esta mostrando. Antes havia
+ * aqui um segundo seletor de conta, repetindo o do topo: dava para importar
+ * na conta B olhando a conciliacao da conta A, e o extrato "sumia" da tela.
+ * Uma escolha so, no topo; aqui, a conta aparece por escrito.
+ */
+export function FormularioImportacao({ conta }: { readonly conta: Opcao }) {
   const [estado, enviar, pendente] = useActionState(acaoImportarExtrato, INICIAL);
   const guardaEnviar = useGuardaDoFormulario(estado);
 
@@ -58,15 +64,10 @@ export function FormularioImportacao({ contas, contaEscolhida }: { readonly cont
         </Aviso>
       ) : null}
 
-      <CampoFormulario id="contaBancariaId" rotulo="Conta bancária" obrigatorio>
-        {(a) => (
-          <select {...a} name="contaBancariaId" defaultValue={contaEscolhida}>
-            {contas.map((conta) => (
-              <option key={conta.id} value={conta.id}>{conta.nome}</option>
-            ))}
-          </select>
-        )}
-      </CampoFormulario>
+      <input type="hidden" name="contaBancariaId" value={conta.id} />
+      <p className={estilos.contaDoExtrato}>
+        Extrato da conta <strong>{conta.nome}</strong>. Para importar em outra conta, troque a conta no topo da tela.
+      </p>
 
       <CampoFormulario id="arquivo" rotulo="Arquivo do extrato (.ofx)" dica="Exporte do aplicativo do banco no formato OFX." obrigatorio>
         {(a) => <input {...a} type="file" name="arquivo" accept=".ofx,application/x-ofx" />}

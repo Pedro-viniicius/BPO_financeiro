@@ -150,6 +150,13 @@
   font-size: var(--texto-sm);
 }
 
+/* A conta do extrato, por escrito: a escolha dela e feita no topo da tela. */
+.contaDoExtrato {
+  margin-bottom: var(--espaco-4);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
 .marcavel {
   display: flex;
   align-items: flex-start;

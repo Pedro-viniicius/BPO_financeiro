@@ -111,7 +111,6 @@ export default async function PaginaConciliacao({
     );
   }
 
-  const opcoesDeConta = contas.map((conta) => ({ id: conta.id, nome: conta.nome }));
   const categoriasDeLancamento = categoriasQueClassificamContas(categorias).map((c) => ({ id: c.id, nome: c.nome }));
 
   const parcelasAPagar = aPagar.itens.map((item) => ({
@@ -190,7 +189,7 @@ export default async function PaginaConciliacao({
       {podeImportar ? (
         <Dobra rotulo="Importar extrato (.ofx)" aberta={!painel.temExtrato} comCaixa={false}>
           <div className={estilos.corpoDobra}>
-            <FormularioImportacao contas={opcoesDeConta} contaEscolhida={contaEscolhida!} />
+            <FormularioImportacao conta={{ id: contaDaEmpresa.id, nome: contaDaEmpresa.nome }} />
 
             {importacoes.length > 0 ? (
               <table className={estilos.importacoes}>
