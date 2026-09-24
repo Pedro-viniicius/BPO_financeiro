@@ -39,6 +39,7 @@ BANCO_URL=<do banco gerido>
 BANCO_URL_MIGRACAO=<do banco gerido>
 APLICACAO_URL=https://<dominio-da-demonstracao>
 APLICACAO_SEGREDO=<openssl rand -base64 48>
+AUDITORIA_SAL_IP=<openssl rand -base64 48>   # obrigatorio em demonstracao (Gate 10)
 EMAIL_PROVEDOR=console       # convites saem como link, sem enviar e-mail
 IA_PROVEDOR=desligado
 ```

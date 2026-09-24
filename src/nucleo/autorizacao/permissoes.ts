@@ -69,6 +69,22 @@ export const PERMISSOES = [
   "orcamento.editar",
   "indicadores.visualizar",
 
+  // Captura de documentos por QR code (Gate 10)
+  "captura.visualizar",
+  /*
+   * Conferir e separado de visualizar pelo mesmo motivo de
+   * `contas_pagar.aprovar`: aprovar um documento faz nascer um titulo. E a
+   * APROVACAO exige ainda `contas_pagar.criar`, verificada junto — sem isso a
+   * captura viraria atalho para criar titulo sem ter permissao de criar titulo.
+   */
+  "captura.conferir",
+  /*
+   * Gerar o QR e distribuir uma credencial de ESCRITA para fora da empresa:
+   * quem tem o QR envia documento para a fila sem entrar no sistema. Por isso
+   * fica separada de `configuracao.gerenciar` e so o administrador a recebe.
+   */
+  "captura.gerenciar_qr",
+
   // Plataforma
   "importacao.executar",
   "exportacao.executar",

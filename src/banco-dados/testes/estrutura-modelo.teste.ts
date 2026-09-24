@@ -37,6 +37,10 @@ const TABELAS_FINANCEIRAS_COM_EMPRESA = [
   "orcamentos",
   "arquivos",
   "sequencias_codigo",
+  // Captura de documentos (Gate 10). `tentativas_captura` fica de fora de
+  // proposito: e controle tecnico sem empresa — ver o cabecalho da migracao 0010.
+  "tokens_captura",
+  "documentos_capturados",
 ];
 
 describe.skipIf(!urlBancoTeste)("estrutura do modelo (PostgreSQL real)", () => {

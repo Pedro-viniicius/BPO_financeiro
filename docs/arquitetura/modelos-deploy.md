@@ -63,6 +63,7 @@ Passo a passo:
      BANCO_URL, BANCO_URL_MIGRACAO (senhas dos usuarios de aplicacao e migracao)
      APLICACAO_URL=https://financeiro.suaempresa.com.br
      APLICACAO_SEGREDO=$(openssl rand -base64 48)
+     AUDITORIA_SAL_IP=$(openssl rand -base64 48)   # guarde a copia no cofre, junto da chave GPG
 4. Edite scripts/banco/criar-usuarios.sql trocando 'troque-esta-senha' pelas
    senhas usadas no .env (roda uma unica vez, na criacao do banco).
 5. docker compose up -d

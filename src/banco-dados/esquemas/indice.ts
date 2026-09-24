@@ -35,3 +35,6 @@ export * from "@/modulos/contas-receber/infraestrutura/esquema";
 export * from "@/modulos/credito-dividas/infraestrutura/esquema";
 export * from "@/modulos/orcamento/infraestrutura/esquema";
 export * from "@/modulos/implantacao/infraestrutura/esquema";
+
+// Captura de documentos por QR code (Gate 10)
+export * from "@/modulos/captura-documentos/infraestrutura/esquema";

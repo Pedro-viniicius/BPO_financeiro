@@ -46,6 +46,9 @@
 | `itens_orcamento` | Valor planejado para um mes, categoria e centro de custo |
 | `arquivos` | Metadados de um arquivo guardado fora do banco |
 | `anexos_*` | Vinculo entre um arquivo e um registro |
+| `tokens_captura` | Token (so o hash) do QR code de envio de documentos de uma empresa |
+| `documentos_capturados` | Documento enviado pela pagina publica, na fila de conferencia |
+| `tentativas_captura` | Contador do limite de tentativas da pagina publica (sem empresa) |
 | `sequencias_codigo` | Contador dos codigos legiveis (CP-2026-000123) |
 | `eventos_auditoria` | Quem fez o que, quando (somente insercao) |
 | `eventos_saida` | Eventos a entregar a outros modulos (outbox) |
@@ -299,6 +302,42 @@ Como `pagamentos`, com `valor_encargos_atraso` (cobranca extra por atraso).
 Combinacao (orcamento, competencia, categoria, centro) e unica — com `coalesce`
 para que dois itens "sem centro de custo" nao coexistam.
 
+## Captura de documentos (Gate 10)
+
+Documento recebido pelo QR code **nao e** conta a pagar: fica em tabela
+propria e a conta so nasce na aprovacao. Migracao `0010`.
+
+### `tokens_captura`
+`token_hash` (SHA-256 hex, unico — o token nunca e gravado),
+`limite_envios_hora` (> 0, padrao 20, por empresa), `criado_por`,
+`revogado_em`/`revogado_por` (andam juntos). **Um token ativo por empresa**:
+indice unico parcial em `empresa_id` onde `revogado_em IS NULL`.
+
+### `documentos_capturados`
+| Campo | Tipo | Obrigatorio | Significado |
+|---|---|---|---|
+| `token_id` | UUID | Sim | Por qual token entrou; revogado continua explicando envios antigos |
+| `codigo` | TEXT | Sim | Protocolo legivel (`DC-2026-000123`), unico por empresa |
+| `situacao` | ENUM | Sim | `pendente_conferencia`, `aprovado`, `rejeitado`, `arquivado_sem_conferencia` |
+| `chave_acesso` | TEXT | Nao | 44 posicoes; CNPJ pode ser alfanumerico (NT 2025.001). **Nao e unica**: duplicidade e aviso na fila |
+| `data_competencia` | DATE | Nao | Definida na conferencia |
+| `data_marco_retencao` | DATE | Nao | Congelada na conferencia/arquivamento: 5 anos a partir de 1o de janeiro seguinte a data mais tardia entre AAMM da chave, competencia e envio |
+| `titulo_pagar_id` | UUID | Nao | Titulo criado na aprovacao; `SET NULL`, o vinculo sobrevive na auditoria |
+| `entrou_na_fila_em` | TIMESTAMPTZ | Sim | Base da contagem de abandono; reabrir reinicia |
+| `conferido_em`/`conferido_por` | | | Andam juntos; obrigatorios se aprovado ou rejeitado |
+| `motivo_rejeicao` | TEXT | | Obrigatorio se rejeitado |
+| `arquivado_em` | TIMESTAMPTZ | | Arquivamento automatico por abandono (sem `_por`: ninguem decidiu) |
+| `reaberto_em`/`reaberto_por` | | | Andam juntos |
+| `expurgado_em` | TIMESTAMPTZ | | Conteudo dos anexos removido no fim da retencao; a linha fica |
+
+`anexos_documentos_capturados` segue o padrao `anexos_<entidade>`, com `ordem`
+(a frente da nota antes do verso).
+
+### `tentativas_captura`
+`identificador` (hash do token ou IP anonimizado por HMAC — nunca IP em
+claro), `janela_iniciada_em`, `contador` (≥ 0). Chave primaria composta.
+**Sem `empresa_id`, de proposito**: pedido recusado na porta nao tem empresa.
+
 ## Arquivos e plataforma
 
 ### `arquivos`
@@ -307,7 +346,7 @@ para que dois itens "sem centro de custo" nao coexistam.
 Ver `anexos.md`.
 
 ### `sequencias_codigo`
-`prefixo` (CP, CR, DV), `ano`, `ultimo_numero` (≥ 0). Um registro por
+`prefixo` (CP, CR, DV, DC), `ano`, `ultimo_numero` (≥ 0). Um registro por
 (empresa, prefixo, ano).
 
 ### `eventos_auditoria`

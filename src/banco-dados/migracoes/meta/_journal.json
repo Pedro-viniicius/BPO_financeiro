@@ -71,6 +71,13 @@
       "when": 1790130188447,
       "tag": "0009_lotes_de_importacao",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790223757760,
+      "tag": "0010_captura_de_documentos",
+      "breakpoints": true
     }
   ]
 }

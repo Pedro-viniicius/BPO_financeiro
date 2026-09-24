@@ -63,6 +63,14 @@
 - Somente por variaveis de ambiente (`.env` fora do git) ou gerenciador de
   segredos da plataforma. `.env.exemplo` documenta cada variavel sem valores reais.
 - `APLICACAO_SEGREDO` ≥ 32 caracteres; validado na inicializacao.
+- `AUDITORIA_SAL_IP` ≥ 32 caracteres: sal do HMAC que anonimiza o IP na
+  trilha de auditoria e no limite de tentativas da captura publica.
+  Obrigatorio em producao e demonstracao (o boot falha sem ele). NUNCA vai
+  para o banco: IPv4 tem 4 bilhoes de enderecos, e com o sal em maos um dump
+  vazado se reverte em segundos. A copia vive no mesmo cofre da chave GPG do
+  backup. Trocar o sal nao e rotina — e resposta a comprometimento — e o
+  prefixo de geracao (`v1:`) torna visivel onde a trilha deixou de ser
+  comparavel.
 - Credenciais de integracoes: variaveis de ambiente; nunca no banco em texto claro.
 - Nunca em log: senhas, tokens, credenciais bancarias, cookies, chaves de API.
   O registrador de logs redige automaticamente chaves sensiveis (testado).

@@ -8,6 +8,8 @@ export const PREFIXOS_CODIGO = {
   contaPagar: "CP",
   contaReceber: "CR",
   divida: "DV",
+  /** Protocolo de documento capturado por QR code ("DC-2026-000123"). */
+  documentoCapturado: "DC",
 } as const;
 
 export type PrefixoCodigo = (typeof PREFIXOS_CODIGO)[keyof typeof PREFIXOS_CODIGO];

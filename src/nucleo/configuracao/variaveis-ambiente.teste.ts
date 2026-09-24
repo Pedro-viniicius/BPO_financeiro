@@ -22,4 +22,23 @@ describe("variaveis de ambiente", () => {
     expect(() => obterVariaveisAmbiente({ APLICACAO_URL: "http://localhost:3000" })).toThrow(/BANCO_URL/);
     expect(() => obterVariaveisAmbiente({ ...minimo, APLICACAO_SEGREDO: "curto" })).toThrow(/APLICACAO_SEGREDO/);
   });
+
+  describe("AUDITORIA_SAL_IP (Gate 10)", () => {
+    it("e tolerada ausente em desenvolvimento", () => {
+      expect(obterVariaveisAmbiente(minimo).AUDITORIA_SAL_IP).toBeUndefined();
+    });
+
+    it.each(["producao", "demonstracao"])("e obrigatoria em %s: sem ela o boot falha", (ambiente) => {
+      expect(() => obterVariaveisAmbiente({ ...minimo, AMBIENTE: ambiente })).toThrow(/AUDITORIA_SAL_IP e obrigatoria/);
+    });
+
+    it("recusa sal curto em qualquer ambiente", () => {
+      expect(() => obterVariaveisAmbiente({ ...minimo, AUDITORIA_SAL_IP: "curto" })).toThrow(/32 caracteres/);
+    });
+
+    it("aceita sal de 32 caracteres em producao", () => {
+      const variaveis = obterVariaveisAmbiente({ ...minimo, AMBIENTE: "producao", AUDITORIA_SAL_IP: "s".repeat(32) });
+      expect(variaveis.AUDITORIA_SAL_IP).toHaveLength(32);
+    });
+  });
 });

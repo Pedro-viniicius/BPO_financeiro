@@ -46,6 +46,35 @@ const esquemaAmbiente = z.object({
 
   // Observabilidade
   LOG_NIVEL: z.enum(["debug", "info", "aviso", "erro"]).default("info"),
+
+  /*
+   * Sal do HMAC que anonimiza o IP na trilha de auditoria e no limite de
+   * tentativas da captura publica (Gate 10). IPv4 tem 4 bilhoes de enderecos:
+   * com o sal em maos, qualquer um reverte todos os hashes num notebook em
+   * segundos. Por isso ele vive AQUI, nunca no banco — um vazamento do dump
+   * nao pode servir para reidentificar ninguem. A copia dele mora no mesmo
+   * cofre da chave GPG do backup, fora do servidor.
+   *
+   * Nao e `APLICACAO_SEGREDO` porque os ciclos de vida sao outros: trocar o
+   * segredo de sessao derruba todo mundo e e operacao normal; trocar este sal
+   * destroi a comparabilidade de anos de trilha. Dois ciclos, dois segredos.
+   */
+  AUDITORIA_SAL_IP: z.string().min(32, "AUDITORIA_SAL_IP precisa ter ao menos 32 caracteres.").optional(),
+}).superRefine((variaveis, contexto) => {
+  /*
+   * Obrigatoria onde ha gente de fora enviando documento: sem o sal o IP
+   * simplesmente nao e registrado, e uma instalacao de producao sem trilha de
+   * IP e um descuido de implantacao que precisa parar o boot, nao passar em
+   * silencio. Em desenvolvimento a ausencia e tolerada.
+   */
+  const exigeSal = variaveis.AMBIENTE === "producao" || variaveis.AMBIENTE === "demonstracao";
+  if (exigeSal && !variaveis.AUDITORIA_SAL_IP) {
+    contexto.addIssue({
+      code: "custom",
+      path: ["AUDITORIA_SAL_IP"],
+      message: `AUDITORIA_SAL_IP e obrigatoria quando AMBIENTE=${variaveis.AMBIENTE}.`,
+    });
+  }
 });
 
 export type VariaveisAmbiente = z.infer<typeof esquemaAmbiente>;

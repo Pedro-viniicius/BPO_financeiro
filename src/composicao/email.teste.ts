@@ -17,6 +17,8 @@ const AMBIENTE_BASE = {
   BANCO_URL: "postgres://u:s@localhost:5432/financeiro",
   APLICACAO_URL: "http://localhost:3000",
   APLICACAO_SEGREDO: "segredo-de-teste-com-pelo-menos-32-caracteres",
+  // Producao exige o sal do IP (Gate 10); sem ele o boot para antes do e-mail.
+  AUDITORIA_SAL_IP: "sal-de-teste-com-pelo-menos-32-caracteres!",
 };
 
 function comAmbiente(extra: Record<string, string>): void {

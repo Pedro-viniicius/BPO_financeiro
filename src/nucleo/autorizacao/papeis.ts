@@ -58,6 +58,13 @@ const operacaoFinanceira: Permissao[] = [
   "importacao.executar",
   "exportacao.executar",
   "relatorios.visualizar",
+  /*
+   * E o papel que tem `contas_pagar.criar`, entao e quem confere a fila de
+   * documentos capturados. Tesouraria NAO ve a fila: documento pendente nao
+   * foi conferido, nao serve para previsao, e ela ve a conta quando nasce.
+   */
+  "captura.visualizar",
+  "captura.conferir",
 ];
 
 const tesouraria: Permissao[] = [
@@ -100,8 +107,17 @@ const controladoria: Permissao[] = [
 
 const auditor: Permissao[] = [...todasVisualizacoes, "dre.exportar", "exportacao.executar"];
 
+/*
+ * `captura.visualizar` sai daqui de proposito: a fila de captura nao e
+ * relatorio, e documento bruto de terceiro — imagem de nota com CPF, CNPJ e
+ * endereco, antes de qualquer conferencia. Este papel existe para quem
+ * acompanha numeros, nao para quem manuseia documento fiscal alheio.
+ */
 const somenteLeitura: Permissao[] = todasVisualizacoes.filter(
-  (permissao) => permissao !== "auditoria.visualizar" && permissao !== "usuarios.visualizar",
+  (permissao) =>
+    permissao !== "auditoria.visualizar" &&
+    permissao !== "usuarios.visualizar" &&
+    permissao !== "captura.visualizar",
 );
 
 export const PERMISSOES_POR_PAPEL: Record<Papel, ReadonlySet<Permissao>> = {
