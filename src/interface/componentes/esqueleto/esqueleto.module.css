@@ -16,3 +16,20 @@
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
 }
+
+/*
+ * Movimento reduzido.
+ *
+ * O pulso e uma animacao INFINITA, e e justamente esse tipo que incomoda
+ * quem pediu menos movimento no sistema — em enxaqueca vestibular, uma
+ * animacao continua na tela inteira chega a impedir a leitura. Sem o pulso,
+ * a barra continua sendo espaco reservado com contraste proprio, e o
+ * `role="status"` continua anunciando o carregamento a quem usa leitor de
+ * tela. Nada se perde alem do movimento.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .barra {
+    animation: none;
+    background: var(--superficie-afundada);
+  }
+}

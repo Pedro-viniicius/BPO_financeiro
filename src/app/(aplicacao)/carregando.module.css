@@ -1,0 +1,37 @@
+/*
+ * Esqueleto da tela.
+ *
+ * As medidas acompanham as das telas reais (cartoes de resumo numa grade que
+ * cabe de 15rem, lista abaixo) para o conteudo verdadeiro aparecer no mesmo
+ * lugar em que o esqueleto estava. Esqueleto com forma diferente da pagina
+ * final faz o layout pular na troca, que e pior do que nao ter esqueleto.
+ */
+.pagina {
+  display: grid;
+  gap: var(--espaco-6);
+}
+
+.cabecalho {
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.cartoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--espaco-4);
+}
+
+.cartao {
+  display: grid;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+}
+
+.lista {
+  display: grid;
+  gap: var(--espaco-2);
+}

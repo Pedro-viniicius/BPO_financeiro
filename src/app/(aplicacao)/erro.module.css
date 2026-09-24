@@ -1,0 +1,28 @@
+.pagina {
+  display: grid;
+  gap: var(--espaco-5);
+  max-inline-size: 42rem;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.ajuda {
+  margin: 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* O codigo precisa ser selecionavel e legivel: alguem vai copia-lo. */
+.codigo {
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background: var(--superficie-afundada);
+  font-family: var(--fonte-mono, monospace);
+  user-select: all;
+}
