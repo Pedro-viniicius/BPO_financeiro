@@ -28,6 +28,14 @@ export function CascaSimples({
    */
   readonly aviso?: { readonly rotulo: string; readonly explicacao: string };
 }) {
+  /*
+   * A faixa fica FORA da area centralizada, e nao ao lado dela: `.pagina`
+   * empilha faixa e area, e so a area centraliza a coluna. Com as duas
+   * irmas na mesma linha flexivel, a faixa roubava metade da largura — no
+   * celular o cartao de entrada ficava com uns 130px, com uma palavra por
+   * linha. Como a faixa so existe fora de producao, o defeito aparecia
+   * justamente na demonstracao que o cliente abre primeiro.
+   */
   return (
     <div className={estilos.pagina}>
       {aviso ? (
@@ -35,18 +43,20 @@ export function CascaSimples({
           <strong>{aviso.rotulo}</strong> <span>{aviso.explicacao}</span>
         </p>
       ) : null}
-      <div className={estilos.coluna}>
-        <header className={estilos.marca}>
-          <LogotipoOficial largura={200} />
-        </header>
+      <div className={estilos.area}>
+        <div className={estilos.coluna}>
+          <header className={estilos.marca}>
+            <LogotipoOficial largura={200} />
+          </header>
 
-        <main id="conteudo" className={estilos.cartao}>
-          {children}
-        </main>
+          <main id="conteudo" className={estilos.cartao}>
+            {children}
+          </main>
 
-        <p className={estilos.rodape}>
-          {MARCA.nomeDoProduto} · gestão financeira, tesouraria e controle gerencial
-        </p>
+          <p className={estilos.rodape}>
+            {MARCA.nomeDoProduto} · gestão financeira, tesouraria e controle gerencial
+          </p>
+        </div>
       </div>
     </div>
   );

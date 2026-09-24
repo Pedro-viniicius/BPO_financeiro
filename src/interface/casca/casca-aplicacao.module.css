@@ -50,9 +50,9 @@
   align-items: baseline;
   margin: 0;
   padding: var(--espaco-2) var(--espaco-4);
-  background: var(--superficie-atencao, #fff4e5);
-  border-bottom: 2px solid var(--cor-atencao-forte, #b26a00);
-  color: var(--cor-atencao-texto, #6b3f00);
+  background: var(--cor-atencao-suave);
+  border-bottom: var(--largura-borda-forte) solid var(--cor-atencao-forte);
+  color: var(--cor-atencao-forte);
   font-size: var(--texto-sm);
   text-align: center;
   justify-content: center;

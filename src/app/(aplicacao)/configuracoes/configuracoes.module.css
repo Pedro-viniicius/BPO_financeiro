@@ -7,10 +7,10 @@
 .pendencias {
   margin: 0 0 var(--espaco-5);
   padding: var(--espaco-3) var(--espaco-4);
-  border: 1px solid var(--cor-atencao-forte, #b26a00);
+  border: var(--largura-borda) solid var(--cor-atencao-borda);
   border-radius: var(--raio-2);
-  background: var(--superficie-atencao, #fff4e5);
-  color: var(--cor-atencao-texto, #6b3f00);
+  background: var(--cor-atencao-suave);
+  color: var(--cor-atencao-forte);
 }
 
 .tudoCerto {

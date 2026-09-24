@@ -7,13 +7,20 @@
  */
 .pagina {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  flex-direction: column;
   min-height: 100dvh;
-  padding: var(--espaco-7) var(--espaco-4) var(--espaco-6);
   background-color: var(--superficie-fundo);
   background-image: radial-gradient(90rem 32rem at 50% -14rem, var(--cor-marca-suave) 0%, transparent 70%);
   background-repeat: no-repeat;
+}
+
+/* A area centraliza a coluna; a faixa de ambiente, quando existe, fica acima, na largura toda. */
+.area {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--espaco-7) var(--espaco-4) var(--espaco-6);
 }
 
 .coluna {
@@ -62,7 +69,7 @@
 }
 
 @media (max-width: 767px) {
-  .pagina {
+  .area {
     padding: var(--espaco-5) var(--espaco-4) var(--espaco-5);
   }
   .cartao {
@@ -88,9 +95,10 @@
   justify-content: center;
   margin: 0;
   padding: var(--espaco-2) var(--espaco-4);
-  background: var(--superficie-atencao, #fff4e5);
-  border-bottom: 2px solid var(--cor-atencao-forte, #b26a00);
-  color: var(--cor-atencao-texto, #6b3f00);
+  /* Tokens reais: os nomes anteriores nao existiam e so valia a cor literal de reserva. */
+  background: var(--cor-atencao-suave);
+  border-bottom: var(--largura-borda-forte) solid var(--cor-atencao-forte);
+  color: var(--cor-atencao-forte);
   font-size: var(--texto-sm);
   text-align: center;
 }
