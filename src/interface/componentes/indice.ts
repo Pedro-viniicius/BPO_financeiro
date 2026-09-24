@@ -38,3 +38,4 @@ export {
 } from "./tabela-dados/tabela-dados";
 export { TituloSecao, type TituloSecaoProps } from "./titulo-secao/titulo-secao";
 export { ValorFinanceiro, type ValorFinanceiroProps } from "./valor-financeiro/valor-financeiro";
+export { CodigoQr, type CodigoQrProps } from "./codigo-qr/codigo-qr";

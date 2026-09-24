@@ -1,0 +1,65 @@
+/*
+ * Envio de documentos por QR code.
+ *
+ * O QR aparece uma vez so — o banco guarda o hash, nao o token. Por isso a
+ * resposta da geracao e a parte mais destacada da tela.
+ */
+.coluna {
+  display: grid;
+  gap: var(--espaco-6);
+  max-width: 40rem;
+}
+
+.formulario {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+.resposta {
+  display: grid;
+  gap: var(--espaco-4);
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  background: var(--cor-superficie);
+}
+
+.qrEmDestaque {
+  display: flex;
+  justify-content: center;
+  padding: var(--espaco-4);
+  background: #fff; /* fundo branco literal: requisito de leitura do QR, nao desenho */
+  border-radius: var(--raio-md);
+}
+
+.link {
+  display: grid;
+  gap: var(--espaco-1);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+.link code {
+  overflow-wrap: anywhere;
+  color: var(--cor-texto);
+}
+
+.acoes {
+  display: flex;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+}
+
+.confirmacao {
+  display: flex;
+  gap: var(--espaco-2);
+  align-items: flex-start;
+}
+
+@media print {
+  .formulario,
+  .acoes,
+  .link {
+    display: none;
+  }
+}

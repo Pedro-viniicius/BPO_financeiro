@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: "Configurações" };
  * atras de uma pendencia de implantacao.
  */
 export default async function PaginaConfiguracoes() {
-  const { escopo, nomeEmpresa } = await exigirContextoFinanceiro("configuracao.gerenciar", "/configuracoes");
+  const { escopo, nomeEmpresa, permissoes } = await exigirContextoFinanceiro("configuracao.gerenciar", "/configuracoes");
 
   const [empresa, plano] = await Promise.all([
     new RepositorioDadosDaEmpresaDrizzle(obterBancoDados()).obter(escopo),
@@ -76,6 +76,14 @@ export default async function PaginaConfiguracoes() {
             <span>Levar tudo embora em planilhas, a qualquer momento</span>
           </Link>
         </li>
+        {permissoes.has("captura.gerenciar_qr") ? (
+          <li>
+            <Link href="/configuracoes/captura">
+              <strong>Envio de documentos por QR code</strong>
+              <span>O QR que o cliente escaneia para mandar nota, recibo e boleto direto para a fila</span>
+            </Link>
+          </li>
+        ) : null}
         <li>
           <Link href="/cadastros/plano-de-contas">
             <strong>Plano de contas</strong>

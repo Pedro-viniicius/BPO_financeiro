@@ -15,6 +15,7 @@ import { RepositorioOrcamentoDrizzle } from "@/modulos/orcamento/publico";
 import { RepositorioPlanoContasDrizzle } from "@/modulos/plano-contas/publico";
 import { RepositorioImplantacaoDrizzle } from "@/modulos/implantacao/publico";
 import { RepositorioExportacaoDrizzle } from "@/modulos/exportacao/publico";
+import { RepositorioCapturaDrizzle } from "@/modulos/captura-documentos/publico";
 
 /**
  * Porta de entrada das telas financeiras.
@@ -66,4 +67,5 @@ export const repositorios = {
   planoContas: () => new RepositorioPlanoContasDrizzle(obterBancoDados()),
   implantacao: () => new RepositorioImplantacaoDrizzle(obterBancoDados()),
   exportacao: () => new RepositorioExportacaoDrizzle(obterBancoDados()),
+  captura: () => new RepositorioCapturaDrizzle(obterBancoDados()),
 };

@@ -9,7 +9,7 @@ Sistema de design e casca da aplicacao (Gate 4). Documentacao em
 | `marca/` | Identidade da empresa dona da instalacao: `identidade.ts` (nome, assinatura, perguntas), `tema-nova-didata.css` (redefine os tokens) e `logotipo.tsx`. Trocar de marca acontece aqui. | `tokens/` |
 | `estilos/` | `global.css`: reset, foco, utilitarios (`.numero-tabular`, `.apenas-leitor-de-tela`, `.pular-para-conteudo`); importa `tokens/` e o tema da marca | `tokens/`, `marca/` |
 | `formatacao/` | valor → texto: `formatarDinheiro`, `formatarData`, `formatarPercentual` | `compartilhado/` |
-| `componentes/` | 29 componentes, um por pasta (`nome/nome.tsx` + `nome.module.css`), exportados por `indice.ts` | `tokens/`, `formatacao/`, `compartilhado/` |
+| `componentes/` | 30 componentes, um por pasta (`nome/nome.tsx` + `nome.module.css`), exportados por `indice.ts` | `tokens/`, `formatacao/`, `compartilhado/` |
 | `casca/` | `CascaAplicacao` (cabecalho + barra lateral + conteudo), `CascaSimples` (cartao das telas de entrada), `mapa-navegacao.ts`, `BarraInferior` (celular) | `componentes/`, `marca/`, `tokens/`, tipos do `nucleo/autorizacao/publico` |
 
 ## Regras
@@ -43,6 +43,7 @@ Sistema de design e casca da aplicacao (Gate 4). Documentacao em
 | `FormularioSimples`, `TituloFormularioSimples`, `ControleTexto`, `AcoesFormularioSimples`, `LigacoesFormularioSimples` | telas de uma coluna: entrar, criar conta, primeiro acesso |
 | `Gaveta`, `DialogoConfirmacao`, `Dobra` | navegacao (ADR-022), estados-interface |
 | `CartaoIndicador`, `CartaoRegistro`, `TituloSecao`, `CabecalhoPainel` | dashboard, listagens |
+| `CodigoQr` | captura de documentos (Gate 10): SVG inline a partir de `compartilhado/qr` |
 
 > **Componentes removidos no Gate 9.** `SeletorEntidade`, `GraficoBarras`,
 > `BarraProporcao`, `AcaoRapida`, `CartaoProgresso`, `CartaoInsight` e

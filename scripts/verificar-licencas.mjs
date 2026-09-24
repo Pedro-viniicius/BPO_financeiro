@@ -13,6 +13,7 @@
  * Uso: `pnpm verificar:licencas`
  */
 import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 
 const PERMITIDAS = new Set([
   "MIT",
@@ -76,4 +77,40 @@ if (proibidos.length) {
   console.error(`\nERRO — licencas incompativeis com software proprietario:\n  ${proibidos.join("\n  ")}`);
   process.exit(1);
 }
+/*
+ * CODIGO DE TERCEIRO INCORPORADO (nao vem de node_modules).
+ *
+ * O `license-checker` so enxerga pacotes instalados. Codigo copiado para o
+ * repositorio (ADR-028) precisa de inventario proprio: cada entrada abaixo
+ * exige que o arquivo exista e que o aviso de licenca do autor continue nele.
+ * Sem isso, a licenca MIT — que obriga a manter o aviso — estaria sendo
+ * cumprida so por confianca.
+ */
+const CODIGO_INCORPORADO = [
+  {
+    arquivo: "src/compartilhado/qr/qrcodegen.ts",
+    titular: "Project Nayuki",
+    licenca: "MIT",
+    marcador: "Copyright (c) Project Nayuki. (MIT License)",
+    origem: "https://github.com/nayuki/QR-Code-generator",
+  },
+];
+
+const incorporadoComProblema = [];
+for (const item of CODIGO_INCORPORADO) {
+  if (!existsSync(item.arquivo)) {
+    incorporadoComProblema.push(`${item.arquivo}: arquivo nao encontrado (esta no inventario, ADR-028)`);
+    continue;
+  }
+  if (!readFileSync(item.arquivo, "utf-8").includes(item.marcador)) {
+    incorporadoComProblema.push(`${item.arquivo}: aviso de licenca de ${item.titular} ausente ou alterado`);
+    continue;
+  }
+  console.log(`Codigo incorporado: ${item.arquivo} — ${item.titular}, ${item.licenca} (${item.origem})`);
+}
+if (incorporadoComProblema.length > 0) {
+  console.error(`\nERRO — codigo de terceiro incorporado sem aviso de licenca:\n  ${incorporadoComProblema.join("\n  ")}`);
+  process.exit(1);
+}
+
 console.log("\nNenhuma licenca incompativel encontrada.");

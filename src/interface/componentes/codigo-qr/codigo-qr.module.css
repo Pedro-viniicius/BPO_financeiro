@@ -1,0 +1,16 @@
+/* O tamanho e da tela; a geometria interna e do SVG (viewBox). */
+.qr {
+  display: block;
+  width: 100%;
+  max-width: 18rem;
+  height: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+}
+
+@media print {
+  .qr {
+    max-width: 12cm;
+    border: none;
+  }
+}

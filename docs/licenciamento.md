@@ -102,6 +102,19 @@ inventario e falha se surgir licenca incompativel (GPL/AGPL/SSPL). O
 inventario deve acompanhar a entrega (avisos de licenca de terceiros).
 Software de terceiros permanece sob suas proprias licencas.
 
+**Codigo de terceiro incorporado ao repositorio** (nao vem de `node_modules`,
+entao o `license-checker` nao o ve). O inventario abaixo e conferido pelo
+mesmo `pnpm verificar:licencas`, que falha se o arquivo sumir ou se o aviso de
+licenca do autor for removido:
+
+| Arquivo | Autor | Licenca | Decisao |
+|---|---|---|---|
+| `src/compartilhado/qr/qrcodegen.ts` | Project Nayuki | MIT | ADR-028 |
+
+A licenca MIT exige manter o aviso de direitos autorais em toda copia. O
+cabecalho original permanece no arquivo, seguido da lista das modificacoes
+locais; um teste reconstroi o original a partir da copia e confere o hash.
+
 ## 11. Provedores de inteligencia artificial
 
 - A IA e recurso contratado a parte (`analises_ia`), desligada por padrao.
