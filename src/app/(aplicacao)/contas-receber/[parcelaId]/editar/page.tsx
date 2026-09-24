@@ -50,7 +50,7 @@ export default async function PaginaEditarContaReceber({ params }: { params: Pro
   }
 
   const cadastros = repositorios.cadastros();
-  const [clientees, categorias] = await Promise.all([
+  const [clientes, categorias] = await Promise.all([
     cadastros.listarClientes(escopo),
     cadastros.listarCategorias(escopo),
   ]);
@@ -84,7 +84,7 @@ export default async function PaginaEditarContaReceber({ params }: { params: Pro
           vencimento: motivoDoBloqueio("vencimento", estadoTitulo, estadoParcela),
           valor: motivoDoBloqueio("valor", estadoTitulo, estadoParcela),
         }}
-        clientees={clientees}
+        clientes={clientes}
         categorias={categoriasQueClassificamContas(categorias)}
       />
     </>

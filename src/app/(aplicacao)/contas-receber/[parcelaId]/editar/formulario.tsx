@@ -71,13 +71,13 @@ export function FormularioEdicaoContaReceber({
   conta,
   editaveis,
   motivos,
-  clientees,
+  clientes,
   categorias,
 }: {
   readonly conta: ContaParaEdicao;
   readonly editaveis: CamposEditaveis;
   readonly motivos: { readonly pessoa: string | null; readonly vencimento: string | null; readonly valor: string | null };
-  readonly clientees: readonly OpcaoSelecao[];
+  readonly clientes: readonly OpcaoSelecao[];
   readonly categorias: readonly OpcaoSelecao[];
 }) {
   const [estado, enviar, pendente] = useActionState(acaoEditarContaReceber, INICIAL);
@@ -109,7 +109,7 @@ export function FormularioEdicaoContaReceber({
           <CampoFormulario id="clienteId" rotulo="Cliente" obrigatorio {...erro("clienteId")}>
             {(a) => (
               <select {...a} name="clienteId" defaultValue={conta.clienteId}>
-                {clientees.map((f) => (
+                {clientes.map((f) => (
                   <option key={f.id} value={f.id}>{f.nome}</option>
                 ))}
               </select>

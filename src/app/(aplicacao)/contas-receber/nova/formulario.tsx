@@ -62,11 +62,11 @@ function paraCampo(valor: Dinheiro): string {
  * porque e la que a conferencia vale.
  */
 export function FormularioNovaContaReceber({
-  clientees,
+  clientes,
   categorias,
   hoje,
 }: {
-  readonly clientees: readonly OpcaoSelecao[];
+  readonly clientes: readonly OpcaoSelecao[];
   readonly categorias: readonly OpcaoSelecao[];
   readonly hoje: string;
 }) {
@@ -132,7 +132,7 @@ export function FormularioNovaContaReceber({
           {(a) => (
             <select {...a} name="clienteId" defaultValue="">
               <option value="" disabled>Escolha um cliente</option>
-              {clientees.map((f) => (
+              {clientes.map((f) => (
                 <option key={f.id} value={f.id}>{f.nome}</option>
               ))}
             </select>

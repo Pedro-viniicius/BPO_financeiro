@@ -7,13 +7,13 @@ import { categoriasQueClassificamContas } from "../../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../../_apoio/contexto-financeiro";
 import { FormularioNovaContaReceber } from "./formulario";
 
-export const metadata: Metadata = { title: "Nova conta a pagar" };
+export const metadata: Metadata = { title: "Nova conta a receber" };
 
 /** Criar exige `contas_receber.criar`: a guarda roda antes de qualquer leitura. */
 export default async function PaginaNovaContaReceber() {
   const { escopo, hoje } = await exigirContextoFinanceiro("contas_receber.criar", "/contas-receber/nova");
   const cadastros = repositorios.cadastros();
-  const [clientees, categorias] = await Promise.all([
+  const [clientes, categorias] = await Promise.all([
     cadastros.listarClientes(escopo),
     cadastros.listarCategorias(escopo),
   ]);
@@ -22,13 +22,13 @@ export default async function PaginaNovaContaReceber() {
   // os dois. Em vez de deixar a pessoa preencher e falhar no fim, o caminho e
   // mostrado antes.
   const faltando = [
-    clientees.length === 0 ? { o: "um cliente", onde: "/cadastros" } : null,
+    clientes.length === 0 ? { o: "um cliente", onde: "/cadastros" } : null,
     categorias.length === 0 ? { o: "uma categoria financeira", onde: "/cadastros" } : null,
   ].filter((x): x is { o: string; onde: string } => x !== null);
 
   return (
     <>
-      <CabecalhoPagina titulo="Nova conta a pagar" descricao="Um compromisso com cliente, com data e valor" />
+      <CabecalhoPagina titulo="Nova conta a receber" descricao="Uma venda ou serviço a receber de um cliente, com data e valor" />
 
       {faltando.length > 0 ? (
         <Aviso
@@ -36,10 +36,10 @@ export default async function PaginaNovaContaReceber() {
           titulo={`Antes, cadastre ${faltando.map((f) => f.o).join(" e ")}`}
           acao={<Link className="acao-primaria" href="/cadastros">Ir para Cadastros</Link>}
         >
-          Toda conta a pagar precisa de um cliente e de uma categoria — é a categoria que responde depois “com o que estamos gastando?”.
+          Toda conta a receber precisa de um cliente e de uma categoria — é a categoria que responde depois “de onde vem a receita?”.
         </Aviso>
       ) : (
-        <FormularioNovaContaReceber clientees={clientees} categorias={categoriasQueClassificamContas(categorias)} hoje={hoje} />
+        <FormularioNovaContaReceber clientes={clientes} categorias={categoriasQueClassificamContas(categorias)} hoje={hoje} />
       )}
     </>
   );

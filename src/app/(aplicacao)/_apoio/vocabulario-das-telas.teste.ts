@@ -57,7 +57,16 @@ describe("vocabulario das telas", () => {
   it("as telas de contas a receber nao falam de pagar nem de fornecedor", () => {
     // `formaPagamento` e `FORMAS_DE_PAGAMENTO` sao nomes do modelo: a forma de
     // pagamento existe nos dois lados. O resto e vocabulario de tela.
-    const proibidas = [/\bJá pago\b/g, /\bfornecedor(es)?\b/gi, /\bpagamento registrado\b/gi];
+    // "clientees" e "conta a pagar" entraram por copia com troca automatica
+    // de palavra: a tela de nova conta a RECEBER se chamava "Nova conta a pagar".
+    const proibidas = [
+      /\bJá pago\b/g,
+      /\bfornecedor(es)?\b/gi,
+      /\bpagamento registrado\b/gi,
+      /\bcontas? a pagar\b/gi,
+      /\bgastando\b/gi,
+      /\bclientees\b/gi,
+    ];
     const encontradas = arquivosDaArea("contas-receber").flatMap(({ caminho, conteudo }) => {
       const limpo = conteudo.replace(/formaPagamento|FORMAS_DE_PAGAMENTO|NOMES_FORMA_PAGAMENTO|forma_pagamento|formas-de-pagamento/g, "");
       return ocorrencias(limpo, proibidas).map((palavra) => `${caminho} -> ${palavra}`);
@@ -66,7 +75,7 @@ describe("vocabulario das telas", () => {
   });
 
   it("as telas de contas a pagar nao falam de receber nem de cliente", () => {
-    const proibidas = [/\bJá recebido\b/g, /\bclientes?\b/gi, /\brecebimento registrado\b/gi];
+    const proibidas = [/\bJá recebido\b/g, /\bclientes?\b/gi, /\brecebimento registrado\b/gi, /\bcontas? a receber\b/gi, /\bde onde vem a receita\b/gi];
     const encontradas = arquivosDaArea("contas-pagar").flatMap(({ caminho, conteudo }) =>
       ocorrencias(conteudo, proibidas).map((palavra) => `${caminho} -> ${palavra}`),
     );

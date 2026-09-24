@@ -50,7 +50,7 @@ export default async function PaginaContasReceber({
   const temFiltro = Object.keys(filtro).length > 0;
   const pagina = paginaDaUrl(parametros.pagina);
 
-  const [resultado, clientees] = await Promise.all([
+  const [resultado, clientes] = await Promise.all([
     repositorios.contasReceber().listar(escopo, filtro, { pagina, tamanho: TAMANHO_DA_PAGINA }, hoje),
     repositorios.cadastros().listarClientes(escopo),
   ]);
@@ -71,7 +71,7 @@ export default async function PaginaContasReceber({
     <>
       <CabecalhoPagina
         titulo="Contas a receber"
-        descricao="Compromissos com clientees, impostos e serviços"
+        descricao="Vendas e serviços que você tem a receber"
         acaoPrimaria={podeCriar ? <Link className="acao-primaria" href="/contas-receber/nova">Nova conta a receber</Link> : null}
       />
 
@@ -118,7 +118,7 @@ export default async function PaginaContasReceber({
           Cliente
           <select name="cliente" defaultValue={texto("cliente") ?? ""}>
             <option value="">Todos</option>
-            {clientees.map((f) => (
+            {clientes.map((f) => (
               <option key={f.id} value={f.id}>{f.nome}</option>
             ))}
           </select>
