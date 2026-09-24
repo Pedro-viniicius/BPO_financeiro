@@ -25,8 +25,37 @@ export interface EscopoResolvidoPorToken {
  * FABRICA um escopo a partir de um token. Abaixo dele, nenhuma linha sabe
  * que houve token; acima dele, ninguem monta escopo por conta propria.
  */
+/** Arquivo ja guardado no armazenamento, pronto para virar linha em `arquivos`. */
+export interface NovoArquivo {
+  readonly chaveArmazenamento: string;
+  readonly nomeOriginal: string;
+  readonly tipoConteudo: string;
+  readonly tamanhoBytes: number;
+  readonly impressaoDigital: string;
+}
+
+/**
+ * Um anexo do envio: ou um arquivo NOVO, ou um que a empresa ja tinha com o
+ * mesmo conteudo (mesmo SHA-256). Reenviar a mesma foto nao duplica nada.
+ */
+export type ArquivoDoEnvio = { readonly existenteId: string } | { readonly novo: NovoArquivo };
+
+export interface DadosDoEnvio {
+  readonly tokenId: string;
+  readonly ano: number;
+  readonly observacao: string | null;
+  readonly arquivos: readonly ArquivoDoEnvio[];
+  /** Para a trilha (LGPD): IP ja anonimizado por HMAC, nunca em claro. */
+  readonly remetente: { readonly ipAnonimo: string | null; readonly agenteUsuario: string | null };
+}
+
 export interface RepositorioCaptura {
   obterTokenAtivo(escopo: EscopoEmpresa): Promise<TokenDeCapturaAtivo | null>;
+  /** Arquivo desta empresa com este SHA-256, se ainda tiver conteudo. */
+  procurarArquivoPorImpressao(escopo: EscopoEmpresa, impressaoDigital: string): Promise<{ readonly id: string } | null>;
+  /** Cria o documento pendente, seus anexos e o evento `documento.recebido`, numa transacao. */
+  receberDocumento(escopo: EscopoEmpresa, dados: DadosDoEnvio): Promise<{ readonly id: string; readonly codigo: string }>;
+  contarPendentes(escopo: EscopoEmpresa): Promise<number>;
   /** Revoga o token ativo (se houver) e cria o novo, na MESMA transacao: o QR antigo morre no instante em que o novo nasce. */
   gerarToken(
     escopo: EscopoEmpresa,

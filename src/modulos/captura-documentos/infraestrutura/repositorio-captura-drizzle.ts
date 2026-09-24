@@ -1,13 +1,14 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, count, eq, isNull } from "drizzle-orm";
 
 import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
-import { empresas } from "@/banco-dados/esquemas/indice";
+import { arquivos, empresas } from "@/banco-dados/esquemas/indice";
 import { ACOES_AUDITORIA, RegistradorAuditoriaDrizzle } from "@/nucleo/auditoria/publico";
 import { executarEmTransacao, type ExecutorBancoDados } from "@/nucleo/banco-dados/publico";
+import { GeradorCodigoPostgres, PREFIXOS_CODIGO } from "@/nucleo/codigos/publico";
 
-import type { EscopoResolvidoPorToken, RepositorioCaptura, TokenDeCapturaAtivo } from "../aplicacao/repositorio-captura";
-import { tokensCaptura } from "./esquema";
+import type { DadosDoEnvio, EscopoResolvidoPorToken, RepositorioCaptura, TokenDeCapturaAtivo } from "../aplicacao/repositorio-captura";
+import { anexosDocumentosCapturados, documentosCapturados, tokensCaptura } from "./esquema";
 
 /**
  * Tokens de captura contra PostgreSQL.
@@ -104,6 +105,69 @@ export class RepositorioCapturaDrizzle implements RepositorioCaptura {
       limiteEnviosHora: linha.limiteEnviosHora,
       nomeEmpresa: linha.nomeFantasia ?? linha.nomeEmpresa,
     };
+  }
+
+  async procurarArquivoPorImpressao(escopo: EscopoEmpresa, impressaoDigital: string): Promise<{ readonly id: string } | null> {
+    const [linha] = await this.banco
+      .select({ id: arquivos.id })
+      .from(arquivos)
+      .where(and(eq(arquivos.empresaId, escopo.empresaId), eq(arquivos.impressaoDigital, impressaoDigital), isNull(arquivos.removidoEm)))
+      .limit(1);
+    return linha ?? null;
+  }
+
+  async receberDocumento(escopo: EscopoEmpresa, dados: DadosDoEnvio): Promise<{ readonly id: string; readonly codigo: string }> {
+    return executarEmTransacao(async (transacao) => {
+      // Dentro da transacao: o numero so e consumido se o documento for gravado.
+      const codigo = await new GeradorCodigoPostgres(transacao).gerarProximo(
+        escopo.empresaId,
+        PREFIXOS_CODIGO.documentoCapturado,
+        dados.ano,
+      );
+
+      const [documento] = await transacao
+        .insert(documentosCapturados)
+        .values({ empresaId: escopo.empresaId, tokenId: dados.tokenId, codigo, observacao: dados.observacao })
+        .returning({ id: documentosCapturados.id });
+
+      let ordem = 0;
+      for (const arquivo of dados.arquivos) {
+        let arquivoId: string;
+        if ("existenteId" in arquivo) {
+          arquivoId = arquivo.existenteId;
+        } else {
+          const [criado] = await transacao
+            .insert(arquivos)
+            .values({ empresaId: escopo.empresaId, enviadoPorUsuarioId: null, ...arquivo.novo })
+            .returning({ id: arquivos.id });
+          arquivoId = criado!.id;
+        }
+        await transacao.insert(anexosDocumentosCapturados).values({ documentoId: documento!.id, arquivoId, ordem });
+        ordem += 1;
+      }
+
+      await new RegistradorAuditoriaDrizzle(transacao).registrar({
+        acao: ACOES_AUDITORIA.documentoRecebido,
+        entidade: "documento_capturado",
+        entidadeId: documento!.id,
+        organizacaoId: escopo.organizacaoId,
+        empresaId: escopo.empresaId,
+        origem: "captura_publica",
+        dadosDepois: { codigo, tokenId: dados.tokenId, arquivos: dados.arquivos.length },
+        ...(dados.remetente.ipAnonimo ? { ip: dados.remetente.ipAnonimo } : {}),
+        ...(dados.remetente.agenteUsuario ? { agenteUsuario: dados.remetente.agenteUsuario.slice(0, 300) } : {}),
+      });
+
+      return { id: documento!.id, codigo };
+    }, this.banco);
+  }
+
+  async contarPendentes(escopo: EscopoEmpresa): Promise<number> {
+    const [linha] = await this.banco
+      .select({ total: count() })
+      .from(documentosCapturados)
+      .where(and(eq(documentosCapturados.empresaId, escopo.empresaId), eq(documentosCapturados.situacao, "pendente_conferencia")));
+    return linha?.total ?? 0;
   }
 
   /** O hash nunca vai para a trilha: so o id do token. */

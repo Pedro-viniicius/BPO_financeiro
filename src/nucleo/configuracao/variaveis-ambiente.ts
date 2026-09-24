@@ -44,6 +44,13 @@ const esquemaAmbiente = z.object({
   // Tarefas em segundo plano
   TAREFAS_INTERVALO_MS: z.coerce.number().int().min(250).default(2000),
 
+  /*
+   * Raiz do armazenamento de arquivos em disco (anexos, documentos capturados).
+   * No compose de producao e o volume `arquivos`, montado em /aplicacao/arquivos.
+   * Em demonstracao (Vercel) o disco nao persiste e a captura fica desligada.
+   */
+  ARQUIVOS_DIRETORIO: z.string().min(1).default("./arquivos"),
+
   // Observabilidade
   LOG_NIVEL: z.enum(["debug", "info", "aviso", "erro"]).default("info"),
 

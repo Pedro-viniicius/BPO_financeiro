@@ -20,8 +20,8 @@
   gap: var(--espaco-4);
   padding: var(--espaco-5);
   border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-md);
-  background: var(--cor-superficie);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
 }
 
 .qrEmDestaque {
@@ -29,7 +29,7 @@
   justify-content: center;
   padding: var(--espaco-4);
   background: #fff; /* fundo branco literal: requisito de leitura do QR, nao desenho */
-  border-radius: var(--raio-md);
+  border-radius: var(--raio-2);
 }
 
 .link {
@@ -41,7 +41,7 @@
 
 .link code {
   overflow-wrap: anywhere;
-  color: var(--cor-texto);
+  color: var(--cor-texto-primario);
 }
 
 .acoes {

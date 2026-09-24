@@ -25,7 +25,23 @@ const configuracao: NextConfig = {
   // devolver 403 de verdade em vez de redirecionar ou estourar 500. Ver ADR-026.
   experimental: { authInterrupts: true },
   async headers() {
-    return [{ source: "/(.*)", headers: cabecalhosSeguranca }];
+    return [
+      { source: "/(.*)", headers: cabecalhosSeguranca },
+      {
+        /*
+         * A URL de envio carrega o token da empresa. `no-referrer` impede que
+         * ele vaze no Referer para qualquer destino — e `no-store` que fique
+         * em cache compartilhado. Sao os unicos cabecalhos que diferem do
+         * restante do site.
+         */
+        source: "/enviar/:caminho*",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "no-store" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+    ];
   },
 };
 

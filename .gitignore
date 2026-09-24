@@ -39,3 +39,6 @@ tsconfig.tsbuildinfo
 /segredos/
 .vercel
 .env*
+
+# Armazenamento local de arquivos (ARQUIVOS_DIRETORIO em desenvolvimento)
+/arquivos/

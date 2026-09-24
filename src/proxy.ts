@@ -17,6 +17,13 @@ export function proxy(requisicao: NextRequest) {
 }
 
 export const config = {
-  // Tudo, exceto arquivos estaticos e as rotas do Next.
-  matcher: ["/((?!_next/|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico|css|js|map|txt|woff2?)$).*)"],
+  /*
+   * Tudo, exceto arquivos estaticos, as rotas do Next e a pagina publica de
+   * envio (`/enviar/...`). Esta ultima fica de fora por dois motivos: nao ha
+   * sessao la, entao o cabecalho de rota nao serve a ninguem; e uma
+   * requisicao que passa pelo proxy tem o corpo limitado a 10 MB pelo Next —
+   * uma foto de celular passa disso. Fora do proxy, o corpo vai direto ao
+   * Route Handler, que confere o tamanho antes de ler.
+   */
+  matcher: ["/((?!_next/|favicon.ico|enviar/|.*\\.(?:png|jpg|jpeg|gif|svg|ico|css|js|map|txt|woff2?)$).*)"],
 };

@@ -1,0 +1,68 @@
+/*
+ * Pagina publica de envio: celular fraco, 3G, sol no balcao.
+ *
+ * Alvos de toque grandes e nada de decoracao. O campo de arquivo e o proprio
+ * controle nativo — e ele que abre a camera — com area de toque generosa.
+ */
+.formulario {
+  display: grid;
+  gap: var(--espaco-5);
+}
+
+.campo {
+  display: grid;
+  gap: var(--espaco-2);
+}
+
+.rotulo {
+  font-weight: var(--peso-medio);
+  font-size: var(--texto-md);
+}
+
+.opcional {
+  color: var(--cor-texto-secundario);
+  font-weight: var(--peso-normal);
+}
+
+.dica {
+  margin: 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.arquivo {
+  width: 100%;
+  min-height: 3rem;
+  padding: var(--espaco-3);
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  font-size: var(--texto-md);
+}
+
+.texto {
+  width: 100%;
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  font: inherit;
+}
+
+.botao {
+  min-height: 3.25rem;
+  padding: var(--espaco-3) var(--espaco-5);
+  border: none;
+  border-radius: var(--raio-2);
+  background: var(--cor-marca-acao);
+  color: var(--cor-texto-invertido);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-medio);
+}
+
+.protocolo {
+  display: block;
+  margin: var(--espaco-4) 0;
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.04em;
+}

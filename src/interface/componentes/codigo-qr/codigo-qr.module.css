@@ -5,7 +5,7 @@
   max-width: 18rem;
   height: auto;
   border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-md);
+  border-radius: var(--raio-2);
 }
 
 @media print {

@@ -45,8 +45,14 @@ describe.skipIf(!urlBancoTeste)("tokens de captura: isolamento entre empresas (P
     `);
   });
 
+  const id0 = () => crypto.randomUUID();
+
   afterAll(async () => {
-    await banco.execute(sql`DELETE FROM eventos_auditoria WHERE usuario_id = ${usuarioId}`).catch(() => undefined);
+    await banco.execute(sql`DELETE FROM eventos_auditoria WHERE usuario_id = ${usuarioId} OR empresa_id IN (${escopoA.empresaId}, ${escopoB.empresaId})`).catch(() => undefined);
+    await banco.execute(sql`DELETE FROM anexos_documentos_capturados WHERE documento_id IN (SELECT id FROM documentos_capturados WHERE empresa_id IN (${escopoA.empresaId}, ${escopoB.empresaId}))`);
+    await banco.execute(sql`DELETE FROM documentos_capturados WHERE empresa_id IN (${escopoA.empresaId}, ${escopoB.empresaId})`);
+    await banco.execute(sql`DELETE FROM arquivos WHERE empresa_id IN (${escopoA.empresaId}, ${escopoB.empresaId})`);
+    await banco.execute(sql`DELETE FROM sequencias_codigo WHERE empresa_id IN (${escopoA.empresaId}, ${escopoB.empresaId})`);
     await banco.execute(sql`DELETE FROM tokens_captura WHERE criado_por = ${usuarioId}`);
     await banco.execute(sql`DELETE FROM "user" WHERE id = ${usuarioId}`);
     await apagarCenarioBase(banco as BancoTeste, cenarioA);
@@ -110,6 +116,29 @@ describe.skipIf(!urlBancoTeste)("tokens de captura: isolamento entre empresas (P
     `);
     expect(eventos.map((e) => e.acao)).toEqual(["qr_captura.gerado", "qr_captura.revogado", "qr_captura.gerado"]);
     expect(JSON.stringify(eventos)).not.toMatch(/[0-9a-f]{64}/);
+  });
+
+  it("um documento recebido por A nao aparece na contagem de B, e o arquivo de A nao e reaproveitado por B", async () => {
+    const resolvido = await repositorio.resolverEscopoPorToken(hashDoTokenDeCaptura("token-da-empresa-A-001"));
+    const impressao = "a".repeat(64);
+    const { id, codigo } = await repositorio.receberDocumento(escopoA, {
+      tokenId: resolvido!.tokenId,
+      ano: 2026,
+      observacao: "nota do fornecedor",
+      arquivos: [{ novo: { chaveArmazenamento: `${escopoA.empresaId}/2026/09/${id0()}.bin`, nomeOriginal: "nota.jpg", tipoConteudo: "image/jpeg", tamanhoBytes: 10, impressaoDigital: impressao } }],
+      remetente: { ipAnonimo: "v1:" + "b".repeat(64), agenteUsuario: "teste" },
+    });
+    expect(codigo).toMatch(/^DC-2026-\d{6}$/);
+
+    expect(await repositorio.contarPendentes(escopoA)).toBe(1);
+    expect(await repositorio.contarPendentes(escopoB)).toBe(0);
+    expect(await repositorio.procurarArquivoPorImpressao(escopoA, impressao)).not.toBeNull();
+    expect(await repositorio.procurarArquivoPorImpressao(escopoB, impressao)).toBeNull();
+
+    const [evento] = await banco.execute<{ origem: string; ip: string | null; usuario_id: string | null }>(sql`
+      SELECT origem, ip, usuario_id FROM eventos_auditoria WHERE entidade_id = ${id}
+    `);
+    expect(evento).toEqual({ origem: "captura_publica", ip: "v1:" + "b".repeat(64), usuario_id: null });
   });
 
   it("revogar em A mata o token: nada resolve, nada ativo", async () => {

@@ -35,6 +35,10 @@ class RepositorioEmMemoria implements RepositorioCaptura {
     if (!this.ativo || this.ativo.hash !== tokenHash) return null;
     return { escopo, tokenId: this.ativo.id, limiteEnviosHora: 20, nomeEmpresa: "Empresa" };
   }
+  // Fora do assunto deste teste (recebimento de documentos):
+  async procurarArquivoPorImpressao() { return null; }
+  async receberDocumento(): Promise<{ id: string; codigo: string }> { throw new Error("nao usado aqui"); }
+  async contarPendentes() { return 0; }
 }
 
 describe("casos de uso do QR de captura", () => {
