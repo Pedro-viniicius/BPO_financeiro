@@ -27,11 +27,35 @@
 
 /* ---- Grafico de saldo ---- */
 
+/* O grafico com o proprio titulo. A margem de baixo continua no .grafico, onde a legenda encosta. */
+.figura {
+  margin: 0;
+}
+
+.tituloGrafico {
+  margin-bottom: var(--espaco-2);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.valorColuna {
+  flex: none;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.valorNegativo {
+  color: var(--cor-perigo-forte);
+}
+
 .grafico {
   display: flex;
   align-items: flex-end;
   gap: var(--espaco-1);
-  height: 11rem;
+  height: 12.5rem;
   margin-bottom: var(--espaco-5);
   padding: var(--espaco-4);
   border: 1px solid var(--cor-borda);

@@ -304,35 +304,52 @@ export default async function PaginaFluxoDeCaixa({
  * Grafico de saldo ao longo do periodo.
  *
  * Barras em HTML e CSS, sem biblioteca: sao poucos valores, e uma dependencia
- * de grafico traria peso e licenca para desenhar retangulos. Cada barra tem
- * `title` e texto para leitor de tela — o grafico e reforco, nunca a unica
- * forma de ler o numero, que esta na tabela logo abaixo.
+ * de grafico traria peso e licenca para desenhar retangulos. O numero exato
+ * esta na tabela logo abaixo; o grafico mostra a tendencia.
+ *
+ * Titulo VISIVEL e valor em cima de cada barra: antes o que a altura media
+ * ("saldo ao final do periodo") so existia para leitor de tela, e o valor so
+ * aparecia passando o mouse — o que nao existe no celular. Com mais de 12
+ * colunas (agrupamento por dia ou semana), os valores ficariam sobrepostos e
+ * saem; o titulo diz onde le-los.
  */
+const MAXIMO_DE_COLUNAS_COM_VALOR = 12;
+const VALOR_COMPACTO = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", notation: "compact", minimumFractionDigits: 0, maximumFractionDigits: 1 });
+
 function GraficoDeSaldo({ periodos }: { readonly periodos: readonly LinhaDoFluxo[] }) {
   if (periodos.length === 0) return null;
 
   const valores = periodos.map((p) => Number(p.saldoFinal.paraTexto()));
   const maximo = Math.max(...valores.map(Math.abs), 1);
+  const comValores = periodos.length <= MAXIMO_DE_COLUNAS_COM_VALOR;
 
   return (
-    <div className={estilos.grafico} role="img" aria-label="Saldo ao final de cada período">
-      {periodos.map((periodo, indice) => {
-        const valor = valores[indice]!;
-        const altura = Math.max(2, Math.round((Math.abs(valor) / maximo) * 100));
-        const negativo = valor < 0;
-        return (
-          <div key={`g-${periodo.inicio}-${periodo.natureza}`} className={estilos.coluna}>
-            <div className={estilos.trilho}>
-              <div
-                className={`${estilos.haste} ${periodo.natureza === "previsto" ? estilos.hastePrevista : ""} ${negativo ? estilos.hasteNegativa : ""}`}
-                style={{ height: `${altura}%` }}
-                title={`${periodo.rotulo}: ${periodo.saldoFinal.formatarBrasileiro()}${periodo.natureza === "previsto" ? " (previsto)" : ""}`}
-              />
+    <figure className={estilos.figura}>
+      <figcaption className={estilos.tituloGrafico}>
+        Saldo ao final de cada período{comValores ? "" : " — os valores estão na tabela abaixo"}
+      </figcaption>
+      <div className={estilos.grafico} role="img" aria-label="Saldo ao final de cada período. Os valores estão na tabela abaixo.">
+        {periodos.map((periodo, indice) => {
+          const valor = valores[indice]!;
+          const altura = Math.max(2, Math.round((Math.abs(valor) / maximo) * 100));
+          const negativo = valor < 0;
+          return (
+            <div key={`g-${periodo.inicio}-${periodo.natureza}`} className={estilos.coluna}>
+              {comValores ? (
+                <span className={`${estilos.valorColuna} ${negativo ? estilos.valorNegativo : ""}`}>{VALOR_COMPACTO.format(valor)}</span>
+              ) : null}
+              <div className={estilos.trilho}>
+                <div
+                  className={`${estilos.haste} ${periodo.natureza === "previsto" ? estilos.hastePrevista : ""} ${negativo ? estilos.hasteNegativa : ""}`}
+                  style={{ height: `${altura}%` }}
+                  title={`${periodo.rotulo}: ${periodo.saldoFinal.formatarBrasileiro()}${periodo.natureza === "previsto" ? " (previsto)" : ""}`}
+                />
+              </div>
+              <span className={estilos.rotuloColuna}>{periodo.rotulo.split(" ")[0]}</span>
             </div>
-            <span className={estilos.rotuloColuna}>{periodo.rotulo.split(" ")[0]}</span>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </figure>
   );
 }
