@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { formatarDataBrasileira, formatarDinheiro, tomDaSituacao } from "../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../_apoio/contexto-financeiro";
+import { filtroDaUrl } from "../_apoio/filtros-da-url";
 import { Paginador, paginaDaUrl, TAMANHO_DA_PAGINA } from "../_apoio/paginador";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { NOMES_SITUACAO_RECEBER, type SituacaoDerivada } from "@/compartilhado/financeiro/indice";
@@ -34,10 +35,8 @@ export default async function PaginaContasReceber({
 }) {
   const { escopo, hoje, permissoes } = await exigirContextoFinanceiro("contas_receber.visualizar", "/contas-receber");
   const parametros = await searchParams;
-  const texto = (chave: string): string | undefined => {
-    const valor = parametros[chave];
-    return typeof valor === "string" && valor.trim() ? valor.trim() : undefined;
-  };
+  // Filtro invalido na URL conta como ausente, em vez de derrubar a consulta.
+  const texto = (chave: string): string | undefined => filtroDaUrl(parametros, chave);
 
   const situacao = texto("situacao") as SituacaoDerivada | undefined;
   const filtro = {

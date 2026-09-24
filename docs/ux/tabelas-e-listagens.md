@@ -69,6 +69,7 @@ Regras:
 | Fichas de filtro ativo | Cada filtro aplicado vira uma ficha removivel com `x` |
 | `Limpar filtros` | Aparece so quando ha algo a limpar |
 | URL | Todo filtro esta na *query string*: recarregar, compartilhar e voltar funcionam |
+| Valor invalido na URL | Conta como filtro ausente (`_apoio/filtros-da-url.ts`); nunca derruba a lista nem a esvazia em silencio |
 | Persistencia | O ultimo conjunto de filtros por tela e lembrado na sessao; `Limpar` volta ao padrao |
 | Padrao de periodo | Contas a pagar/receber: `Próximos 30 dias`. Movimentacoes: `Mês atual`. DRE: `Mês fechado anterior` |
 
