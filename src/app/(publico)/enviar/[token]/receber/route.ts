@@ -1,3 +1,4 @@
+import { comCorpoLimitado, ehCorpoAcimaDoLimite } from "@/compartilhado/http/corpo-limitado";
 import {
   autorizarEnvio, EnvioRecusado, LimiteDeTentativasExcedido, receberEnvio, TAMANHO_MAXIMO_ENVIO_BYTES,
   TokenDeCapturaInvalido, type ArquivoEnviado, type EscopoResolvidoPorToken,
@@ -60,21 +61,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   }
 
   /*
-   * Tamanho conferido pelo cabecalho ANTES de ler o corpo: um envio acima do
-   * limite e recusado sem gastar memoria com ele. A folga cobre os cabecalhos
-   * do multipart. O Caddy corta antes ainda (413), mas a demonstracao na
-   * Vercel nao tem Caddy na frente — por isso a conferencia vive aqui tambem.
+   * Tamanho conferido em DUAS camadas, ambas antes de gastar memoria:
+   *
+   * 1. pelo `Content-Length` declarado — barato, recusa sem ler nada;
+   * 2. pelos BYTES QUE CHEGAM (`comCorpoLimitado`) — porque o cabecalho e
+   *    promessa de quem envia, e uma transferencia em pedacos (`chunked`)
+   *    nem o traz. Sem esta camada, `formData()` leria um corpo de qualquer
+   *    tamanho para a memoria antes de a conferencia acima ter efeito.
+   *
+   * A folga cobre os cabecalhos do multipart. O Caddy corta antes ainda (413)
+   * no Modelo A; nos Modelos B/C o proxy e do operador, e a demonstracao na
+   * Vercel nao tem proxy nenhum — por isso as duas camadas vivem aqui tambem.
    */
+  const TETO_DO_CORPO = TAMANHO_MAXIMO_ENVIO_BYTES + 64 * 1024;
   const tamanhoDeclarado = Number(request.headers.get("content-length") ?? "0");
-  if (tamanhoDeclarado > TAMANHO_MAXIMO_ENVIO_BYTES + 64 * 1024) {
+  if (tamanhoDeclarado > TETO_DO_CORPO) {
     return irPara(`/enviar/${token}?erro=envio_grande`);
   }
 
-  // So agora o corpo e lido.
+  // So agora o corpo e lido — e interrompido no primeiro byte alem do teto.
   let formulario: FormData;
   try {
-    formulario = await request.formData();
-  } catch {
+    formulario = await comCorpoLimitado(request, TETO_DO_CORPO).formData();
+  } catch (erro) {
+    if (ehCorpoAcimaDoLimite(erro)) return irPara(`/enviar/${token}?erro=envio_grande`);
     return irPara(`/enviar/${token}?erro=falha`);
   }
 

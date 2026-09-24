@@ -168,6 +168,8 @@
   extensao (ADR-032). CSV exportado sem execucao de formulas: `campoCsv`
   prefixa `'` em celulas que comecam com `=`, `+`, `-`, `@`, tabulacao ou
   retorno de carro (demonstrativo e pacote completo).
+- O envio publico limita o corpo pelos BYTES QUE CHEGAM (`comCorpoLimitado`),
+  nao so pelo `Content-Length` declarado; o Caddy corta antes, em 41 MB.
 - Anexos servidos com `Content-Disposition: attachment` e sem execucao.
 
 ## 14. Integracoes externas

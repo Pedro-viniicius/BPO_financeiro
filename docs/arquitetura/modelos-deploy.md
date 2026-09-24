@@ -69,8 +69,15 @@ Passo a passo:
 5. docker compose up -d
 6. docker compose logs migracao   → "Migracoes aplicadas com sucesso."
 7. curl http://127.0.0.1:3000/api/saude → {"situacao":"ok","banco":"ok"}
-8. Configure o proxy HTTPS (exemplo Caddy):
-     financeiro.suaempresa.com.br { reverse_proxy 127.0.0.1:3000 }
+8. Configure o proxy HTTPS. Ele PRECISA cortar o corpo do envio publico de
+   documentos em 41 MB (a aplicacao tambem limita pelos bytes que chegam, mas
+   o corte antes dela poupa rede e memoria). Exemplo Caddy:
+     financeiro.suaempresa.com.br {
+       @recebimento path_regexp ^/enviar/[A-Za-z0-9_-]{22}/receber$
+       request_body @recebimento { max_size 41MB }
+       reverse_proxy 127.0.0.1:3000
+     }
+   No Nginx: `client_max_body_size 41m;` no `location ~ ^/enviar/.+/receber$`.
 9. Crie o primeiro usuario administrador (instalador — Gate 5).
 ```
 

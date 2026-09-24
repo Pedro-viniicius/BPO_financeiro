@@ -12,7 +12,10 @@
 #   cp .env.exemplo .env   (preencha)
 #   docker compose up -d
 # Um proxy reverso com HTTPS (Caddy, Nginx, Traefik) deve ficar na frente da
-# porta 3000. Ver docs/arquitetura/modelos-deploy.md.
+# porta 3000. Ver docs/arquitetura/modelos-deploy.md. O proxy PRECISA cortar o
+# corpo de `POST /enviar/<token>/receber` em 41 MB (no Caddy: `request_body`,
+# ver o Caddyfile deste repositorio): a aplicacao tambem limita pelos bytes que
+# chegam, mas o corte antes dela poupa rede e memoria.
 # ============================================================================
 services:
   banco:
