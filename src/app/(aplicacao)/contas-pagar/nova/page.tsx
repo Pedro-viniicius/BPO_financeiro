@@ -34,7 +34,12 @@ export default async function PaginaNovaContaPagar() {
         <Aviso
           tom="informacao"
           titulo={`Antes, cadastre ${faltando.map((f) => f.o).join(" e ")}`}
-          acao={<Link className="acao-primaria" href="/cadastros">Ir para Cadastros</Link>}
+          acao={
+            // Direto ao formulario que falta: sem fornecedor, o de pessoa ja com o papel marcado; senao, o de categoria.
+            <Link className="acao-primaria" href={fornecedores.length === 0 ? "/cadastros?papel=fornecedor#cadastrar-pessoa" : "/cadastros#nova-categoria"}>
+              {fornecedores.length === 0 ? "Cadastrar fornecedor" : "Criar categoria"}
+            </Link>
+          }
         >
           Toda conta a pagar precisa de um fornecedor e de uma categoria — é a categoria que responde depois “com o que estamos gastando?”.
         </Aviso>

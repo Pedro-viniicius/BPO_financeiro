@@ -52,7 +52,12 @@ export default async function PaginaNovaDivida() {
         <Aviso
           tom="informacao"
           titulo={`Antes, cadastre ${faltando.map((f) => f.o).join(" e ")}`}
-          acao={<Link className="acao-primaria" href="/cadastros">Ir para Cadastros</Link>}
+          acao={
+            // Direto ao formulario que falta. O credor nao tem papel fixo (banco, financeira, fornecedor), entao nada vem marcado.
+            <Link className="acao-primaria" href={credores.length === 0 ? "/cadastros#cadastrar-pessoa" : "/cadastros#nova-categoria"}>
+              {credores.length === 0 ? "Cadastrar credor" : "Criar categoria"}
+            </Link>
+          }
         >
           O credor é uma pessoa do cadastro — o banco ou a financeira. E os juros precisam de uma categoria do grupo
           “Resultado financeiro”: é ela que separa o custo do dinheiro das despesas da operação.

@@ -20,7 +20,7 @@ function usarErro(estado: EstadoFormulario) {
  * grafica" duas vezes, uma como cliente e outra como fornecedor, criaria dois
  * cadastros para a mesma empresa e dois historicos que nunca se encontram.
  */
-export function FormularioPessoa() {
+export function FormularioPessoa({ papelSugerido }: { readonly papelSugerido?: "cliente" | "fornecedor" } = {}) {
   const [estado, enviar, pendente] = useActionState(acaoCriarPessoa, INICIAL);
   const guardaEnviar = useGuardaDoFormulario(estado);
   const erro = usarErro(estado);
@@ -59,12 +59,12 @@ export function FormularioPessoa() {
         <legend>Papéis nesta empresa</legend>
         <p>
           <label htmlFor="papelCliente">
-            <input id="papelCliente" type="checkbox" name="papelCliente" /> Cliente — pode aparecer em contas a receber
+            <input id="papelCliente" type="checkbox" name="papelCliente" defaultChecked={papelSugerido === "cliente"} /> Cliente — pode aparecer em contas a receber
           </label>
         </p>
         <p>
           <label htmlFor="papelFornecedor">
-            <input id="papelFornecedor" type="checkbox" name="papelFornecedor" /> Fornecedor — pode aparecer em contas a pagar
+            <input id="papelFornecedor" type="checkbox" name="papelFornecedor" defaultChecked={papelSugerido === "fornecedor"} /> Fornecedor — pode aparecer em contas a pagar
           </label>
         </p>
         {estado.campos?.papelCliente?.[0] ? <p role="alert">{estado.campos.papelCliente[0]}</p> : null}

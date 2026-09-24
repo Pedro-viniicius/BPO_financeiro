@@ -72,7 +72,7 @@ export default async function PaginaPlanejarOrcamento({
         <EstadoVazio
           titulo="Nenhuma categoria para orçar"
           explicacao="O orçamento é por categoria financeira. Crie o plano de contas inicial em Cadastros para começar."
-          acao={<Link className="acao-primaria" href="/cadastros">Ir para Cadastros</Link>}
+          acao={<Link className="acao-primaria" href="/cadastros#nova-categoria">Criar categorias</Link>}
         />
       ) : (
         <>

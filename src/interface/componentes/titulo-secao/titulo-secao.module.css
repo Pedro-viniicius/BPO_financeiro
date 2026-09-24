@@ -11,6 +11,8 @@
   gap: var(--espaco-4);
   margin-top: var(--espaco-6);
   margin-bottom: var(--espaco-3);
+  /* Quem chega por ancora ve o titulo com folga, nao colado na borda. */
+  scroll-margin-top: var(--espaco-4);
 }
 
 .secao:first-child {

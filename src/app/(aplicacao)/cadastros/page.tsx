@@ -23,6 +23,12 @@ export default async function PaginaCadastros({
   const { escopo, permissoes } = await exigirContextoFinanceiro("cadastros.visualizar", "/cadastros");
   const parametros = await searchParams;
   const busca = typeof parametros.busca === "string" ? parametros.busca : undefined;
+  /*
+   * Quem chega de "Nova conta a pagar" (ou a receber) sem fornecedor (ou
+   * cliente) vem com `?papel=`: o formulario abre com esse papel ja marcado.
+   * Sem papel nenhum o cadastro e recusado, e era o passo que se esquecia.
+   */
+  const papelSugerido = parametros.papel === "fornecedor" || parametros.papel === "cliente" ? parametros.papel : undefined;
 
   const cadastros = repositorios.cadastros();
   const [pessoas, categorias, contasPlano] = await Promise.all([
@@ -76,8 +82,8 @@ export default async function PaginaCadastros({
 
       {podeEditar ? (
         <>
-          <TituloSecao titulo="Cadastrar pessoa" />
-          <FormularioPessoa />
+          <TituloSecao id="cadastrar-pessoa" titulo="Cadastrar pessoa" />
+          <FormularioPessoa {...(papelSugerido ? { papelSugerido } : {})} />
         </>
       ) : null}
 
@@ -106,7 +112,7 @@ export default async function PaginaCadastros({
 
       {podeEditar ? (
         <>
-          <TituloSecao titulo="Nova categoria" />
+          <TituloSecao id="nova-categoria" titulo="Nova categoria" />
           <FormularioCategoria contasPlano={contasPlano} />
         </>
       ) : null}

@@ -34,7 +34,12 @@ export default async function PaginaNovaContaReceber() {
         <Aviso
           tom="informacao"
           titulo={`Antes, cadastre ${faltando.map((f) => f.o).join(" e ")}`}
-          acao={<Link className="acao-primaria" href="/cadastros">Ir para Cadastros</Link>}
+          acao={
+            // Direto ao formulario que falta: sem cliente, o de pessoa ja com o papel marcado; senao, o de categoria.
+            <Link className="acao-primaria" href={clientes.length === 0 ? "/cadastros?papel=cliente#cadastrar-pessoa" : "/cadastros#nova-categoria"}>
+              {clientes.length === 0 ? "Cadastrar cliente" : "Criar categoria"}
+            </Link>
+          }
         >
           Toda conta a receber precisa de um cliente e de uma categoria — é a categoria que responde depois “de onde vem a receita?”.
         </Aviso>

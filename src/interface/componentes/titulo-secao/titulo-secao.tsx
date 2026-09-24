@@ -11,13 +11,19 @@ export interface TituloSecaoProps {
   readonly acao?: ReactNode;
   /** Nivel do titulo no documento. Padrao: h2. */
   readonly nivel?: 2 | 3;
+  /**
+   * Ancora para links que levam direto a esta secao
+   * (ex.: `/cadastros#cadastrar-pessoa`). Fica no titulo, e nao no conteudo,
+   * para que o salto mostre o titulo junto do que vem abaixo dele.
+   */
+  readonly id?: string;
 }
 
 /** Cabecalho de uma secao dentro da pagina: da hierarquia sem pesar a tela. */
-export function TituloSecao({ titulo, explicacao, acao, nivel = 2 }: TituloSecaoProps) {
+export function TituloSecao({ titulo, explicacao, acao, nivel = 2, id }: TituloSecaoProps) {
   const Titulo = nivel === 2 ? "h2" : "h3";
   return (
-    <div className={estilos.secao}>
+    <div className={estilos.secao} id={id}>
       <div className={estilos.textos}>
         <Titulo className={estilos.titulo}>{titulo}</Titulo>
         {explicacao ? <p className={estilos.explicacao}>{explicacao}</p> : null}

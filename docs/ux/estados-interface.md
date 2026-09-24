@@ -40,6 +40,14 @@ vazio**, **o que fazer agora**. Nunca uma caixa cinza escrita "Sem dados".
 Regra: estado vazio **por filtro** e diferente de estado vazio **de verdade**.
 Oferecer `Nova conta` para quem filtrou errado e uma resposta idiota.
 
+Regra: quando a tela depende de outro cadastro (nova conta sem fornecedor,
+sem cliente ou sem categoria; dívida sem credor; orçamento sem categoria), a
+acao diz o passo e leva ao formulario exato, nao a pagina inteira:
+`Cadastrar cliente` abre `/cadastros?papel=cliente#cadastrar-pessoa`, com o
+papel ja marcado; `Criar categoria` abre `/cadastros#nova-categoria`. Um
+"Ir para Cadastros" deixava a pessoa procurando o formulario numa pagina
+longa e esquecendo de marcar o papel, o que faz o cadastro ser recusado.
+
 ## 2. Carregamento
 
 | Situacao | Padrao |
