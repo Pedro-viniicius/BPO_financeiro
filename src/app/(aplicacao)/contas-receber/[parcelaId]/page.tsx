@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { NOMES_SITUACAO_RECEBER } from "@/compartilhado/financeiro/indice";
-import { Aviso, CabecalhoPagina, CartaoResumo, EstadoVazio, SeloSituacao, ValorFinanceiro } from "@/interface/componentes/indice";
+import { Aviso, CabecalhoPagina, CartaoResumo, EstadoVazio, SeloSituacao, TituloSecao, ValorFinanceiro } from "@/interface/componentes/indice";
 
 import { formatarDataBrasileira, formatarDinheiro, tomDaSituacao } from "../../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../../_apoio/contexto-financeiro";
@@ -86,10 +86,10 @@ export default async function PaginaContaReceber({ params }: { params: Promise<{
 
       {parcelada ? (
         <>
-          <h2>Parcelas desta conta</h2>
-          <p>
-            {conta.quantidadeParcelas} parcelas · ainda em aberto {formatarDinheiro(saldoDoTitulo)}
-          </p>
+          <TituloSecao
+            titulo="Parcelas desta conta"
+            explicacao={`${conta.quantidadeParcelas} parcelas · ainda em aberto ${formatarDinheiro(saldoDoTitulo)}`}
+          />
           <table className={estilos.parcelas}>
             <caption className="apenas-leitor-de-tela">Parcelas do título {conta.codigo}</caption>
             <thead>
@@ -128,7 +128,7 @@ export default async function PaginaContaReceber({ params }: { params: Promise<{
         </>
       ) : null}
 
-      <h2>Recebimentos</h2>
+      <TituloSecao titulo="Recebimentos" />
       {conta.recebimentos.length === 0 ? (
         <EstadoVazio
           titulo="Nenhum recebimento registrado"
@@ -185,7 +185,7 @@ export default async function PaginaContaReceber({ params }: { params: Promise<{
         </ul>
       )}
 
-      <h2>Registrar recebimento</h2>
+      <TituloSecao titulo="Registrar recebimento" />
       {conta.tituloCancelado ? (
         <Aviso tom="atencao" titulo="Conta cancelada">
           Não é possível registrar recebimento numa conta cancelada.

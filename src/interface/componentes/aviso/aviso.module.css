@@ -8,6 +8,11 @@
   font-size: var(--texto-base);
 }
 
+/* Dois avisos seguidos (ex.: sem e-mail configurado + um so administrador) nao se tocam. */
+.aviso + .aviso {
+  margin-top: var(--espaco-3);
+}
+
 .simbolo {
   flex: none;
   display: inline-flex;

@@ -194,3 +194,16 @@ textarea {
   color: var(--cor-texto-primario);
   font: inherit;
 }
+
+/*
+ * Formularios em fluxo simples (sem classe de layout): um campo embaixo do
+ * outro. Sem esta regra, o rotulo de um campo encostava na caixa do campo de
+ * cima — cadastro de pessoa, registrar pagamento, ajuste de saldo — e a
+ * proximidade deixava de dizer qual rotulo e de qual campo. Formularios com
+ * classe propria (grade, linha de filtros) decidem o proprio espacamento.
+ * Campos ocultos nao contam: o primeiro campo visivel nao ganha margem.
+ */
+form:not([class]) > :not(input[type="hidden"]) ~ :not(input[type="hidden"]) {
+  margin-top: var(--espaco-4);
+}
+

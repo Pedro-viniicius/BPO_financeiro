@@ -1,9 +1,20 @@
+/*
+ * Uma secao nova comeca com respiro: sem margem acima, o titulo colava no
+ * fim do bloco anterior (um estado vazio, um botao) e parecia legenda dele,
+ * nao o comeco de outro assunto. A primeira secao de um container nao
+ * precisa do espaco — quem esta acima dela ja e o cabecalho.
+ */
 .secao {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: var(--espaco-4);
+  margin-top: var(--espaco-6);
   margin-bottom: var(--espaco-3);
+}
+
+.secao:first-child {
+  margin-top: 0;
 }
 
 .textos {
