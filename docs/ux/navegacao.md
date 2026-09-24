@@ -47,8 +47,8 @@ regiao que muda (conteudo). A altura do cabecalho e a largura da barra lateral
 | Elemento | Comportamento | Por que existe |
 |---|---|---|
 | Seletor de empresa | Botao com o nome da empresa ativa; abre lista com busca; `Ctrl+K` → "Trocar empresa" | Carlos troca dezenas de vezes/dia; errar de empresa e o erro mais caro do produto |
-| Busca | Campo unico; busca fornecedor, cliente, codigo (`CP-2026-000123`), valor e documento | Reconhecimento em vez de memorizacao |
-| Sino | Contador de pontos de atencao nao lidos; abre painel lateral | Alerta e interrupcao, nao destino (IA §5) |
+| Busca | Campo unico; busca fornecedor, cliente, codigo (`CP-2026-000123`), valor e documento. **Hoje** (`/busca`): contas a pagar e a receber por descricao, codigo e pessoa; fornecedores e clientes por nome e CPF/CNPJ; ainda nao por valor. No celular, fica no topo do painel "Mais" | Reconhecimento em vez de memorizacao |
+| Sino | Contador de pontos de atencao nao lidos; abre painel lateral. **Ainda nao existe**: o botao so volta ao cabecalho junto com o painel — botao que nao faz nada nao entra | Alerta e interrupcao, nao destino (IA §5) |
 | Ajuda | Link para a documentacao e para o glossario da tela atual | Vocabulario financeiro precisa de socorro no lugar |
 | Usuario | Nome, papel na empresa ativa, preferencias, sair | Mostra o papel para explicar acoes ausentes |
 

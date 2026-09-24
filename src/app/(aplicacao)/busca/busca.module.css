@@ -1,0 +1,80 @@
+/*
+ * Resultados da busca global: uma lista curta por area, cada item com o que
+ * reconhece (descricao, codigo, pessoa, vencimento), o valor e a situacao.
+ */
+.area {
+  margin-top: var(--espaco-5);
+}
+
+.lista {
+  display: grid;
+  background: var(--superficie-cartao);
+  border: var(--largura-borda) solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas:
+    "titulo  valor situacao"
+    "detalhe valor situacao";
+  align-items: center;
+  gap: var(--espaco-1) var(--espaco-4);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-bottom: var(--largura-borda) solid var(--cor-borda);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.titulo {
+  grid-area: titulo;
+  min-width: 0;
+  font-weight: var(--peso-medio);
+  overflow-wrap: anywhere;
+}
+
+.detalhe {
+  grid-area: detalhe;
+  min-width: 0;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
+
+.valor {
+  grid-area: valor;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.acoes {
+  grid-area: valor / valor / situacao / situacao;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  justify-content: flex-end;
+}
+
+.acoes a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque-minimo);
+}
+
+@media (max-width: 767px) {
+  .item {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "titulo  titulo"
+      "detalhe detalhe"
+      "valor   situacao";
+  }
+
+  .acoes {
+    grid-area: valor / valor / situacao / situacao;
+    justify-content: flex-start;
+  }
+}

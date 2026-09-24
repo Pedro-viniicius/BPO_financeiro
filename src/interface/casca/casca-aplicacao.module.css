@@ -61,3 +61,23 @@
 .faixaAmbiente strong {
   font-weight: var(--peso-medio);
 }
+
+/* Busca no painel "Mais" do celular: o campo do cabecalho nao cabe nessa largura. */
+.buscaPainel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  margin-bottom: var(--espaco-4);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.buscaPainel input {
+  min-height: var(--alvo-toque-minimo);
+  padding: 0 var(--espaco-3);
+  border: var(--largura-borda) solid var(--cor-borda-forte);
+  border-radius: var(--raio-2);
+  background: var(--superficie-cartao);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-normal);
+}

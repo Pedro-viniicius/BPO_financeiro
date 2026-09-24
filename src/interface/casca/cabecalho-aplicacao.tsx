@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 import { Logotipo } from "../marca/logotipo";
 import estilos from "./cabecalho-aplicacao.module.css";
 
@@ -25,6 +27,10 @@ export interface CabecalhoAplicacaoProps {
 /**
  * Cabecalho fixo: empresa ativa, busca e usuario.
  *
+ * A busca e um formulario GET de verdade para `/busca`: funciona sem
+ * JavaScript, e `Ctrl+K` (ou `Cmd+K`) leva o foco ate ela de qualquer tela,
+ * como promete o texto do proprio campo.
+ *
  * Nao ha botao de avisos: o sino da especificacao (docs/ux/navegacao.md) so
  * entra quando existir o painel de pontos de atencao. Um botao que parece
  * clicavel e nao faz nada ensina a pessoa a desconfiar da tela inteira — e
@@ -45,6 +51,19 @@ export function CabecalhoAplicacao({
   aoSair,
 }: CabecalhoAplicacaoProps) {
   const podeTrocar = empresas.length > 1 && aoTrocarEmpresa !== undefined;
+  const campoBusca = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const aoTeclar = (evento: KeyboardEvent) => {
+      if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === "k" && campoBusca.current) {
+        evento.preventDefault();
+        campoBusca.current.focus();
+        campoBusca.current.select();
+      }
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, []);
 
   return (
     <header className={estilos.cabecalho}>
@@ -83,17 +102,21 @@ export function CabecalhoAplicacao({
         </div>
       )}
 
-      <div className={estilos.busca}>
+      <form className={estilos.busca} role="search" action="/busca" method="get">
         <label className="apenas-leitor-de-tela" htmlFor="busca-global">
-          Buscar fornecedor, cliente, código ou valor
+          Buscar conta, código, fornecedor, cliente ou CPF/CNPJ
         </label>
         <input
+          ref={campoBusca}
           id="busca-global"
+          name="q"
           type="search"
           className={estilos.campoBusca}
-          placeholder="Buscar (Ctrl+K)"
+          placeholder="Buscar conta, fornecedor ou cliente (Ctrl+K)"
+          enterKeyHint="search"
+          autoComplete="off"
         />
-      </div>
+      </form>
 
       <div className={estilos.usuario}>
         <span className={estilos.nomeUsuario}>{nomeDoUsuario}</span>

@@ -82,6 +82,21 @@ export function CascaAplicacao({ cabecalho, grupos, contadores, aviso, children 
 
       <BarraInferior itens={itensBarraInferior} aoAbrirMais={abrirPainel} />
       <Gaveta aberta={painelAberto} titulo="Navegação" aoFechar={fecharPainel}>
+        {/*
+          No celular o campo de busca do cabecalho nao cabe; ele vem para o
+          topo deste painel, o mesmo formulario GET para `/busca`.
+        */}
+        <form className={estilos.buscaPainel} role="search" action="/busca" method="get">
+          <label htmlFor="busca-painel">Buscar</label>
+          <input
+            id="busca-painel"
+            name="q"
+            type="search"
+            placeholder="Conta, código, fornecedor ou cliente"
+            enterKeyHint="search"
+            autoComplete="off"
+          />
+        </form>
         <NavegacaoLateral
           grupos={grupos}
           itensDeApoio={NAVEGACAO_APOIO}
