@@ -1,6 +1,7 @@
 import { MAXIMO_ARQUIVOS_POR_ENVIO, TAMANHO_MAXIMO_OBSERVACAO, TIPOS_ACEITOS_NA_CAPTURA } from "@/modulos/captura-documentos/publico";
 
 import { CompressaoDeFotos } from "./compressao-de-fotos";
+import { LeitorDeChave } from "./leitor-de-chave";
 import estilos from "./envio.module.css";
 
 const ACEITA = TIPOS_ACEITOS_NA_CAPTURA.join(",");
@@ -44,6 +45,27 @@ export function FormularioEnvio({ token }: { readonly token: string }) {
         </label>
         <p className={estilos.dica}>PDF ou foto já salva no aparelho. JPG, PNG e PDF, até 15 MB cada.</p>
         <input id="arquivos" name="arquivos" type="file" accept={ACEITA} multiple className={estilos.arquivo} />
+      </div>
+
+      <div className={estilos.campo}>
+        <label htmlFor="chaveAcesso" className={estilos.rotulo}>
+          Chave de acesso da nota <span className={estilos.opcional}>(opcional)</span>
+        </label>
+        <p className={estilos.dica}>
+          Os 44 caracteres impressos na nota fiscal. Recibo e boleto não têm — deixe em branco. Se o aparelho conseguir, a chave é
+          lida da foto sozinha.
+        </p>
+        <input
+          id="chaveAcesso"
+          name="chaveAcesso"
+          type="text"
+          maxLength={60}
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
+          className={`${estilos.texto} ${estilos.chave}`}
+        />
+        <LeitorDeChave campoChaveId="chaveAcesso" camposDeArquivo={["fotos", "arquivos"]} />
       </div>
 
       <div className={estilos.campo}>

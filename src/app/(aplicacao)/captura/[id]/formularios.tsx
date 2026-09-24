@@ -18,6 +18,8 @@ export interface DadosParaAprovar {
   readonly documentoId: string;
   readonly descricaoSugerida: string;
   readonly chaveAcesso: string | null;
+  /** Mes de emissao da chave, quando ha; senao hoje. */
+  readonly competenciaSugerida: string;
   readonly hoje: string;
   readonly fornecedores: readonly Opcao[];
   readonly categorias: readonly Opcao[];
@@ -78,7 +80,7 @@ export function FormularioAprovacao({ dados }: { readonly dados: DadosParaAprova
         </CampoFormulario>
 
         <CampoFormulario id="dataCompetencia" rotulo="Competência" dica="O mês a que a despesa pertence. Entra no prazo de guarda do documento." obrigatorio {...erro("dataCompetencia")}>
-          {(a) => <ControleTexto {...a} name="dataCompetencia" type="date" defaultValue={dados.hoje} />}
+          {(a) => <ControleTexto {...a} name="dataCompetencia" type="date" defaultValue={dados.competenciaSugerida} />}
         </CampoFormulario>
 
         <CampoFormulario id="chaveAcesso" rotulo="Chave de acesso (NF-e/NFC-e)" dica="44 posições. Opcional: recibo e boleto não têm." {...erro("chaveAcesso")}>

@@ -58,6 +58,19 @@ export default async function PaginaDocumento({ params }: { params: Promise<{ id
         {documento.tituloPagarId ? <div><dt>Conta criada</dt><dd><Link href={`/contas-pagar?busca=${encodeURIComponent(documento.codigo)}`}>Ver no Contas a pagar</Link></dd></div> : null}
       </dl>
 
+      {documento.dadosDaChave ? (
+        <>
+          <TituloSecao titulo="O que a chave de acesso já diz" />
+          <dl className={estilos.ficha}>
+            <div><dt>Tipo</dt><dd>{documento.dadosDaChave.nomeDoModelo} (modelo {documento.dadosDaChave.modelo})</dd></div>
+            <div><dt>Emissão</dt><dd>{documento.dadosDaChave.anoMes} · {documento.dadosDaChave.uf}</dd></div>
+            <div><dt>CNPJ do emitente</dt><dd className={estilos.chave}>{documento.dadosDaChave.cnpjEmitente}</dd></div>
+            <div><dt>Série / número</dt><dd>{documento.dadosDaChave.serie} / {documento.dadosDaChave.numero}</dd></div>
+          </dl>
+          <p className={estilos.anexoDetalhe}>Lido por posição, sem OCR. O valor total não está na chave: confira no documento e digite abaixo.</p>
+        </>
+      ) : null}
+
       {documento.duplicadoDe ? (
         <Aviso tom="atencao" titulo="Chave de acesso já recebida antes">
           A mesma chave está no documento <Link href={`/captura/${documento.duplicadoDe.id}`}>{documento.duplicadoDe.codigo}</Link>. Pode ser reenvio da mesma nota — confira antes de aprovar duas vezes.
@@ -100,6 +113,7 @@ export default async function PaginaDocumento({ params }: { params: Promise<{ id
               documentoId: documento.id,
               descricaoSugerida: documento.observacao?.slice(0, 120) ?? `Documento ${documento.codigo}`,
               chaveAcesso: documento.chaveAcesso,
+              competenciaSugerida: documento.dadosDaChave?.emissao ?? hoje,
               hoje,
               fornecedores,
               categorias: categoriasQueClassificamContas(categorias),

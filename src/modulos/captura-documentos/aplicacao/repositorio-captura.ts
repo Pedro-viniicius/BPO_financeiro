@@ -48,6 +48,8 @@ export interface DadosDoEnvio {
   readonly tokenId: string;
   readonly ano: number;
   readonly observacao: string | null;
+  /** Informada por quem enviou (digitada ou lida do QR da nota), ja validada pelo DV. */
+  readonly chaveAcesso: string | null;
   readonly arquivos: readonly ArquivoDoEnvio[];
   /** Para a trilha (LGPD): IP ja anonimizado por HMAC, nunca em claro. */
   readonly remetente: { readonly ipAnonimo: string | null; readonly agenteUsuario: string | null };

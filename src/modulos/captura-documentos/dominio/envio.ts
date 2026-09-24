@@ -29,7 +29,8 @@ export type MotivoRecusa =
   | "envio_grande"
   | "tipo_nao_permitido"
   | "observacao_longa"
-  | "limite_excedido";
+  | "limite_excedido"
+  | "chave_invalida";
 
 /** Mensagens para quem enviou: dizem O QUE fazer, nao o que deu errado por dentro. */
 export const MENSAGENS_DE_RECUSA: Record<MotivoRecusa, string> = {
@@ -40,6 +41,7 @@ export const MENSAGENS_DE_RECUSA: Record<MotivoRecusa, string> = {
   tipo_nao_permitido: "Só são aceitos JPG, PNG e PDF.",
   observacao_longa: `A observação pode ter no máximo ${TAMANHO_MAXIMO_OBSERVACAO} caracteres.`,
   limite_excedido: "Muitos envios na última hora para esta empresa. Aguarde um pouco e tente de novo.",
+  chave_invalida: "A chave de acesso não confere (44 posições, dígito verificador). Confira ou deixe em branco: a equipe preenche na conferência.",
 };
 
 export class EnvioRecusado extends ErroDominio {

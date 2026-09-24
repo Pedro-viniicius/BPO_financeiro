@@ -10,7 +10,7 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
 
 | Pasta | Conteudo |
 |---|---|
-| `dominio/` | `token-captura.ts` (token, hash, formato, link), `envio.ts` (limites do envio, tipos aceitos, recusas, protocolo), `limite-tentativas.ts` (janela, dois limites) e `conferencia.ts` (situacoes, marcos de retencao, erros da decisao) |
+| `dominio/` | `token-captura.ts` (token, hash, formato, link), `envio.ts` (limites do envio, tipos aceitos, recusas, protocolo), `limite-tentativas.ts` (janela, dois limites), `conferencia.ts` (situacoes, marcos de retencao, erros da decisao) |
 | `aplicacao/` | `repositorio-captura.ts` (contrato), `casos-de-uso-qr.ts`, `receber-envio.ts` e `conferir-documento.ts` (abrir com aviso de duplicidade, aprovar, rejeitar, reabrir); `testes/` tem o repositorio em memoria dos testes de caso de uso |
 | `infraestrutura/` | `esquema.ts` (migracao 0010) e `repositorio-captura-drizzle.ts` |
 
@@ -58,6 +58,15 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
     volta. Duplicidade de chave e AVISO na tela, dentro da empresa.
 13. **Arquivos sao servidos sempre como anexo**, com o tipo detectado, nunca
     renderizados (ADR-032).
+14. **A chave de acesso e interpretada por posicao, sem OCR** (ADR-029/030),
+    por `compartilhado/fiscal/chave-de-acesso.ts` — regra pura, que o navegador
+    tambem executa:
+    UF, ano-mes, CNPJ do emitente (alfanumerico desde a NT 2025.001), modelo,
+    serie e numero. Validada pelo DV no envio e na conferencia; chave errada e
+    recusada, nunca guardada "para depois"; em branco e aceita. No navegador
+    com `BarcodeDetector`, e lida da imagem escolhida (QR da NFC-e — a chave
+    vem dentro da URL — ou CODE-128). O valor total nao esta na chave: quem
+    confere digita.
 10. **Dois limites em Postgres** (ADR-031): por token, em envios validos,
     configuravel por empresa (padrao 20/h); por IP, so em tentativas com token
     invalido (10/h). Conferidos antes de ler o corpo. Sem
@@ -88,6 +97,9 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
   Ensaiada sem JavaScript: aprovacao criou `CP-2026-000001`. A conta a
   RECEBER nao nasce daqui ainda: documento recebido pelo QR e, por ora,
   compromisso com fornecedor.
+- Fatia 6: chave de acesso no envio (campo + leitor no navegador) e na
+  conferencia (dados extraidos, competencia sugerida pelo mes de emissao, data
+  de emissao no marco de retencao).
 
-Proximas fatias: extracao da chave de acesso; backup e exportacao dos anexos;
+Proxima fatia: backup e exportacao dos anexos;
 tarefas de retencao (arquivamento por abandono, expurgo, limpeza de tentativas).

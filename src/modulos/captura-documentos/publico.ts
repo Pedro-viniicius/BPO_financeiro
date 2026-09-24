@@ -28,3 +28,8 @@ export {
   ABANDONO_DIAS, AVISO_PENDENTE_DIAS, DocumentoNaoEncontrado, DocumentoNaoPendente, DocumentoNaoReabrivel,
   MotivoDeRejeicaoInvalido, NOMES_SITUACAO_DOCUMENTO, podeReabrir, TAMANHO_MAXIMO_MOTIVO, type SituacaoDocumento,
 } from "./dominio/conferencia";
+// A chave de acesso e regra fiscal PURA e vive em compartilhado/fiscal (o navegador tambem a usa); reexportada por conveniencia.
+export {
+  ChaveDeAcessoInvalida, digitoVerificador, extrairChaveDeTexto, FORMATO_CHAVE_DE_ACESSO, interpretarChaveDeAcesso,
+  normalizarChaveDeAcesso, type ChaveDeAcesso,
+} from "@/compartilhado/fiscal/indice";

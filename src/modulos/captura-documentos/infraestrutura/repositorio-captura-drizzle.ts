@@ -134,7 +134,7 @@ export class RepositorioCapturaDrizzle implements RepositorioCaptura {
 
       const [documento] = await transacao
         .insert(documentosCapturados)
-        .values({ empresaId: escopo.empresaId, tokenId: dados.tokenId, codigo, observacao: dados.observacao })
+        .values({ empresaId: escopo.empresaId, tokenId: dados.tokenId, codigo, observacao: dados.observacao, chaveAcesso: dados.chaveAcesso })
         .returning({ id: documentosCapturados.id });
 
       let ordem = 0;

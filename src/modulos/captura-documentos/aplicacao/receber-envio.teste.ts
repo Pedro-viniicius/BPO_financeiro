@@ -165,6 +165,27 @@ describe("receber envio pela pagina publica", () => {
     expect(repositorio.recebidos[0]!.arquivos).toEqual([{ existenteId: "arq-antigo" }, expect.objectContaining({ novo: expect.anything() })]);
   });
 
+  it("a chave de acesso e validada pelo DV: certa entra normalizada, errada e recusada, em branco e aceita", async () => {
+    const { token, dependencias, repositorio, armazenamento } = montar();
+    const LEGADA = "35260912345678000195550010000001231123456784";
+    await receberEnvio(dependencias, await autorizado(dependencias, token), {
+      arquivos: [arquivo("a.jpg", JPEG)], observacao: null, chaveAcesso: ` ${LEGADA.toLowerCase()} `, remetente,
+    });
+    expect(repositorio.recebidos[0]!.chaveAcesso).toBe(LEGADA);
+
+    await expect(
+      receberEnvio(dependencias, await autorizado(dependencias, token), {
+        arquivos: [arquivo("b.jpg", JPEG, "b")], observacao: null, chaveAcesso: LEGADA.slice(0, 43) + "5", remetente,
+      }),
+    ).rejects.toMatchObject({ motivo: "chave_invalida" });
+    expect(armazenamento.guardados).toHaveLength(1); // a recusa veio antes do disco
+
+    await receberEnvio(dependencias, await autorizado(dependencias, token), {
+      arquivos: [arquivo("c.jpg", JPEG, "c")], observacao: null, chaveAcesso: "  ", remetente,
+    });
+    expect(repositorio.recebidos[1]!.chaveAcesso).toBeNull();
+  });
+
   it("envio sem arquivo ou grande demais e recusado ANTES de tocar o disco", async () => {
     const { token, dependencias, armazenamento } = montar();
     const ok = await autorizado(dependencias, token);

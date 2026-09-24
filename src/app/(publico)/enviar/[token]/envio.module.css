@@ -66,3 +66,16 @@
   font-weight: var(--peso-forte);
   letter-spacing: 0.04em;
 }
+
+/* Chave de acesso: maiusculas e largura fixa, para os 44 caracteres serem conferiveis a olho. */
+.chave {
+  font-family: var(--fonte-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lida {
+  margin: 0;
+  color: var(--cor-sucesso-forte);
+  font-size: var(--texto-sm);
+}

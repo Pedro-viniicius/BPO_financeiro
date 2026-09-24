@@ -131,6 +131,7 @@ describe.skipIf(!urlBancoTeste)("tokens de captura: isolamento entre empresas (P
       tokenId: resolvido!.tokenId,
       ano: 2026,
       observacao: "nota do fornecedor",
+      chaveAcesso: "35260912345678000195550010000001231123456784",
       arquivos: [{ novo: { chaveArmazenamento: `${escopoA.empresaId}/2026/09/${id0()}.bin`, nomeOriginal: "nota.jpg", tipoConteudo: "image/jpeg", tamanhoBytes: 10, impressaoDigital: impressao } }],
       remetente: { ipAnonimo: "v1:" + "b".repeat(64), agenteUsuario: "teste" },
     });
@@ -191,6 +192,7 @@ describe.skipIf(!urlBancoTeste)("tokens de captura: isolamento entre empresas (P
 
       const detalhe = await repositorio.obterDocumento(escopoA, documentoId);
       expect(detalhe?.anexos[0]?.nomeOriginal).toBe("nota.jpg");
+      expect(detalhe?.chaveAcesso).toBe("35260912345678000195550010000001231123456784");
       expect(await repositorio.obterDocumento(escopoB, documentoId)).toBeNull();
       expect(await repositorio.obterAnexo(escopoA, documentoId, detalhe!.anexos[0]!.arquivoId)).not.toBeNull();
       expect(await repositorio.obterAnexo(escopoB, documentoId, detalhe!.anexos[0]!.arquivoId)).toBeNull();
@@ -256,7 +258,7 @@ describe.skipIf(!urlBancoTeste)("tokens de captura: isolamento entre empresas (P
     it("rejeitar guarda o motivo e o marco; reabrir volta para a fila, limpa o juizo e reinicia a contagem", async () => {
       const resolvido = await repositorio.resolverEscopoPorToken(hashDoTokenDeCaptura("token-da-empresa-A-001"));
       const { id } = await repositorio.receberDocumento(escopoA, {
-        tokenId: resolvido!.tokenId, ano: 2026, observacao: null, arquivos: [], remetente: { ipAnonimo: null, agenteUsuario: null },
+        tokenId: resolvido!.tokenId, ano: 2026, observacao: null, chaveAcesso: null, arquivos: [], remetente: { ipAnonimo: null, agenteUsuario: null },
       });
       await repositorio.rejeitar(escopoA, id, { motivo: "ilegivel", dataMarcoRetencao: d("2026-12-23"), autorUsuarioId: usuarioId });
       let documento = await repositorio.obterDocumento(escopoA, id);

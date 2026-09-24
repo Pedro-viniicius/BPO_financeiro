@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import { hojeDataCivil } from "@/compartilhado/datas/indice";
 import { type CategoriaErro, ErroDominio } from "@/compartilhado/erros/indice";
+import { ChaveDeAcessoInvalida, interpretarChaveDeAcesso } from "@/compartilhado/fiscal/indice";
 import { detectarTipoPorConteudo, type ArmazenamentoArquivos } from "@/nucleo/arquivos/publico";
 import { anonimizarIp } from "@/nucleo/auditoria/publico";
 
@@ -34,6 +35,8 @@ export interface ArquivoEnviado {
 export interface Envio {
   readonly arquivos: readonly ArquivoEnviado[];
   readonly observacao: string | null;
+  /** Opcional: digitada ou lida do QR da nota no navegador. Validada pelo DV aqui. */
+  readonly chaveAcesso?: string | null;
   readonly remetente: { readonly ip: string | null; readonly agenteUsuario: string | null };
 }
 
@@ -132,6 +135,7 @@ export async function receberEnvio(
   const { escopo, tokenId } = autorizado;
 
   const observacao = envio.observacao?.trim() || null;
+  const chaveAcesso = chaveDoEnvio(envio.chaveAcesso);
   const tipados = envio.arquivos.map((arquivo) => {
     const tipoConteudo = detectarTipoPorConteudo(arquivo.conteudo);
     if (!tipoConteudo) throw new EnvioRecusado("tipo_nao_permitido");
@@ -176,6 +180,7 @@ export async function receberEnvio(
     tokenId,
     ano: Number(hojeDataCivil(FUSO, dependencias.agora?.()).slice(0, 4)),
     observacao,
+    chaveAcesso,
     arquivos,
     remetente: {
       ipAnonimo: anonimizarIp(envio.remetente.ip, dependencias.salDoIp),
@@ -183,4 +188,16 @@ export async function receberEnvio(
     },
   });
   return { codigo };
+}
+
+/** Chave em branco e aceita (recibo e boleto nao tem); chave errada e recusada, nunca guardada "para conferir depois". */
+function chaveDoEnvio(texto: string | null | undefined): string | null {
+  const limpo = (texto ?? "").trim();
+  if (limpo === "") return null;
+  try {
+    return interpretarChaveDeAcesso(limpo).chave;
+  } catch (erro) {
+    if (erro instanceof ChaveDeAcessoInvalida) throw new EnvioRecusado("chave_invalida");
+    throw erro;
+  }
 }

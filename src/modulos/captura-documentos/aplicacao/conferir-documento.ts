@@ -1,5 +1,6 @@
 import type { DataCivil, DataVencimento } from "@/compartilhado/datas/indice";
 import type { Dinheiro } from "@/compartilhado/dinheiro/indice";
+import { interpretarChaveDeAcesso, type ChaveDeAcesso } from "@/compartilhado/fiscal/indice";
 import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
 
 import {
@@ -28,6 +29,8 @@ export interface EntradaDeAprovacao {
 export interface DocumentoParaConferir extends DocumentoDetalhado {
   /** Outro documento desta empresa com a mesma chave: AVISO para a equipe, nunca bloqueio. */
   readonly duplicadoDe: { readonly id: string; readonly codigo: string } | null;
+  /** O que a chave de acesso ja diz por posicao (sem OCR). `null` sem chave ou se ela nao interpreta. */
+  readonly dadosDaChave: ChaveDeAcesso | null;
 }
 
 export async function abrirDocumento(
@@ -40,7 +43,15 @@ export async function abrirDocumento(
   const duplicadoDe = documento.chaveAcesso
     ? await dependencias.repositorio.procurarOutroComChave(escopo, documento.chaveAcesso, documentoId)
     : null;
-  return { ...documento, duplicadoDe };
+  let dadosDaChave: ChaveDeAcesso | null = null;
+  if (documento.chaveAcesso) {
+    try {
+      dadosDaChave = interpretarChaveDeAcesso(documento.chaveAcesso);
+    } catch {
+      dadosDaChave = null;
+    }
+  }
+  return { ...documento, duplicadoDe, dadosDaChave };
 }
 
 /**

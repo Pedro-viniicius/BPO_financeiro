@@ -8,7 +8,10 @@ import { dataCivilDeTexto, type DataVencimento } from "@/compartilhado/datas/ind
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
 import { ehErroDominio } from "@/compartilhado/erros/indice";
 import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
-import { aprovarDocumento, reabrirDocumento, rejeitarDocumento, TAMANHO_MAXIMO_MOTIVO } from "@/modulos/captura-documentos/publico";
+import {
+  aprovarDocumento, ChaveDeAcessoInvalida, interpretarChaveDeAcesso, reabrirDocumento, rejeitarDocumento, TAMANHO_MAXIMO_MOTIVO,
+  type ChaveDeAcesso,
+} from "@/modulos/captura-documentos/publico";
 
 import { exigirContextoFinanceiro, repositorios } from "../_apoio/contexto-financeiro";
 
@@ -19,8 +22,6 @@ export interface EstadoConferencia {
   readonly campos?: Record<string, readonly string[]>;
 }
 
-const CHAVE = /^[0-9]{6}[A-Z0-9]{12}[0-9]{26}$/;
-
 const esquemaAprovacao = z.object({
   documentoId: z.string().uuid(),
   descricao: z.string().trim().min(2, "Descreva a conta.").max(200),
@@ -29,13 +30,7 @@ const esquemaAprovacao = z.object({
   valor: z.string().trim().min(1, "Informe o valor."),
   dataVencimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe o vencimento."),
   dataCompetencia: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a competência."),
-  chaveAcesso: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .transform((t) => t.replace(/\s/g, ""))
-    .refine((t) => t === "" || CHAVE.test(t), "A chave de acesso tem 44 posições.")
-    .optional(),
+  chaveAcesso: z.string().trim().optional(),
   observacoes: z.string().trim().max(500).optional(),
 });
 
@@ -73,6 +68,17 @@ export async function acaoAprovar(_anterior: EstadoConferencia, formulario: Form
   }
   const dados = analise.data;
 
+  // A chave e conferida pelo digito verificador, nao so pelo formato; a data de emissao dela entra no marco de retencao.
+  let chave: ChaveDeAcesso | null = null;
+  if (dados.chaveAcesso) {
+    try {
+      chave = interpretarChaveDeAcesso(dados.chaveAcesso);
+    } catch (erro) {
+      if (erro instanceof ChaveDeAcessoInvalida) return { mensagem: "Confira os campos destacados.", campos: { chaveAcesso: [erro.message] } };
+      throw erro;
+    }
+  }
+
   let valorTotal: Dinheiro;
   try {
     valorTotal = Dinheiro.deTextoBrasileiro(dados.valor);
@@ -96,7 +102,8 @@ export async function acaoAprovar(_anterior: EstadoConferencia, formulario: Form
         valorTotal,
         dataVencimento: dataCivilDeTexto(dados.dataVencimento) as DataVencimento,
         dataCompetencia: dataCivilDeTexto(dados.dataCompetencia),
-        chaveAcesso: dados.chaveAcesso || null,
+        chaveAcesso: chave?.chave ?? null,
+        ...(chave ? { datasDoDocumento: [chave.emissao] } : {}),
         ...(dados.observacoes ? { observacoes: dados.observacoes } : {}),
       },
       usuarioId,

@@ -87,11 +87,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     }
   }
   const observacao = formulario.get("observacao");
+  const chaveAcesso = formulario.get("chaveAcesso");
 
   try {
     const { codigo } = await receberEnvio(dependencias, autorizado, {
       arquivos,
       observacao: typeof observacao === "string" ? observacao : null,
+      chaveAcesso: typeof chaveAcesso === "string" ? chaveAcesso : null,
       remetente: { ip, agenteUsuario: request.headers.get("user-agent") },
     });
     return irPara(`/enviar/${token}/recebido?protocolo=${codigo}`);
