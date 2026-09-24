@@ -275,6 +275,68 @@ describe.skipIf(!urlBancoTeste)("tokens de captura: isolamento entre empresas (P
     });
   });
 
+  describe("retencao (tarefa do sistema)", () => {
+    const d = (t: string) => t as DataCivil;
+    const resolvidoA = async () => (await repositorio.resolverEscopoPorToken(hashDoTokenDeCaptura("token-da-empresa-A-001")))!;
+    const novoArquivo = (impressao: string) => ({
+      novo: { chaveArmazenamento: `${escopoA.empresaId}/2026/09/${crypto.randomUUID()}.bin`, nomeOriginal: "x.jpg", tipoConteudo: "image/jpeg", tamanhoBytes: 3, impressaoDigital: impressao },
+    });
+
+    it("lista so as empresas que tem documentos, e arquiva por abandono so os pendentes antigos de A", async () => {
+      const escopos = await repositorio.listarEscoposComDocumentos();
+      expect(escopos.map((e) => e.empresaId)).toContain(escopoA.empresaId);
+      expect(escopos.map((e) => e.empresaId)).not.toContain(escopoB.empresaId);
+
+      const { tokenId } = await resolvidoA();
+      const { id: antigo } = await repositorio.receberDocumento(escopoA, { tokenId, ano: 2026, observacao: null, chaveAcesso: null, arquivos: [], remetente: { ipAnonimo: null, agenteUsuario: null } });
+      const { id: recente } = await repositorio.receberDocumento(escopoA, { tokenId, ano: 2026, observacao: null, chaveAcesso: null, arquivos: [], remetente: { ipAnonimo: null, agenteUsuario: null } });
+      await banco.execute(sql`UPDATE documentos_capturados SET entrou_na_fila_em = now() - interval '91 days', criado_em = now() - interval '91 days' WHERE id = ${antigo}`);
+
+      const arquivados = await repositorio.arquivarAbandonados(escopoA, new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), (envio) => `${Number(envio.slice(0, 4)) + 1}${envio.slice(4)}` as DataCivil);
+      expect(arquivados).toHaveLength(1);
+      expect((await repositorio.obterDocumento(escopoA, antigo))?.situacao).toBe("arquivado_sem_conferencia");
+      expect((await repositorio.obterDocumento(escopoA, antigo))?.dataMarcoRetencao).not.toBeNull();
+      expect((await repositorio.obterDocumento(escopoA, recente))?.situacao).toBe("pendente_conferencia");
+      const [evento] = await banco.execute<{ origem: string; usuario_id: string | null }>(sql`SELECT origem, usuario_id FROM eventos_auditoria WHERE acao = 'documento.arquivado' AND entidade_id = ${antigo}`);
+      expect(evento).toEqual({ origem: "tarefa", usuario_id: null });
+    });
+
+    it("expurga so o vencido, e NAO remove um arquivo que outro documento vivo compartilha", async () => {
+      const { tokenId } = await resolvidoA();
+      const compartilhado = "c".repeat(64);
+      const { id: vencido } = await repositorio.receberDocumento(escopoA, { tokenId, ano: 2026, observacao: null, chaveAcesso: null, arquivos: [novoArquivo(compartilhado), novoArquivo("d".repeat(64))], remetente: { ipAnonimo: null, agenteUsuario: null } });
+      const arquivoCompartilhado = await repositorio.procurarArquivoPorImpressao(escopoA, compartilhado);
+      const { id: vivo } = await repositorio.receberDocumento(escopoA, { tokenId, ano: 2026, observacao: null, chaveAcesso: null, arquivos: [{ existenteId: arquivoCompartilhado!.id }], remetente: { ipAnonimo: null, agenteUsuario: null } });
+      await repositorio.rejeitar(escopoA, vencido, { motivo: "vencido no teste", dataMarcoRetencao: d("2026-01-01"), autorUsuarioId: usuarioId });
+
+      const antes = await repositorio.expurgarVencidos(escopoB, d("2026-09-24"));
+      expect(antes).toEqual({ documentos: [], chavesParaRemover: [] }); // B nao expurga nada de A
+
+      const expurgo = await repositorio.expurgarVencidos(escopoA, d("2026-09-24"));
+      expect(expurgo.documentos).toHaveLength(1);
+      // So o arquivo exclusivo do vencido sai; o compartilhado com o documento vivo fica.
+      expect(expurgo.chavesParaRemover).toHaveLength(1);
+      expect(await repositorio.procurarArquivoPorImpressao(escopoA, compartilhado)).not.toBeNull();
+      expect(await repositorio.procurarArquivoPorImpressao(escopoA, "d".repeat(64))).toBeNull();
+      const [doc] = await banco.execute<{ expurgado: boolean }>(sql`SELECT expurgado_em IS NOT NULL AS expurgado FROM documentos_capturados WHERE id = ${vencido}`);
+      expect(doc?.expurgado).toBe(true);
+      expect((await repositorio.obterDocumento(escopoA, vencido))?.anexos.map((a) => a.removido).sort()).toEqual([false, true]);
+      expect((await repositorio.obterDocumento(escopoA, vivo))?.anexos[0]?.removido).toBe(false);
+      // Rodar de novo nao expurga duas vezes.
+      expect((await repositorio.expurgarVencidos(escopoA, d("2026-09-24"))).documentos).toHaveLength(0);
+    });
+
+    it("limpa so as janelas de tentativas antigas", async () => {
+      const id = `limpeza:${usuarioId}`;
+      await repositorio.registrarTentativa(id, new Date("2026-01-01T00:00:00Z"));
+      await repositorio.registrarTentativa(id, new Date(Date.now() + 60 * 60 * 1000));
+      expect(await repositorio.limparTentativas(new Date("2026-06-01T00:00:00Z"))).toBeGreaterThanOrEqual(1);
+      const [restantes] = await banco.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM tentativas_captura WHERE identificador = ${id}`);
+      expect(restantes?.n).toBe(1);
+      await banco.execute(sql`DELETE FROM tentativas_captura WHERE identificador = ${id}`);
+    });
+  });
+
   it("revogar em A mata o token: nada resolve, nada ativo", async () => {
     expect(await repositorio.revogarToken(escopoA, { autorUsuarioId: usuarioId })).toBe(true);
     expect(await repositorio.obterTokenAtivo(escopoA)).toBeNull();

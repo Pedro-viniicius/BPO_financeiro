@@ -129,6 +129,27 @@ export interface RepositorioCaptura {
   ): Promise<void>;
   /** Volta um rejeitado ou arquivado para a fila; reinicia a contagem de abandono. */
   reabrir(escopo: EscopoEmpresa, documentoId: string, dados: { readonly autorUsuarioId: string }): Promise<void>;
+
+  // ---- Retencao (tarefas do sistema, origem "tarefa") ----------------------
+  /**
+   * Empresas que tem documentos capturados: e por elas que a tarefa diaria
+   * itera, chamando os metodos abaixo UMA empresa por vez, com escopo. Sem
+   * escopo aqui porque quem chama e o sistema, nao um usuario — o mesmo caso
+   * de `resolverEscopoPorToken` (ADR-033).
+   */
+  listarEscoposComDocumentos(): Promise<readonly EscopoEmpresa[]>;
+  /** Pendentes que entraram na fila antes de `limite` viram `arquivado_sem_conferencia`. Devolve os codigos. */
+  arquivarAbandonados(escopo: EscopoEmpresa, limite: Date, marcoDe: (dataDoEnvio: DataCivil) => DataCivil): Promise<readonly string[]>;
+  /**
+   * Documentos com marco de retencao vencido: marca `expurgado_em` e
+   * `arquivos.removido_em` — SO nos arquivos que nenhuma outra linha viva
+   * referencia (o conteudo e compartilhado por hash). Devolve as chaves cujo
+   * conteudo deve sair do disco; quem chama remove DEPOIS de a transacao
+   * fechar, para nunca haver linha viva sem arquivo.
+   */
+  expurgarVencidos(escopo: EscopoEmpresa, hoje: DataCivil): Promise<{ readonly documentos: readonly string[]; readonly chavesParaRemover: readonly string[] }>;
+  /** Janelas de tentativas mais antigas que `antesDe`. Devolve quantas linhas saíram. */
+  limparTentativas(antesDe: Date): Promise<number>;
   obterTokenAtivo(escopo: EscopoEmpresa): Promise<TokenDeCapturaAtivo | null>;
   /** Arquivo desta empresa com este SHA-256, se ainda tiver conteudo. */
   procurarArquivoPorImpressao(escopo: EscopoEmpresa, impressaoDigital: string): Promise<{ readonly id: string } | null>;

@@ -9,6 +9,17 @@
 #   BACKUP_CHAVE_PUBLICA_GPG  destinatario GPG; cifra antes de sair do servidor
 #   BACKUP_REMOTO_DESTINO     destino rclone, ex.: "b2:nova-didata/financeiro"
 #   BACKUP_REMOTO_RETENCAO_DIAS (padrao: igual a BACKUP_RETENCAO_DIAS)
+#   ARQUIVOS_DIRETORIO (padrao: /arquivos)  o volume de anexos, montado so-leitura
+#
+# ARQUIVOS (Gate 10, ADR-027): um backup que salva o lancamento e perde a nota
+# fiscal nao serve para nada. Os anexos vao para o remoto ANTES do dump do
+# banco, de proposito: a chave de cada arquivo nunca muda, entao a pior
+# consequencia da janela entre os dois e um arquivo sem linha (lixo
+# inofensivo). Na ordem inversa, seria uma linha apontando para arquivo que
+# o backup nao tem. A copia e incremental de graca (`rclone copy` so envia o
+# que falta) e NUNCA apaga pelo remoto: a retencao alcanca a copia remota por
+# uma LISTA EXPLICITA de chaves que o sistema expurgou (`arquivos.removido_em`),
+# porque apagar por idade destruiria arquivo antigo que ainda esta vigente.
 #
 # BACKUP QUE MORA SO NO PROPRIO SERVIDOR NAO E BACKUP. Ele protege contra
 # "apaguei sem querer", que e o caso comum, mas nao contra o caso que encerra
@@ -28,8 +39,51 @@ DIRETORIO="${BACKUP_DIRETORIO:-/backups}"
 RETENCAO="${BACKUP_RETENCAO_DIAS:-30}"
 export PGHOST PGUSER PGDATABASE
 
+ARQUIVOS_DIRETORIO="${ARQUIVOS_DIRETORIO:-/arquivos}"
+
 mkdir -p "$DIRETORIO"
 ARQUIVO="$DIRETORIO/financeiro-$(date +%Y%m%d-%H%M%S).dump"
+
+# ---- 1. Anexos: copia incremental para o remoto, antes do dump -------------
+if [ -n "${BACKUP_REMOTO_DESTINO:-}" ] && [ -d "$ARQUIVOS_DIRETORIO" ]; then
+  if ! command -v rclone >/dev/null 2>&1; then
+    echo "[backup] ERRO: BACKUP_REMOTO_DESTINO definido mas rclone nao esta instalado." >&2
+    exit 1
+  fi
+  echo "[backup] anexos: enviando o que falta para $BACKUP_REMOTO_DESTINO/arquivos"
+  rclone copy "$ARQUIVOS_DIRETORIO" "$BACKUP_REMOTO_DESTINO/arquivos" --exclude "*.parcial"
+
+  # Retencao na copia remota: SO as chaves que o sistema expurgou. A lista vem
+  # do banco (usuario de backup so le), limitada aos ultimos dias para nao
+  # varrer a tabela inteira todo dia. Um arquivo que sumiu do disco por outro
+  # motivo NAO e apagado do remoto — e justamente o caso em que o remoto salva.
+  JANELA_EXPURGO_DIAS="${BACKUP_JANELA_EXPURGO_DIAS:-7}"
+  EXPURGADOS="$DIRETORIO/.expurgados-$$.txt"
+  psql -tA -c "SELECT chave_armazenamento FROM arquivos WHERE removido_em IS NOT NULL AND removido_em > now() - interval '${JANELA_EXPURGO_DIAS} days'" > "$EXPURGADOS"
+  if [ -s "$EXPURGADOS" ]; then
+    rclone delete "$BACKUP_REMOTO_DESTINO/arquivos" --files-from "$EXPURGADOS"
+    echo "[backup] anexos: $(grep -c . "$EXPURGADOS") chave(s) expurgada(s) removida(s) do remoto"
+  fi
+  rm -f "$EXPURGADOS"
+
+  # Conferencia: todo arquivo VIVO no banco precisa existir no remoto. Contar
+  # nao basta (orfaos inflam o numero); conferimos chave a chave.
+  VIVOS="$DIRETORIO/.vivos-$$.txt"
+  psql -tA -c "SELECT chave_armazenamento FROM arquivos WHERE removido_em IS NULL" > "$VIVOS"
+  rclone lsf "$BACKUP_REMOTO_DESTINO/arquivos" --recursive --files-only | sort > "$VIVOS.remoto"
+  FALTANDO=$(sort "$VIVOS" | comm -23 - "$VIVOS.remoto" | grep -c . || true)
+  if [ "$FALTANDO" != "0" ]; then
+    echo "[backup] ERRO: $FALTANDO arquivo(s) vivo(s) no banco nao esta(ao) no remoto." >&2
+    rm -f "$VIVOS" "$VIVOS.remoto"
+    exit 1
+  fi
+  echo "[backup] anexos: $(grep -c . "$VIVOS" || true) arquivo(s) vivo(s) conferido(s) no remoto"
+  rm -f "$VIVOS" "$VIVOS.remoto"
+elif [ -d "$ARQUIVOS_DIRETORIO" ]; then
+  echo "[backup] AVISO: anexos em $ARQUIVOS_DIRETORIO sem BACKUP_REMOTO_DESTINO — vivem so neste servidor." >&2
+fi
+
+# ---- 2. Banco ---------------------------------------------------------------
 
 echo "[backup] iniciando: $ARQUIVO"
 pg_dump --format=custom --compress=6 --file="$ARQUIVO.parcial"

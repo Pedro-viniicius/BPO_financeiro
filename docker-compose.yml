@@ -56,7 +56,7 @@ services:
 
   tarefas:
     build: .
-    command: ["npx", "tsx", "src/nucleo/tarefas/executor-linha-comando.ts"]
+    command: ["npx", "tsx", "src/composicao/executor-tarefas.ts"]
     restart: unless-stopped
     env_file: .env
     depends_on:

@@ -33,3 +33,7 @@ export {
   ChaveDeAcessoInvalida, digitoVerificador, extrairChaveDeTexto, FORMATO_CHAVE_DE_ACESSO, interpretarChaveDeAcesso,
   normalizarChaveDeAcesso, type ChaveDeAcesso,
 } from "@/compartilhado/fiscal/indice";
+export {
+  executarRetencaoDiaria, manipuladorDeRetencao, pedidoDeRetencaoDiaria, TIPO_TAREFA_RETENCAO,
+  type DependenciasRetencao, type ResultadoRetencao,
+} from "./aplicacao/retencao-diaria";

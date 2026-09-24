@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Aviso, CabecalhoPagina, TituloSecao } from "@/interface/componentes/indice";
 import { CONJUNTOS } from "@/modulos/exportacao/publico";
 
-import { exigirContextoFinanceiro } from "../../_apoio/contexto-financeiro";
+import { exigirContextoFinanceiro, repositorios } from "../../_apoio/contexto-financeiro";
 import estilos from "./exportacao.module.css";
 
 export const metadata: Metadata = { title: "Exportar dados" };
@@ -17,8 +17,14 @@ export const metadata: Metadata = { title: "Exportar dados" };
  * basta: ela precisa dizer o que vem no pacote, o que NAO vem, e como os
  * arquivos se ligam — senao o cliente recebe um ZIP que ninguem sabe usar.
  */
+function tamanhoLegivel(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+}
+
 export default async function PaginaExportacao() {
-  const { nomeEmpresa } = await exigirContextoFinanceiro("configuracao.gerenciar", "/configuracoes/exportacao");
+  const { escopo, nomeEmpresa } = await exigirContextoFinanceiro("configuracao.gerenciar", "/configuracoes/exportacao");
+  const partes = await repositorios.exportacao().listarPartesDeAnexos(escopo);
 
   return (
     <>
@@ -53,6 +59,23 @@ export default async function PaginaExportacao() {
         ))}
       </dl>
 
+      <TituloSecao
+        titulo="Anexos, por mês"
+        explicacao="Um pacote por mês, sem compressão, com a soma SHA-256 de cada arquivo. Uma exportação de anexos por vez."
+      />
+      {partes.length === 0 ? (
+        <p className={estilos.ligacoes}>Nenhum anexo recebido ainda.</p>
+      ) : (
+        <ul className={estilos.fora}>
+          {partes.map((parte) => (
+            <li key={parte.mes}>
+              <a href={`/configuracoes/exportacao/anexos/${parte.mes}`}>anexos {parte.mes}.zip</a> — {parte.arquivos} arquivo(s),{" "}
+              {tamanhoLegivel(parte.bytes)}
+            </li>
+          ))}
+        </ul>
+      )}
+
       <TituloSecao titulo="O que não vem, e por quê" />
       <ul className={estilos.fora}>
         <li>
@@ -67,7 +90,8 @@ export default async function PaginaExportacao() {
           <strong>Dados de outras empresas.</strong> Toda consulta filtra por esta empresa, e há teste provando.
         </li>
         <li>
-          <strong>Os anexos enviados.</strong> Ficam fora deste pacote; peça-os separadamente.
+          <strong>Os anexos enviados.</strong> Saem em pacotes separados, um por mês (abaixo): sem compressão, com a soma
+          SHA-256 de cada arquivo.
         </li>
       </ul>
     </>

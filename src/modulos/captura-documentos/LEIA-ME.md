@@ -11,7 +11,7 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
 | Pasta | Conteudo |
 |---|---|
 | `dominio/` | `token-captura.ts` (token, hash, formato, link), `envio.ts` (limites do envio, tipos aceitos, recusas, protocolo), `limite-tentativas.ts` (janela, dois limites), `conferencia.ts` (situacoes, marcos de retencao, erros da decisao) |
-| `aplicacao/` | `repositorio-captura.ts` (contrato), `casos-de-uso-qr.ts`, `receber-envio.ts` e `conferir-documento.ts` (abrir com aviso de duplicidade, aprovar, rejeitar, reabrir); `testes/` tem o repositorio em memoria dos testes de caso de uso |
+| `aplicacao/` | `repositorio-captura.ts` (contrato), `casos-de-uso-qr.ts`, `receber-envio.ts`, `conferir-documento.ts` e `retencao-diaria.ts` (arquivar abandonados, expurgar vencidos, limpar tentativas — origem `tarefa`); `testes/` tem o repositorio em memoria |
 | `infraestrutura/` | `esquema.ts` (migracao 0010) e `repositorio-captura-drizzle.ts` |
 
 ## Regras que este modulo carrega
@@ -67,6 +67,14 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
     com `BarcodeDetector`, e lida da imagem escolhida (QR da NFC-e — a chave
     vem dentro da URL — ou CODE-128). O valor total nao esta na chave: quem
     confere digita.
+15. **Retencao e tarefa do sistema, uma vez por dia** (`captura.retencao_diaria`,
+    enfileirada pela composicao com chave de idempotencia do dia): pendente
+    ha 90 dias vira `arquivado_sem_conferencia` (marco: 1 ano do envio);
+    marco vencido expurga o conteudo — SO dos arquivos que nenhuma linha viva
+    referencia, porque o conteudo e compartilhado por hash — e marca
+    `arquivos.removido_em`; o backup usa essa marca para apagar do remoto por
+    lista (ADR-027). O disco e limpo DEPOIS da transacao: nunca linha viva
+    sem arquivo. Janelas de tentativas com mais de 2 dias sao apagadas.
 10. **Dois limites em Postgres** (ADR-031): por token, em envios validos,
     configuravel por empresa (padrao 20/h); por IP, so em tentativas com token
     invalido (10/h). Conferidos antes de ler o corpo. Sem
@@ -100,6 +108,10 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
 - Fatia 6: chave de acesso no envio (campo + leitor no navegador) e na
   conferencia (dados extraidos, competencia sugerida pelo mes de emissao, data
   de emissao no marco de retencao).
+- Fatia 7: backup dos anexos antes do dump, retencao que alcanca a copia
+  remota por lista de chaves expurgadas, restauracao chave a chave
+  (testada localmente: 57 tabelas, 3 anexos), anexos no pacote de
+  exportacao em partes mensais (STORE, SHA-256 por arquivo, teto de 512 MB,
+  uma exportacao por vez), e a retencao diaria como tarefa.
 
-Proxima fatia: backup e exportacao dos anexos;
-tarefas de retencao (arquivamento por abandono, expurgo, limpeza de tentativas).
+Gate 10 entregue nas sete fatias. Pendencias registradas no relatorio final.

@@ -3,3 +3,4 @@ export type { EstadoTarefa, FilaTarefas, ManipuladorTarefa, PedidoTarefa, Tarefa
 export { ExecutorTarefas, calcularAtrasoReagendamento } from "./aplicacao/executor-tarefas";
 export { FilaTarefasPostgres } from "./infraestrutura/fila-tarefas-postgres";
 export { FilaTarefasEmMemoria } from "./infraestrutura/fila-tarefas-em-memoria";
+export { rodarLacoDoExecutor, type OpcoesDoLaco, type RegistradorDoLaco } from "./aplicacao/laco-do-executor";

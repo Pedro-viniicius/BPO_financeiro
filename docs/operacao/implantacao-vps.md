@@ -27,7 +27,7 @@ o que uma escola nao tem, e que em troca traz a parte mais dificil
 |---|---|---|---|
 | CPU | 2 vCPU | 4 vCPU | O build da imagem e o pico; em regime, o Next.js e o PostgreSQL convivem folgados. Com 1 vCPU o build chega a travar. |
 | RAM | 4 GB | 8 GB | PostgreSQL ~1 GB, aplicacao ~512 MB, tarefas ~256 MB, proxy ~64 MB. O `pnpm build` sozinho pede ~2 GB; com 2 GB e preciso construir a imagem fora. |
-| Disco | 40 GB SSD | 80 GB SSD | Banco de um cliente deste porte cresce devagar (< 2 GB/ano), mas **backups com retencao de 30 dias** e as imagens Docker das versoes anteriores ocupam o resto. |
+| Disco | 40 GB SSD | 80 GB SSD | Banco de um cliente deste porte cresce devagar (< 2 GB/ano); os **anexos do QR code** somam ~1,2 GB/ano (Gate 10); **backups com retencao de 30 dias** e as imagens Docker das versoes anteriores ocupam o resto. |
 | Sistema | Ubuntu 24.04 LTS | Ubuntu 24.04 LTS | Suporte ate 2029, Docker oficial, `unattended-upgrades` pronto. Debian 12 serve igual. |
 | Rede | IPv4 dedicado | idem | O Let's Encrypt precisa alcancar a porta 80 no dominio. |
 | Local | Brasil (idealmente SP) | idem | Latencia e, com dados de cliente brasileiro, jurisdicao. |
@@ -63,6 +63,24 @@ Antes de subir a aplicacao. Cada item vale por si; nenhum substitui outro.
       nada.
 - [ ] **Backup remoto conferido**: subir, esperar o primeiro ciclo e confirmar
       que o arquivo chegou ao destino.
+- [ ] **`AUDITORIA_SAL_IP` gerado e guardado no cofre**, junto da chave GPG
+      (Gate 10). Sem ele a aplicacao nao sobe; sem a copia, uma restauracao
+      continua funcionando mas os IPs novos deixam de ser comparaveis com os
+      antigos (prefixo `v1:` no hash).
+- [ ] **Instalacao criada antes do Gate 10?** Rode uma vez, como
+      `financeiro_admin`: `GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO
+      financeiro_backup;` — sem isso o `pg_dump` falha em
+      `migracoes_aplicadas_id_seq` (achado do ensaio; os scripts novos ja
+      concedem).
+- [ ] **Anexos no backup** (Gate 10, ADR-027): o volume `arquivos` esta
+      montado so-leitura no servico `backup`, e o log do primeiro ciclo mostra
+      `anexos: N arquivo(s) vivo(s) conferido(s) no remoto`. A retencao alcanca
+      o remoto por lista de chaves expurgadas, nunca por idade.
+- [ ] **Restauracao dos anexos testada** com `ARQUIVOS_RESTAURACAO` (ver
+      `docs/operacao/registro-restauracoes.md`): toda chave viva no banco
+      restaurado precisa ter conteudo, chave a chave.
+- [ ] **Espaco no remoto** dimensionado para 5 anos de documentos aprovados
+      (~100 MB/mes de anexos neste porte).
 
 ## Primeira implantacao
 

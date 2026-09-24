@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, lt, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, isNull, lt, lte, ne, sql } from "drizzle-orm";
 
 import type { DataCivil } from "@/compartilhado/datas/indice";
 import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
@@ -9,7 +9,7 @@ import { executarEmTransacao, type ExecutorBancoDados } from "@/nucleo/banco-dad
 import { GeradorCodigoPostgres, PREFIXOS_CODIGO } from "@/nucleo/codigos/publico";
 import { RepositorioContasPagarDrizzle } from "@/modulos/contas-pagar/publico";
 
-import { DocumentoNaoEncontrado, DocumentoNaoPendente, DocumentoNaoReabrivel, podeReabrir } from "../dominio/conferencia";
+import { ABANDONO_DIAS, dataCivilDoInstante, DocumentoNaoEncontrado, DocumentoNaoPendente, DocumentoNaoReabrivel, podeReabrir } from "../dominio/conferencia";
 
 import type {
   AnexoDoDocumento, DadosDeAprovacao, DadosDoEnvio, DocumentoDetalhado, DocumentoNaFila, EscopoResolvidoPorToken, FiltroDaFila,
@@ -435,6 +435,131 @@ export class RepositorioCapturaDrizzle implements RepositorioCaptura {
         situacaoAnterior: documento.situacao,
       });
     }, this.banco);
+  }
+
+  async listarEscoposComDocumentos(): Promise<readonly EscopoEmpresa[]> {
+    const linhas = await this.banco
+      .selectDistinct({ empresaId: empresas.id, organizacaoId: empresas.organizacaoId })
+      .from(documentosCapturados)
+      .innerJoin(empresas, eq(empresas.id, documentosCapturados.empresaId));
+    return linhas.map((linha) => ({
+      organizacaoId: comoIdentificador<"Organizacao">(linha.organizacaoId),
+      empresaId: comoIdentificador<"Empresa">(linha.empresaId),
+    }));
+  }
+
+  async arquivarAbandonados(escopo: EscopoEmpresa, limite: Date, marcoDe: (dataDoEnvio: DataCivil) => DataCivil): Promise<readonly string[]> {
+    return executarEmTransacao(async (transacao) => {
+      const abandonados = await transacao
+        .select({ id: documentosCapturados.id, codigo: documentosCapturados.codigo, criadoEm: documentosCapturados.criadoEm })
+        .from(documentosCapturados)
+        .where(
+          and(
+            eq(documentosCapturados.empresaId, escopo.empresaId),
+            eq(documentosCapturados.situacao, "pendente_conferencia"),
+            lt(documentosCapturados.entrouNaFilaEm, limite),
+          ),
+        )
+        .for("update");
+      const agora = new Date();
+      for (const documento of abandonados) {
+        await transacao
+          .update(documentosCapturados)
+          .set({
+            situacao: "arquivado_sem_conferencia",
+            arquivadoEm: agora,
+            dataMarcoRetencao: marcoDe(dataCivilDoInstante(documento.criadoEm)),
+            atualizadoEm: agora,
+          })
+          .where(eq(documentosCapturados.id, documento.id));
+        await new RegistradorAuditoriaDrizzle(transacao).registrar({
+          acao: ACOES_AUDITORIA.documentoArquivado,
+          entidade: "documento_capturado",
+          entidadeId: documento.id,
+          organizacaoId: escopo.organizacaoId,
+          empresaId: escopo.empresaId,
+          origem: "tarefa",
+          dadosDepois: { codigo: documento.codigo, motivo: "abandono", diasNaFila: ABANDONO_DIAS },
+        });
+      }
+      return abandonados.map((d) => d.codigo);
+    }, this.banco);
+  }
+
+  async expurgarVencidos(escopo: EscopoEmpresa, hoje: DataCivil): Promise<{ readonly documentos: readonly string[]; readonly chavesParaRemover: readonly string[] }> {
+    return executarEmTransacao(async (transacao) => {
+      const vencidos = await transacao
+        .select({ id: documentosCapturados.id, codigo: documentosCapturados.codigo })
+        .from(documentosCapturados)
+        .where(
+          and(
+            eq(documentosCapturados.empresaId, escopo.empresaId),
+            isNull(documentosCapturados.expurgadoEm),
+            isNotNull(documentosCapturados.dataMarcoRetencao),
+            lte(documentosCapturados.dataMarcoRetencao, hoje),
+            ne(documentosCapturados.situacao, "pendente_conferencia"),
+          ),
+        )
+        .for("update");
+      if (vencidos.length === 0) return { documentos: [], chavesParaRemover: [] };
+
+      const agora = new Date();
+      const idsVencidos = vencidos.map((d) => d.id);
+      await transacao
+        .update(documentosCapturados)
+        .set({ expurgadoEm: agora, atualizadoEm: agora })
+        .where(inArray(documentosCapturados.id, idsVencidos));
+
+      /*
+       * Arquivos dos documentos vencidos que NENHUMA outra linha viva
+       * referencia: nem outro documento capturado ainda vigente, nem qualquer
+       * tabela `anexos_*` do resto do sistema. Conteudo e compartilhado por
+       * hash; apagar por documento apagaria a nota de outro.
+       */
+      const candidatos = await transacao
+        .select({ arquivoId: arquivos.id, chave: arquivos.chaveArmazenamento })
+        .from(anexosDocumentosCapturados)
+        .innerJoin(arquivos, eq(arquivos.id, anexosDocumentosCapturados.arquivoId))
+        .where(and(inArray(anexosDocumentosCapturados.documentoId, idsVencidos), isNull(arquivos.removidoEm), eq(arquivos.empresaId, escopo.empresaId)));
+
+      const chavesParaRemover: string[] = [];
+      for (const candidato of [...new Map(candidatos.map((c) => [c.arquivoId, c])).values()]) {
+        const [referencias] = await transacao.execute<{ vivas: number }>(sql`
+          SELECT (
+            (SELECT count(*) FROM anexos_documentos_capturados a JOIN documentos_capturados d ON d.id = a.documento_id
+              WHERE a.arquivo_id = ${candidato.arquivoId} AND d.expurgado_em IS NULL)
+            + (SELECT count(*) FROM anexos_titulos_pagar WHERE arquivo_id = ${candidato.arquivoId})
+            + (SELECT count(*) FROM anexos_titulos_receber WHERE arquivo_id = ${candidato.arquivoId})
+            + (SELECT count(*) FROM anexos_pagamentos WHERE arquivo_id = ${candidato.arquivoId})
+            + (SELECT count(*) FROM anexos_recebimentos WHERE arquivo_id = ${candidato.arquivoId})
+            + (SELECT count(*) FROM anexos_pessoas WHERE arquivo_id = ${candidato.arquivoId})
+            + (SELECT count(*) FROM anexos_dividas WHERE arquivo_id = ${candidato.arquivoId})
+            + (SELECT count(*) FROM extratos_bancarios WHERE arquivo_id = ${candidato.arquivoId})
+          )::int AS vivas
+        `);
+        if ((referencias?.vivas ?? 1) > 0) continue;
+        await transacao.update(arquivos).set({ removidoEm: agora, atualizadoEm: agora }).where(eq(arquivos.id, candidato.arquivoId));
+        chavesParaRemover.push(candidato.chave);
+        await new RegistradorAuditoriaDrizzle(transacao).registrar({
+          acao: ACOES_AUDITORIA.arquivoExpurgado,
+          entidade: "arquivo",
+          entidadeId: candidato.arquivoId,
+          organizacaoId: escopo.organizacaoId,
+          empresaId: escopo.empresaId,
+          origem: "tarefa",
+          dadosDepois: { motivo: "fim_da_retencao" },
+        });
+      }
+      return { documentos: vencidos.map((d) => d.codigo), chavesParaRemover };
+    }, this.banco);
+  }
+
+  async limparTentativas(antesDe: Date): Promise<number> {
+    const apagadas = await this.banco
+      .delete(tentativasCaptura)
+      .where(lt(tentativasCaptura.janelaIniciadaEm, antesDe))
+      .returning({ identificador: tentativasCaptura.identificador });
+    return apagadas.length;
   }
 
   /** `SELECT ... FOR UPDATE` filtrado pela empresa: duas conferencias simultaneas do mesmo documento se enfileiram. */

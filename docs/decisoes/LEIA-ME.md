@@ -33,6 +33,7 @@ escolha meses depois.
 | [024](ADR-024-camada-apresentacao.md) | Camada de apresentacao: a interface nao decide regra financeira | Aceita |
 | [025](ADR-025-contexto-organizacional.md) | Contexto organizacional autenticado e empresa ativa | Aceita |
 | [026](ADR-026-guarda-de-autorizacao.md) | Guarda unica de autorizacao no servidor | Aceita |
+| [027](ADR-027-onde-o-arquivo-mora.md) | Onde o arquivo mora, e como o backup passa a cobri-lo | Aceita |
 | [028](ADR-028-qr-code-incorporado.md) | Geracao de QR code por codigo incorporado (qrcodegen, MIT) | Aceita |
 | [029](ADR-029-chave-de-acesso-sem-visao-computacional.md) | Chave de acesso: digitada ou lida pelo navegador, nunca decodificada no servidor | Aceita |
 | [030](ADR-030-sem-ocr.md) | Sem OCR no Gate 10: o valor e digitado na conferencia | Aceita |

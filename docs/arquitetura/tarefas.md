@@ -67,7 +67,7 @@ Implementacoes: `FilaTarefasPostgres`, `PublicadorEventosSaida` (producao);
 
 ## Como registrar um manipulador
 
-Em `src/nucleo/tarefas/executor-linha-comando.ts`:
+Em `src/composicao/tarefas.ts` (o laco generico esta em `nucleo/tarefas/aplicacao/laco-do-executor.ts`; o nucleo nao conhece modulos, entao os manipuladores sao montados na composicao):
 
 ```ts
 executor.registrar(manipuladorImportacaoOfx);        // tarefa

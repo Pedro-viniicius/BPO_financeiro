@@ -68,7 +68,7 @@ services:
 
   tarefas:
     image: financeiro:${VERSAO:?defina VERSAO (use scripts/implantar.sh)}
-    command: ["npx", "tsx", "src/nucleo/tarefas/executor-linha-comando.ts"]
+    command: ["npx", "tsx", "src/composicao/executor-tarefas.ts"]
     restart: unless-stopped
     env_file: .env
     environment:
@@ -109,10 +109,14 @@ services:
       BACKUP_REMOTO_DESTINO: "${BACKUP_REMOTO_DESTINO:-}"
       BACKUP_REMOTO_RETENCAO_DIAS: "${BACKUP_REMOTO_RETENCAO_DIAS:-}"
       BACKUP_CHAVE_PUBLICA_GPG: "${BACKUP_CHAVE_PUBLICA_GPG:-}"
+      ARQUIVOS_DIRETORIO: /arquivos
       RCLONE_CONFIG: /rclone/rclone.conf
       TZ: America/Sao_Paulo
     volumes:
       - ./backups:/backups
+      # Os anexos (Gate 10) entram no backup, so-leitura: o backup nunca
+      # escreve no volume da aplicacao.
+      - arquivos:/arquivos:ro
       # Credenciais do destino remoto: arquivos do SERVIDOR, nunca do
       # repositorio. Monta-se a PASTA, e nao o arquivo: um bind-mount de
       # arquivo inexistente faz o Docker criar um diretorio no lugar dele, e o

@@ -32,6 +32,11 @@ ALTER DEFAULT PRIVILEGES FOR ROLE financeiro_migracao IN SCHEMA public
   GRANT USAGE, SELECT ON SEQUENCES TO financeiro_aplicacao;
 ALTER DEFAULT PRIVILEGES FOR ROLE financeiro_migracao IN SCHEMA public
   GRANT SELECT ON TABLES TO financeiro_backup;
+-- pg_dump le tambem as SEQUENCIAS (ex.: migracoes_aplicadas_id_seq). Sem isto o
+-- backup falha com "permission denied for sequence" — achado do ensaio do Gate 10.
+ALTER DEFAULT PRIVILEGES FOR ROLE financeiro_migracao IN SCHEMA public
+  GRANT SELECT ON SEQUENCES TO financeiro_backup;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO financeiro_backup;
 
 -- A protecao da auditoria (revogar UPDATE/DELETE de eventos_auditoria para a
 -- aplicacao) e feita na migracao que cria a tabela, pois a tabela ainda nao

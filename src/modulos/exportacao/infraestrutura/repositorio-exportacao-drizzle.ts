@@ -7,7 +7,8 @@ import { BOM_UTF8, campoCsv, SEPARADOR_CSV } from "@/modulos/dre/publico";
 import { RegistradorAuditoriaDrizzle } from "@/nucleo/auditoria/publico";
 import { executarEmTransacao, type ExecutorBancoDados } from "@/nucleo/banco-dados/publico";
 
-import type { PacoteExportado, RepositorioExportacao } from "../aplicacao/repositorio-exportacao";
+import type { PacoteExportado, ParteDeAnexos, RepositorioExportacao } from "../aplicacao/repositorio-exportacao";
+import { montarParteDeAnexos, type AnexoParaExportar } from "../dominio/parte-de-anexos";
 import { CONJUNTOS } from "../dominio/conjunto-de-dados";
 
 /**
@@ -77,7 +78,8 @@ export class RepositorioExportacaoDrizzle implements RepositorioExportacao {
       SELECT COALESCE(nome_fantasia, nome) AS nome FROM empresas WHERE id = ${escopo.empresaId}
     `);
 
-    arquivos.unshift({ nome: "LEIAME.txt", conteudo: this.leiame(empresa?.nome ?? "—", agora, resumo) });
+    const partes = await this.listarPartesDeAnexos(escopo);
+    arquivos.unshift({ nome: "LEIAME.txt", conteudo: this.leiame(empresa?.nome ?? "—", agora, resumo, partes) });
 
     const zip = montarZip(arquivos, agora);
     const nome = `financeiro-${(empresa?.nome ?? "empresa").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase()}-${agora.toISOString().slice(0, 10)}.zip`;
@@ -98,7 +100,79 @@ export class RepositorioExportacaoDrizzle implements RepositorioExportacao {
     return { nome, conteudo: zip, soma: somaDeVerificacao(zip), resumo };
   }
 
-  private leiame(nomeEmpresa: string, agora: Date, resumo: readonly { arquivo: string; linhas: number }[]): string {
+  async listarPartesDeAnexos(escopo: EscopoEmpresa): Promise<readonly ParteDeAnexos[]> {
+    const linhas = await this.banco.execute<{ mes: string; arquivos: number; bytes: string }>(sql`
+      SELECT to_char(a.criado_em AT TIME ZONE 'America/Sao_Paulo', 'YYYY-MM') AS mes,
+             count(*)::int AS arquivos,
+             sum(a.tamanho_bytes)::text AS bytes
+      FROM arquivos a
+      WHERE a.empresa_id = ${escopo.empresaId} AND a.removido_em IS NULL
+        AND EXISTS (SELECT 1 FROM anexos_documentos_capturados x WHERE x.arquivo_id = a.id)
+      GROUP BY 1 ORDER BY 1 DESC
+    `);
+    return linhas.map((l) => ({ mes: l.mes, arquivos: l.arquivos, bytes: Number(l.bytes) }));
+  }
+
+  async exportarAnexosDoMes(
+    escopo: EscopoEmpresa,
+    mes: string,
+    usuarioId: string,
+    obterConteudo: (chave: string) => Promise<Uint8Array | null>,
+    agora = new Date(),
+  ): Promise<PacoteExportado> {
+    if (!/^\d{4}-\d{2}$/.test(mes)) throw new Error("Mes invalido.");
+    const linhas = await this.banco.execute<{
+      codigo: string; ordem: number; nome_original: string; tipo_conteudo: string; tamanho_bytes: string; impressao_digital: string; chave_armazenamento: string;
+    }>(sql`
+      SELECT d.codigo, x.ordem, a.nome_original, a.tipo_conteudo, a.tamanho_bytes::text, a.impressao_digital, a.chave_armazenamento
+      FROM anexos_documentos_capturados x
+      JOIN documentos_capturados d ON d.id = x.documento_id
+      JOIN arquivos a ON a.id = x.arquivo_id
+      WHERE a.empresa_id = ${escopo.empresaId} AND d.empresa_id = ${escopo.empresaId} AND a.removido_em IS NULL
+        AND to_char(a.criado_em AT TIME ZONE 'America/Sao_Paulo', 'YYYY-MM') = ${mes}
+      ORDER BY d.codigo, x.ordem
+    `);
+
+    const anexos: AnexoParaExportar[] = [];
+    for (const linha of linhas) {
+      const conteudo = await obterConteudo(linha.chave_armazenamento);
+      // Linha viva sem conteudo e exatamente o que o backup deve impedir; aqui vira erro, nao pacote incompleto.
+      if (!conteudo) throw new Error(`Conteudo ausente no armazenamento para ${linha.codigo} (${linha.nome_original}).`);
+      anexos.push({
+        codigoDocumento: linha.codigo,
+        ordem: linha.ordem,
+        nomeOriginal: linha.nome_original,
+        tipoConteudo: linha.tipo_conteudo,
+        tamanhoBytes: Number(linha.tamanho_bytes),
+        impressaoDigital: linha.impressao_digital,
+        conteudo,
+      });
+    }
+
+    const [empresa] = await this.banco.execute<{ nome: string }>(sql`
+      SELECT COALESCE(nome_fantasia, nome) AS nome FROM empresas WHERE id = ${escopo.empresaId}
+    `);
+    const nomeEmpresa = empresa?.nome ?? "empresa";
+    const { zip, quantidade, bytes } = montarParteDeAnexos(mes, nomeEmpresa, anexos, agora);
+    const nome = `financeiro-${nomeEmpresa.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase()}-anexos-${mes}.zip`;
+
+    await executarEmTransacao(async (transacao) => {
+      await new RegistradorAuditoriaDrizzle(transacao).registrar({
+        acao: "dados.exportados",
+        entidade: "empresa",
+        entidadeId: escopo.empresaId,
+        organizacaoId: escopo.organizacaoId,
+        empresaId: escopo.empresaId,
+        usuarioId: comoIdentificador<"Usuario">(usuarioId),
+        origem: "interface",
+        dadosDepois: { arquivo: nome, parte: mes, anexos: quantidade, bytes },
+      });
+    }, this.banco);
+
+    return { nome, conteudo: zip, soma: somaDeVerificacao(zip), resumo: [{ arquivo: `anexos ${mes}`, linhas: quantidade }] };
+  }
+
+  private leiame(nomeEmpresa: string, agora: Date, resumo: readonly { arquivo: string; linhas: number }[], partes: readonly ParteDeAnexos[] = []): string {
     const data = agora.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
     const dicionario = CONJUNTOS.map((conjunto) => {
@@ -146,7 +220,11 @@ O QUE NÃO ESTÁ AQUI, E POR QUÊ
     sequências de código).
   - Dados de outras empresas. Toda consulta filtra por esta empresa.
 
-Os anexos (arquivos enviados) não vêm neste pacote: peça-os separadamente.
+Os anexos (arquivos enviados pelo QR code) saem em pacotes SEPARADOS, um por
+mês, na mesma tela de exportação, sem compressão e com a soma SHA-256 de cada
+arquivo. Este pacote de dados referencia os documentos pelo protocolo
+(DC-AAAA-NNNNNN), que é o nome da pasta dentro de cada parte.
+${partes.length === 0 ? "Partes disponíveis: nenhuma (nenhum anexo ainda)." : `Partes disponíveis:\n${partes.map((p) => `  - ${p.mes}: ${p.arquivos} arquivo(s), ${p.bytes} bytes`).join("\n")}`}
 
 ================================================================
 DICIONÁRIO DOS ARQUIVOS

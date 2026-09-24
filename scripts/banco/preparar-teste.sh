@@ -93,6 +93,8 @@ ALTER DEFAULT PRIVILEGES FOR ROLE financeiro_migracao IN SCHEMA public
   GRANT USAGE, SELECT ON SEQUENCES TO financeiro_aplicacao;
 ALTER DEFAULT PRIVILEGES FOR ROLE financeiro_migracao IN SCHEMA public
   GRANT SELECT ON TABLES TO financeiro_backup;
+ALTER DEFAULT PRIVILEGES FOR ROLE financeiro_migracao IN SCHEMA public
+  GRANT SELECT ON SEQUENCES TO financeiro_backup;
 SQL
 else
   echo "Banco $NOME ja existe."

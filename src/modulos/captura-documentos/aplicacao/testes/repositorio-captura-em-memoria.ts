@@ -113,6 +113,12 @@ export class RepositorioCapturaEmMemoria implements RepositorioCaptura {
     this.rejeicoes.push({ documentoId, motivo: dados.motivo, dataMarcoRetencao: dados.dataMarcoRetencao });
     this.documentos.set(documentoId, { ...documento, situacao: "rejeitado", motivoRejeicao: dados.motivo, dataMarcoRetencao: dados.dataMarcoRetencao, conferidoEm: new Date(), conferidoPor: dados.autorUsuarioId });
   }
+  async listarEscoposComDocumentos() { return this.documentos.size > 0 ? [escopoDeTeste] : []; }
+  async arquivarAbandonados(_e: EscopoEmpresa, _limite: Date, _marcoDe: (d: DataCivil) => DataCivil): Promise<readonly string[]> { return []; }
+  async expurgarVencidos(_e: EscopoEmpresa, _hoje: DataCivil): Promise<{ documentos: readonly string[]; chavesParaRemover: readonly string[] }> {
+    return { documentos: [], chavesParaRemover: [] };
+  }
+  async limparTentativas(_antesDe: Date): Promise<number> { return 0; }
   async reabrir(_e: EscopoEmpresa, documentoId: string) {
     const documento = this.documentos.get(documentoId);
     if (!documento) throw new DocumentoNaoEncontrado();

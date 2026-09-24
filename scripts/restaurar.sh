@@ -11,6 +11,12 @@
 # com a aplicacao parada. Ver docs/arquitetura/modelos-deploy.md.
 #
 # Variaveis: PGHOST PGUSER (precisa poder criar banco) PGPASSWORD
+#
+# ANEXOS (Gate 10): com BACKUP_REMOTO_DESTINO e ARQUIVOS_RESTAURACAO definidos,
+# os arquivos do remoto sao copiados para ARQUIVOS_RESTAURACAO e conferidos
+# CHAVE A CHAVE contra as linhas vivas de `arquivos` no banco restaurado. Uma
+# chave viva sem arquivo e FALHA: e exatamente "o lancamento voltou, a nota
+# fiscal nao".
 # ============================================================================
 set -eu
 
@@ -79,6 +85,25 @@ if [ "$ORIGEM" != "$BANCO_DESTINO" ] && psql -d "$ORIGEM" -c "SELECT 1" > /dev/n
   echo "[restaurar] contagens IGUAIS nas $TABELAS tabelas."
 else
   echo "[restaurar] origem indisponivel para comparar; conferido so o total."
+fi
+
+if [ -n "${BACKUP_REMOTO_DESTINO:-}" ] && [ -n "${ARQUIVOS_RESTAURACAO:-}" ]; then
+  echo "[restaurar] anexos: copiando de $BACKUP_REMOTO_DESTINO/arquivos para $ARQUIVOS_RESTAURACAO"
+  mkdir -p "$ARQUIVOS_RESTAURACAO"
+  rclone copy "$BACKUP_REMOTO_DESTINO/arquivos" "$ARQUIVOS_RESTAURACAO"
+  psql -d "$BANCO_DESTINO" -tAc "SELECT chave_armazenamento FROM arquivos WHERE removido_em IS NULL" > "$TEMP/vivos.txt"
+  FALTANDO=0
+  while IFS= read -r chave; do
+    [ -z "$chave" ] && continue
+    [ -f "$ARQUIVOS_RESTAURACAO/$chave" ] || { echo "[restaurar] FALTA: $chave" >&2; FALTANDO=$((FALTANDO + 1)); }
+  done < "$TEMP/vivos.txt"
+  if [ "$FALTANDO" != "0" ]; then
+    echo "[restaurar] FALHOU: $FALTANDO arquivo(s) vivo(s) no banco sem conteudo restaurado." >&2
+    exit 1
+  fi
+  echo "[restaurar] anexos: $(grep -c . "$TEMP/vivos.txt" || true) arquivo(s) vivo(s) presente(s), chave a chave."
+else
+  echo "[restaurar] anexos NAO conferidos (defina BACKUP_REMOTO_DESTINO e ARQUIVOS_RESTAURACAO)."
 fi
 
 echo "[restaurar] concluido. Registre a data e o resultado em docs/operacao/registro-restauracoes.md"
