@@ -40,7 +40,9 @@
 - Sem cache de sessao em cookie: toda requisicao consulta o banco; revogar
   (sair, redefinir senha, remover vinculo) vale na hora. *Verificado:
   `get-session` devolve `null` imediatamente apos `sign-out`.*
-- Redefinicao de senha revoga todas as sessoes.
+- Redefinicao de senha revoga todas as sessoes. A falha do provedor de
+  e-mail vai para o log e NAO muda a resposta ao navegador: uma resposta
+  diferente diria quais e-mails existem.
 - "Redefinir acesso" (tela de usuarios) gera um link que troca a senha de
   outra pessoa: ele vai SO para o e-mail dela, nunca para a tela do
   administrador, e e recusado quando a conta serve tambem a outra

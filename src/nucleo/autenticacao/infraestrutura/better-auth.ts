@@ -9,6 +9,7 @@ import { obterBancoDados } from "@/nucleo/banco-dados/publico";
 import { obterVariaveisAmbiente } from "@/nucleo/configuracao/publico";
 import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
 
+import { entregarRedefinicaoDeSenha } from "../aplicacao/entregar-redefinicao-senha";
 import { montarMensagemRedefinicaoSenha } from "../aplicacao/mensagem-redefinicao-senha";
 import { TAMANHO_MAXIMO_SENHA, TAMANHO_MINIMO_SENHA } from "../dominio/regras-senha";
 import { contarUsuarios } from "./contar-usuarios";
@@ -71,18 +72,17 @@ function criarAutenticacao() {
           aplicacaoUrl: variaveis.APLICACAO_URL,
           validadeEmMinutos: VALIDADE_REDEFINICAO_EM_MINUTOS,
         });
-        try {
-          await montarEnviadorEmail().enviar(mensagem);
-          logs.info("e-mail de redefinicao de senha entregue ao provedor", { usuarioId: user.id });
-        } catch (erro) {
-          // Nunca deixar passar em silencio: sem isto, a tela diria "enviamos"
-          // e ninguem saberia que nada saiu.
-          logs.erro("falha ao enviar e-mail de redefinicao de senha", {
-            usuarioId: user.id,
-            erro: erro instanceof Error ? erro.message : String(erro),
-          });
-          throw erro;
-        }
+        /*
+         * A falha do provedor vai para o log de erro e NAO sobe: a biblioteca
+         * so chama este envio quando o e-mail existe, e uma resposta diferente
+         * aqui diria a qualquer pessoa quais e-mails tem conta. Quem opera ve
+         * a falha no log; quem digitou o e-mail ve a mesma tela de sempre.
+         */
+        await entregarRedefinicaoDeSenha(
+          { enviar: async (pronta) => montarEnviadorEmail().enviar(pronta), logs },
+          mensagem,
+          user.id,
+        );
       },
     },
 
