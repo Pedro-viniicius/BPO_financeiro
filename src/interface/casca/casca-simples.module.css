@@ -72,3 +72,29 @@
     margin: calc(var(--espaco-5) * -1) calc(var(--espaco-5) * -1) 0;
   }
 }
+
+/*
+ * Faixa de ambiente na tela de entrada.
+ *
+ * Nunca aparece em producao. Esta aqui, e nao so na casca autenticada, porque
+ * e nesta tela que a pessoa CHEGA: um aviso que so aparece depois de entrar
+ * chega tarde demais para impedir que alguem cadastre dado real na vitrine.
+ */
+.faixaAmbiente {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-2);
+  align-items: baseline;
+  justify-content: center;
+  margin: 0;
+  padding: var(--espaco-2) var(--espaco-4);
+  background: var(--superficie-atencao, #fff4e5);
+  border-bottom: 2px solid var(--cor-atencao-forte, #b26a00);
+  color: var(--cor-atencao-texto, #6b3f00);
+  font-size: var(--texto-sm);
+  text-align: center;
+}
+
+.faixaAmbiente strong {
+  font-weight: var(--peso-medio);
+}
