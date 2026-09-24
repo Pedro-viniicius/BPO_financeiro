@@ -120,7 +120,12 @@
   nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy:
   strict-origin-when-cross-origin`, `Permissions-Policy` (camera, microfone,
   geolocalizacao desligados), sem `X-Powered-By`. *Verificado com `curl -I`.*
-- **(Gate 5)** `Content-Security-Policy` com nonce apos definir bibliotecas de interface.
+- `Content-Security-Policy` com nonce por requisicao, gerada em `src/proxy.ts`
+  (`script-src 'self' 'nonce-…' 'strict-dynamic'`, `frame-ancestors 'none'`,
+  `form-action 'self'`, `object-src 'none'`); `style-src 'unsafe-inline'`
+  porque atributos `style=` nao aceitam nonce. A rota de recebimento do envio
+  publico, fora do proxy, recebe CSP estatica fechada pelo `next.config.ts`.
+  Cookies `Secure` sempre que `APLICACAO_URL` e https.
 
 ## 8. Limite de requisicoes (rate limiting)
 
@@ -157,7 +162,7 @@
 ## 12. XSS (injecao de script na tela)
 
 - React escapa por padrao; `dangerouslySetInnerHTML` proibido salvo revisao explicita.
-- **(Gate 5)** CSP com nonce.
+- CSP com nonce (secao 7).
 
 ## 13. Arquivos enviados (anexos, extratos)
 

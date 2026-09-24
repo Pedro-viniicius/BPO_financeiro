@@ -8,6 +8,8 @@ import type { NextConfig } from "next";
  *   plataforma empacota as funcoes, e `standalone` atrapalharia esse pipeline.
  * - Os cabecalhos de seguranca sao definidos aqui para valerem em qualquer
  *   hospedagem, sem depender de proxy externo. Ver docs/seguranca/modelo-seguranca.md.
+ *   A `Content-Security-Policy` NAO esta nesta lista: ela leva um nonce por
+ *   requisicao e por isso nasce em `src/proxy.ts`.
  */
 const cabecalhosSeguranca = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -40,6 +42,16 @@ const configuracao: NextConfig = {
           { key: "Cache-Control", value: "no-store" },
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],
+      },
+      {
+        /*
+         * O recebimento do envio publico e a unica rota fora do proxy (que
+         * gera a CSP com nonce): o corpo de ate 40 MB nao pode passar pelo
+         * limite de 10 MB do proxy. Ela nao devolve HTML — so redireciona ou
+         * responde texto —, entao a politica aqui e estatica e fechada.
+         */
+        source: "/enviar/:token/receber",
+        headers: [{ key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'none'" }],
       },
     ];
   },

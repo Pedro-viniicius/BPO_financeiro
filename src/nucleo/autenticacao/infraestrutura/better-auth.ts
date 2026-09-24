@@ -107,7 +107,10 @@ function criarAutenticacao() {
     },
 
     advanced: {
-      useSecureCookies: producao,
+      // `Secure` sempre que o site e servido por HTTPS — inclusive na
+      // demonstracao. Antes valia so em producao, e o cookie de sessao da
+      // demonstracao saia sem a marca.
+      useSecureCookies: producao || variaveis.APLICACAO_URL.startsWith("https://"),
       cookiePrefix: "financeiro",
       database: { generateId: "uuid" },
     },

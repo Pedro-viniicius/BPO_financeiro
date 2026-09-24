@@ -20,10 +20,12 @@ export async function lerPreferenciaEmpresaAtiva(): Promise<string | undefined> 
 /** So deve ser chamado depois de validar que a empresa e acessivel ao usuario. */
 export async function gravarPreferenciaEmpresaAtiva(empresaId: string): Promise<void> {
   const armazem = await cookies();
+  const variaveis = obterVariaveisAmbiente();
   armazem.set(NOME_COOKIE_EMPRESA_ATIVA, empresaId, {
     httpOnly: true,
     sameSite: "lax",
-    secure: obterVariaveisAmbiente().AMBIENTE === "producao",
+    // `Secure` sempre que o site e servido por HTTPS, inclusive na demonstracao.
+    secure: variaveis.AMBIENTE === "producao" || variaveis.APLICACAO_URL.startsWith("https://"),
     path: "/",
     maxAge: UM_ANO_EM_SEGUNDOS,
   });
