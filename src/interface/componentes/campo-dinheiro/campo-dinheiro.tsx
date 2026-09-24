@@ -37,7 +37,7 @@ export interface CampoDinheiroProps {
 function paraTextoBrasileiro(valorCanonico: string): string {
   if (valorCanonico === "") return "";
   try {
-    return Dinheiro.deTexto(valorCanonico).formatarBrasileiro().replace("R$ ", "");
+    return Dinheiro.deTexto(valorCanonico).formatarBrasileiro().replace(/R\$\s/, "");
   } catch {
     return valorCanonico;
   }
@@ -85,7 +85,7 @@ export function CampoDinheiro({
   function aoSair() {
     if (texto.trim() === "") return;
     try {
-      definirTexto(Dinheiro.deTextoBrasileiro(texto).formatarBrasileiro().replace("R$ ", ""));
+      definirTexto(Dinheiro.deTextoBrasileiro(texto).formatarBrasileiro().replace(/R\$\s/, ""));
     } catch {
       /* Texto invalido permanece como o usuario digitou; o erro e mostrado pelo campo. */
     }

@@ -19,9 +19,9 @@ describe("desconto na quitacao", () => {
     const desconto = reais("50,00");
 
     // Sai do banco apenas o dinheiro.
-    expect(valorQueMovimentaOBanco(principal).formatarBrasileiro()).toBe("R$ 950,00");
+    expect(valorQueMovimentaOBanco(principal).formatarBrasileiro()).toBe("R$\u00a0950,00");
     // O saldo cai o valor cheio: o desconto abate sem dinheiro andar.
-    expect(abatimentoDaBaixa(principal, desconto).formatarBrasileiro()).toBe("R$ 1.000,00");
+    expect(abatimentoDaBaixa(principal, desconto).formatarBrasileiro()).toBe("R$\u00a01.000,00");
 
     expect(validarValorDaBaixa({ valorPrincipal: principal, valorDesconto: desconto, saldoRestante: reais("1.000,00") }).sucesso).toBe(
       true,
@@ -39,16 +39,16 @@ describe("desconto na quitacao", () => {
     const juros = reais("30,00");
     const multa = reais("20,00");
 
-    expect(valorQueMovimentaOBanco(principal, juros, multa).formatarBrasileiro()).toBe("R$ 1.050,00");
-    expect(abatimentoDaBaixa(principal).formatarBrasileiro()).toBe("R$ 1.000,00");
+    expect(valorQueMovimentaOBanco(principal, juros, multa).formatarBrasileiro()).toBe("R$\u00a01.050,00");
+    expect(abatimentoDaBaixa(principal).formatarBrasileiro()).toBe("R$\u00a01.000,00");
     // Continua valido mesmo saindo mais dinheiro do que o saldo da parcela.
     expect(validarValorDaBaixa({ valorPrincipal: principal, saldoRestante: reais("1.000,00") }).sucesso).toBe(true);
   });
 
   it("juros, multa e desconto convivem na mesma baixa", () => {
     const noBanco = valorQueMovimentaOBanco(reais("900,00"), reais("30,00"), reais("20,00"));
-    expect(noBanco.formatarBrasileiro()).toBe("R$ 950,00");
-    expect(abatimentoDaBaixa(reais("900,00"), reais("100,00")).formatarBrasileiro()).toBe("R$ 1.000,00");
+    expect(noBanco.formatarBrasileiro()).toBe("R$\u00a0950,00");
+    expect(abatimentoDaBaixa(reais("900,00"), reais("100,00")).formatarBrasileiro()).toBe("R$\u00a01.000,00");
   });
 
   it("recusa quando principal mais desconto passam do saldo", () => {
@@ -60,7 +60,7 @@ describe("desconto na quitacao", () => {
     expect(r.sucesso).toBe(false);
     if (!r.sucesso) {
       expect(r.erro.message).toContain("valor mais desconto");
-      expect(r.erro.message).toContain("R$ 1.000,00");
+      expect(r.erro.message).toContain("R$\u00a01.000,00");
     }
   });
 

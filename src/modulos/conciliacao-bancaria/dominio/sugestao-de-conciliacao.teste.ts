@@ -166,8 +166,8 @@ describe("validacao da conciliacao 1:N", () => {
     );
     expect(resultado.sucesso).toBe(false);
     if (!resultado.sucesso) {
-      expect(resultado.erro.message).toContain("R$ 1.000,00");
-      expect(resultado.erro.message).toContain("R$ 999,99");
+      expect(resultado.erro.message).toContain("R$\u00a01.000,00");
+      expect(resultado.erro.message).toContain("R$\u00a0999,99");
     }
   });
 

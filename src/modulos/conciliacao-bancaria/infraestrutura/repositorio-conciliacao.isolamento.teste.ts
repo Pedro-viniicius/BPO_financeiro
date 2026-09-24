@@ -281,7 +281,7 @@ describe.skipIf(!urlBancoTeste)("conciliacao bancaria (PostgreSQL real)", () => 
         origemDecisao: "manual",
         usuarioId,
       }),
-    ).rejects.toThrow(/DESEQUILIBRADA.*R\$ 1\.000,00.*R\$ 999,00/s);
+    ).rejects.toThrow(/DESEQUILIBRADA.*R\$\s1\.000,00.*R\$\s999,00/s);
 
     await banco.execute(sql`DELETE FROM movimentacoes_bancarias WHERE id = ${movimentacao}`);
   });

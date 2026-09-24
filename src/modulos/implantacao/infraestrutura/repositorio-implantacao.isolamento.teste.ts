@@ -162,7 +162,7 @@ describe.skipIf(!urlBancoTeste)("carga inicial (PostgreSQL real)", () => {
     // pagamento no banco, e o extrato deixaria de fechar.
     expect(titulo!.valor_total).toBe("1000.00");
     expect(titulo!.descricao).toContain("(parcela 3/10)");
-    expect(titulo!.observacoes).toContain("Valor original R$ 1.500,00");
+    expect(titulo!.observacoes).toContain("Valor original R$\u00a01.500,00");
     // Codigo pela MESMA sequencia das telas.
     expect(titulo!.codigo).toMatch(/^CP-2025-\d{6}$/);
   });

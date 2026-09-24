@@ -194,7 +194,11 @@ export class Dinheiro {
     const decimal = texto.slice(texto.length - casas);
     const inteiraComPontos = inteira.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     const simbolo = this.moeda === "BRL" ? "R$" : this.moeda;
-    return `${negativo ? "-" : ""}${simbolo} ${inteiraComPontos},${decimal}`;
+    // Espaco INSEPARAVEL (U+00A0) entre o simbolo e o numero, como faz o
+    // `Intl` do navegador: com espaco comum, uma coluna estreita quebrava
+    // "R$" numa linha e "187,50" na outra. A leitura (`deTextoBrasileiro`)
+    // aceita os dois, entao colar um valor copiado da tela continua valendo.
+    return `${negativo ? "-" : ""}${simbolo}\u00a0${inteiraComPontos},${decimal}`;
   }
 
   toJSON(): { valor: string; moeda: Moeda } {

@@ -29,7 +29,7 @@ describe("preencher o ano", () => {
   it("distribuir divide o total e poe a sobra de centavos na ULTIMA parcela", () => {
     const ano = distribuirNoAno(reais("10.000,00"));
     expect(ano.slice(0, 11).every((valor) => valor.igual(reais("833,33")))).toBe(true);
-    expect(ano[11]?.formatarBrasileiro()).toBe("R$ 833,37");
+    expect(ano[11]?.formatarBrasileiro()).toBe("R$\u00a0833,37");
   });
 
   it("a soma dos doze meses bate exatamente com o total, sempre", () => {

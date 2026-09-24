@@ -74,9 +74,13 @@ describe("Dinheiro", () => {
   });
 
   it("formata para exibicao em portugues do Brasil", () => {
-    expect(Dinheiro.deTexto("1234567.89").formatarBrasileiro()).toBe("R$ 1.234.567,89");
-    expect(Dinheiro.deTexto("0.05").formatarBrasileiro()).toBe("R$ 0,05");
-    expect(Dinheiro.deTexto("-1000").formatarBrasileiro()).toBe("-R$ 1.000,00");
+    expect(Dinheiro.deTexto("1234567.89").formatarBrasileiro()).toBe("R$\u00a01.234.567,89");
+    expect(Dinheiro.deTexto("0.05").formatarBrasileiro()).toBe("R$\u00a00,05");
+    // Espaco inseparavel: "R$" e o numero nunca ficam em linhas diferentes.
+    expect(Dinheiro.deTexto("187.5").formatarBrasileiro()).not.toContain("R$ ");
+    // E o texto formatado volta a ser lido: colar um valor copiado da tela funciona.
+    expect(Dinheiro.deTextoBrasileiro(Dinheiro.deTexto("1234.5").formatarBrasileiro()).paraTexto()).toBe("1234.50");
+    expect(Dinheiro.deTexto("-1000").formatarBrasileiro()).toBe("-R$\u00a01.000,00");
   });
 
   it("serializa para JSON com valor em texto e moeda", () => {

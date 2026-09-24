@@ -259,8 +259,8 @@ describe("validacao do cronograma", () => {
     const resultado = validarCronograma(adulterado, reais("12.000,00"));
     expect(resultado.sucesso).toBe(false);
     if (!resultado.sucesso) {
-      expect(resultado.erro.message).toContain("R$ 12.001,00");
-      expect(resultado.erro.message).toContain("R$ 12.000,00");
+      expect(resultado.erro.message).toContain("R$\u00a012.001,00");
+      expect(resultado.erro.message).toContain("R$\u00a012.000,00");
     }
   });
 

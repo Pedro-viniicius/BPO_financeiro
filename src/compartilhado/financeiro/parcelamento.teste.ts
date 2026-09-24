@@ -22,7 +22,7 @@ describe("gerarParcelas", () => {
       periodicidade: "mensal",
     });
 
-    expect(parcelas.map((p) => p.valor.formatarBrasileiro())).toEqual(["R$ 333,33", "R$ 333,33", "R$ 333,34"]);
+    expect(parcelas.map((p) => p.valor.formatarBrasileiro())).toEqual(["R$\u00a0333,33", "R$\u00a0333,33", "R$\u00a0333,34"]);
     expect(Dinheiro.somarTodos(parcelas.map((p) => p.valor)).igual(reais("1.000,00"))).toBe(true);
   });
 
@@ -36,7 +36,7 @@ describe("gerarParcelas", () => {
 
     // 100,00 / 7 = 14,285... -> 14,28 em seis parcelas e o resto na setima.
     expect(parcelas.slice(0, 6).every((p) => p.valor.igual(reais("14,28")))).toBe(true);
-    expect(parcelas[6]!.valor.formatarBrasileiro()).toBe("R$ 14,32");
+    expect(parcelas[6]!.valor.formatarBrasileiro()).toBe("R$\u00a014,32");
     expect(Dinheiro.somarTodos(parcelas.map((p) => p.valor)).igual(reais("100,00"))).toBe(true);
   });
 
