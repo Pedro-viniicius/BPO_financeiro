@@ -86,7 +86,7 @@ pnpm banco:migrar     # usa BANCO_URL_MIGRACAO (usuario que pode alterar estrutu
 
 A aplicacao roda com `BANCO_URL` (usuario `financeiro_aplicacao`), que **nao**
 pode criar tabelas nem alterar a auditoria. Os papeis sao criados por
-`scripts/banco/criar-usuarios.sql`.
+`scripts/banco/10-criar-usuarios.sh`, com as senhas lidas de `BANCO_SENHA_*`.
 
 ## 5. Como rodar os testes de integracao
 
@@ -97,12 +97,13 @@ Eles usam PostgreSQL de verdade — nao simulamos o que o banco deve garantir
 # 1. suba um PostgreSQL com os papeis criados
 docker run -d --name financeiro-pg \
   -e POSTGRES_DB=financeiro -e POSTGRES_USER=financeiro_admin -e POSTGRES_PASSWORD=admin \
+  -e BANCO_SENHA_APLICACAO=<senha> -e BANCO_SENHA_MIGRACAO=<senha> -e BANCO_SENHA_BACKUP=<senha> \
   -p 127.0.0.1:5432:5432 \
-  -v "$PWD/scripts/banco/criar-usuarios.sql:/docker-entrypoint-initdb.d/10-criar-usuarios.sql:ro" \
+  -v "$PWD/scripts/banco/10-criar-usuarios.sh:/docker-entrypoint-initdb.d/10-criar-usuarios.sh:ro" \
   postgres:17-alpine
 
 # 2. aplique as migracoes
-BANCO_URL_MIGRACAO="postgres://financeiro_migracao:troque-esta-senha@127.0.0.1:5432/financeiro" pnpm banco:migrar
+BANCO_URL_MIGRACAO="postgres://financeiro_migracao:<senha>@127.0.0.1:5432/financeiro" pnpm banco:migrar
 
 # 3. rode os testes apontando para o usuario da APLICACAO
 BANCO_URL_TESTE="postgres://financeiro_aplicacao:troque-esta-senha@127.0.0.1:5432/financeiro" pnpm testar

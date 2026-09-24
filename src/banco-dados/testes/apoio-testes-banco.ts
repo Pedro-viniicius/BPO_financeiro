@@ -9,7 +9,7 @@ import * as esquema from "@/banco-dados/esquemas/indice";
  * Os testes rodam apenas quando `BANCO_URL_TESTE` esta definida (usuario da
  * APLICACAO, com migracoes aplicadas). Na CI, o servico PostgreSQL e criado,
  * as migracoes sao aplicadas e a variavel e exportada (ver .github/workflows/ci.yml).
- * Localmente: docker + scripts/banco/criar-usuarios.sql + pnpm banco:migrar.
+ * Localmente: docker + scripts/banco/10-criar-usuarios.sh + pnpm banco:migrar.
  */
 export const urlBancoTeste = process.env.BANCO_URL_TESTE;
 

@@ -59,13 +59,15 @@ Passo a passo:
 1. Instale Docker e Docker Compose no servidor (Ubuntu 22.04+ recomendado).
 2. git clone <repositorio> financeiro && cd financeiro   (ou extraia o pacote da versao)
 3. cp .env.exemplo .env   e preencha:
-     BANCO_SENHA_ADMIN, BANCO_SENHA_BACKUP (usadas pelo compose)
-     BANCO_URL, BANCO_URL_MIGRACAO (senhas dos usuarios de aplicacao e migracao)
+     BANCO_SENHA_ADMIN, BANCO_SENHA_APLICACAO, BANCO_SENHA_MIGRACAO, BANCO_SENHA_BACKUP
+       (o compose entrega ao banco; o script de inicializacao cria os usuarios com elas)
+     BANCO_URL, BANCO_URL_MIGRACAO (as MESMAS senhas da aplicacao e da migracao)
      APLICACAO_URL=https://financeiro.suaempresa.com.br
      APLICACAO_SEGREDO=$(openssl rand -base64 48)
      AUDITORIA_SAL_IP=$(openssl rand -base64 48)   # guarde a copia no cofre, junto da chave GPG
-4. Edite scripts/banco/criar-usuarios.sql trocando 'troque-esta-senha' pelas
-   senhas usadas no .env (roda uma unica vez, na criacao do banco).
+4. Nada a editar em arquivo versionado: scripts/banco/10-criar-usuarios.sh
+   le as BANCO_SENHA_* do ambiente na criacao do volume (uma unica vez) e se
+   recusa a rodar com valor vazio ou de exemplo.
 5. docker compose up -d
 6. docker compose logs migracao   → "Migracoes aplicadas com sucesso."
 7. curl http://127.0.0.1:3000/api/saude → {"situacao":"ok","banco":"ok"}
@@ -125,7 +127,7 @@ apenas garante compatibilidade (sem dependencia de servico externo obrigatorio).
 | `Dockerfile` | imagem multi-etapa; roda como usuario `financeiro` (nao root); `HEALTHCHECK` em `/api/saude` |
 | `docker-compose.yml` | os cinco servicos; porta 3000 apenas em 127.0.0.1; banco sem porta publica |
 | `.env.exemplo` | todas as variaveis, comentadas em portugues |
-| `scripts/banco/criar-usuarios.sql` | usuarios do PostgreSQL com menor privilegio |
+| `scripts/banco/10-criar-usuarios.sh` | usuarios do PostgreSQL com menor privilegio; senhas lidas do ambiente |
 | `scripts/backup.sh` | `pg_dump` + sha256 + retencao + GPG opcional |
 | `scripts/restaurar.sh` | restauracao em banco separado; exige confirmacao explicita para producao |
 

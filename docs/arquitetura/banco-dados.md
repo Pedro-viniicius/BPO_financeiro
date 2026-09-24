@@ -72,8 +72,9 @@ Tabela de controle: `migracoes_aplicadas` no esquema `public`.
 
 ## Usuarios do banco (menor privilegio)
 
-Criados por `scripts/banco/criar-usuarios.sql` (roda automaticamente no
-primeiro `docker compose up`; no Modelo A o administrador executa).
+Criados por `scripts/banco/10-criar-usuarios.sh` (roda automaticamente no
+primeiro `docker compose up`, lendo as senhas de `BANCO_SENHA_*` no `.env`;
+recusa valor vazio ou de exemplo). Nenhuma senha fica em arquivo versionado.
 
 | Usuario | Usado por | Pode | Nao pode |
 |---|---|---|---|

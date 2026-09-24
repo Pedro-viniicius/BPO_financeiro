@@ -27,9 +27,14 @@ services:
       # Fuso do servidor de banco. Datas de negocio ja sao DATE (sem fuso);
       # isto alinha os TIMESTAMPTZ tecnicos e os nomes de arquivo do backup.
       TZ: America/Sao_Paulo
+      # Senhas dos tres usuarios de menor privilegio, lidas pelo script de
+      # inicializacao abaixo (so roda na criacao do volume). Vem do .env.
+      BANCO_SENHA_APLICACAO: "${BANCO_SENHA_APLICACAO:?defina BANCO_SENHA_APLICACAO no .env}"
+      BANCO_SENHA_MIGRACAO: "${BANCO_SENHA_MIGRACAO:?defina BANCO_SENHA_MIGRACAO no .env}"
+      BANCO_SENHA_BACKUP: "${BANCO_SENHA_BACKUP:?defina BANCO_SENHA_BACKUP no .env}"
     volumes:
       - dados-banco:/var/lib/postgresql/data
-      - ./scripts/banco/criar-usuarios.sql:/docker-entrypoint-initdb.d/10-criar-usuarios.sql:ro
+      - ./scripts/banco/10-criar-usuarios.sh:/docker-entrypoint-initdb.d/10-criar-usuarios.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U financeiro_admin -d financeiro"]
       interval: 10s

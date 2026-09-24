@@ -34,14 +34,18 @@ jobs:
           --health-retries 20
 
     env:
-      # Usuarios criados por scripts/banco/criar-usuarios.sql (senha padrao do script; apenas na CI).
+      # Usuarios criados por scripts/banco/10-criar-usuarios.sh com as senhas
+      # abaixo (valores so da CI; o script recusa vazio e o valor de exemplo).
+      BANCO_SENHA_APLICACAO: senha-aplicacao-ci
+      BANCO_SENHA_MIGRACAO: senha-migracao-ci
+      BANCO_SENHA_BACKUP: senha-backup-ci
       BANCO_URL_ADMIN: postgres://financeiro_admin:senha-admin-ci@localhost:5432/financeiro
-      BANCO_URL_MIGRACAO: postgres://financeiro_migracao:troque-esta-senha@localhost:5432/financeiro
+      BANCO_URL_MIGRACAO: postgres://financeiro_migracao:senha-migracao-ci@localhost:5432/financeiro
       # Banco PROPRIO para os testes, como em desenvolvimento: as suites de
       # integracao escrevem de verdade e nao podem dividir banco com a aplicacao.
-      BANCO_URL_TESTE: postgres://financeiro_aplicacao:troque-esta-senha@localhost:5432/financeiro_teste
+      BANCO_URL_TESTE: postgres://financeiro_aplicacao:senha-aplicacao-ci@localhost:5432/financeiro_teste
       BANCO_ADMIN_URL: postgres://financeiro_admin:senha-admin-ci@localhost:5432/postgres
-      BANCO_URL: postgres://financeiro_aplicacao:troque-esta-senha@localhost:5432/financeiro
+      BANCO_URL: postgres://financeiro_aplicacao:senha-aplicacao-ci@localhost:5432/financeiro
       APLICACAO_URL: http://localhost:3000
       APLICACAO_SEGREDO: segredo-apenas-para-ci-0123456789abcdefghij
 
@@ -81,8 +85,18 @@ jobs:
             exit 1
           fi
 
+      - name: Nenhuma senha literal nos scripts do banco
+        # As senhas dos usuarios do banco vem do ambiente. Um `PASSWORD '...'`
+        # literal aqui e senha em arquivo versionado — e foi assim que o fluxo
+        # de instalacao pedia para fazer ate o Gate 10.
+        run: |
+          if git grep -n -E "PASSWORD +'" -- scripts/banco; then
+            echo "ERRO: senha literal em scripts/banco. Use as variaveis BANCO_SENHA_*." >&2
+            exit 1
+          fi
+
       - name: Criar usuarios do banco com menor privilegio
-        run: psql "$BANCO_URL_ADMIN" -v ON_ERROR_STOP=1 -f scripts/banco/criar-usuarios.sql
+        run: sh scripts/banco/10-criar-usuarios.sh
 
       - name: Aplicar migracoes do zero (usuario de migracao)
         run: pnpm banco:migrar

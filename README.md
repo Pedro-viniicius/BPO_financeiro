@@ -46,8 +46,9 @@ pnpm install
 cp .env.exemplo .env                 # ajuste BANCO_URL etc.
 docker run -d --name financeiro-pg -e POSTGRES_DB=financeiro -e POSTGRES_USER=financeiro_admin \
   -e POSTGRES_PASSWORD=admin -p 127.0.0.1:5432:5432 \
-  -v "$PWD/scripts/banco/criar-usuarios.sql:/docker-entrypoint-initdb.d/10-criar-usuarios.sql:ro" \
-  postgres:17-alpine
+  -e BANCO_SENHA_APLICACAO=<senha> -e BANCO_SENHA_MIGRACAO=<senha> -e BANCO_SENHA_BACKUP=<senha> \
+  -v "$PWD/scripts/banco/10-criar-usuarios.sh:/docker-entrypoint-initdb.d/10-criar-usuarios.sh:ro" \
+  postgres:17-alpine                   # as mesmas senhas vao no .env (BANCO_SENHA_* e URLs)
 pnpm banco:migrar                    # aplica migracoes
 pnpm dev                             # http://localhost:3000
 pnpm tarefas:executar                # em outro terminal: processo de tarefas

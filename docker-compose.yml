@@ -25,10 +25,15 @@ services:
       POSTGRES_DB: financeiro
       POSTGRES_USER: financeiro_admin
       POSTGRES_PASSWORD: ${BANCO_SENHA_ADMIN:?defina BANCO_SENHA_ADMIN no .env}
+      # Senhas dos tres usuarios de menor privilegio, lidas pelo script de
+      # inicializacao abaixo. Vem do .env, nunca de arquivo versionado.
+      BANCO_SENHA_APLICACAO: ${BANCO_SENHA_APLICACAO:?defina BANCO_SENHA_APLICACAO no .env}
+      BANCO_SENHA_MIGRACAO: ${BANCO_SENHA_MIGRACAO:?defina BANCO_SENHA_MIGRACAO no .env}
+      BANCO_SENHA_BACKUP: ${BANCO_SENHA_BACKUP:?defina BANCO_SENHA_BACKUP no .env}
     volumes:
       - dados-banco:/var/lib/postgresql/data
       # Cria os usuarios de aplicacao/migracao/backup na primeira inicializacao.
-      - ./scripts/banco/criar-usuarios.sql:/docker-entrypoint-initdb.d/10-criar-usuarios.sql:ro
+      - ./scripts/banco/10-criar-usuarios.sh:/docker-entrypoint-initdb.d/10-criar-usuarios.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U financeiro_admin -d financeiro"]
       interval: 10s

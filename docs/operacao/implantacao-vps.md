@@ -88,9 +88,11 @@ Antes de subir a aplicacao. Cada item vale por si; nenhum substitui outro.
 1. Checklist acima.
 2. git clone <repositorio> financeiro && cd financeiro
 3. cp .env.producao.exemplo .env && chmod 600 .env    # preencher tudo
-4. Editar scripts/banco/criar-usuarios.sql com as MESMAS senhas do .env.
-   Ele roda uma unica vez, na criacao do volume do banco; depois disso,
-   mudar o arquivo nao tem efeito.
+4. Conferir que BANCO_SENHA_ADMIN, BANCO_SENHA_APLICACAO, BANCO_SENHA_MIGRACAO
+   e BANCO_SENHA_BACKUP estao preenchidas no .env: o script de inicializacao
+   do banco (scripts/banco/10-criar-usuarios.sh) le DALI e roda uma unica
+   vez, na criacao do volume. Nada e editado em arquivo versionado; o
+   implantar.sh recusa qualquer 'troque-esta-senha'.
 5. mkdir -p segredos && rclone config --config segredos/rclone.conf
 6. scripts/implantar.sh
 7. Abrir https://<DOMINIO> e criar o primeiro administrador (primeiro acesso).

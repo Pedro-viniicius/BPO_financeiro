@@ -25,7 +25,7 @@ if [ -f .env ]; then
         valor=${linha#*=}
         valor=$(printf '%s' "$valor" | sed 's/^["'"'"']//; s/["'"'"']$//')
         case "$chave" in
-          BANCO_URL_TESTE|BANCO_SENHA_ADMIN|BANCO_ADMIN_URL|BANCO_TESTE_NOME)
+          BANCO_URL_TESTE|BANCO_URL_MIGRACAO|BANCO_SENHA_ADMIN|BANCO_ADMIN_URL|BANCO_TESTE_NOME)
             eval "$chave=\$valor"; export "$chave"
             ;;
         esac
@@ -101,8 +101,15 @@ else
 fi
 
 # As migracoes vao pelo usuario de MIGRACAO, no banco de testes.
-senha_e_host=$(printf '%s' "$BANCO_URL_TESTE" | sed 's|^postgres://[^:]*:||')
-BANCO_URL_MIGRACAO="postgres://financeiro_migracao:$senha_e_host" \
-  pnpm exec tsx src/banco-dados/migrar.ts
+# Com BANCO_URL_MIGRACAO definida, troca-se so o nome do banco na URL dela: a
+# senha da migracao e propria, nao a da aplicacao. Sem ela, cai no atalho
+# antigo (mesma senha para os dois), que so vale em maquina de desenvolvimento.
+if [ -n "${BANCO_URL_MIGRACAO:-}" ]; then
+  URL_MIGRACAO_TESTE=$(printf '%s' "$BANCO_URL_MIGRACAO" | sed "s|/[^/?]*\(?.*\)\{0,1\}$|/$NOME|")
+else
+  senha_e_host=$(printf '%s' "$BANCO_URL_TESTE" | sed 's|^postgres://[^:]*:||')
+  URL_MIGRACAO_TESTE="postgres://financeiro_migracao:$senha_e_host"
+fi
+BANCO_URL_MIGRACAO="$URL_MIGRACAO_TESTE" pnpm exec tsx src/banco-dados/migrar.ts
 
 echo "Banco de testes pronto: $NOME"

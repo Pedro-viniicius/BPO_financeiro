@@ -33,6 +33,20 @@ if [ "$(stat -c '%a' .env)" != "600" ]; then
   chmod 600 .env
 fi
 
+# Senhas do banco: as quatro precisam existir, e nenhuma pode ser o valor de
+# exemplo. O script de inicializacao do banco tambem recusa, mas ele so roda
+# na criacao do volume — aqui a recusa vem antes de qualquer `up`.
+if grep -q 'troque-esta-senha' .env; then
+  echo "ERRO: o .env ainda contem 'troque-esta-senha'. Gere senhas reais: openssl rand -base64 24" >&2
+  exit 1
+fi
+for variavel in BANCO_SENHA_ADMIN BANCO_SENHA_APLICACAO BANCO_SENHA_MIGRACAO BANCO_SENHA_BACKUP; do
+  if ! grep -q "^$variavel=." .env; then
+    echo "ERRO: $variavel esta ausente ou vazia no .env." >&2
+    exit 1
+  fi
+done
+
 # A pasta existe mesmo sem backup remoto configurado: o compose a monta.
 mkdir -p segredos backups
 chmod 700 segredos

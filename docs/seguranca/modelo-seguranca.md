@@ -92,7 +92,10 @@
 - Credenciais de integracoes: variaveis de ambiente; nunca no banco em texto claro.
 - Nunca em log: senhas, tokens, credenciais bancarias, cookies, chaves de API.
   O registrador de logs redige automaticamente chaves sensiveis (testado).
-- Scripts de instalacao pedem para trocar `troque-esta-senha` antes de produzao.
+- Senhas dos usuarios do banco vem do ambiente (`BANCO_SENHA_*`): o script
+  de inicializacao (`scripts/banco/10-criar-usuarios.sh`) recusa valor vazio
+  ou de exemplo, `implantar.sh` recusa `troque-esta-senha` no `.env`, e a CI
+  falha se houver `PASSWORD '...'` literal em `scripts/banco/`.
 
 ## 5. Auditoria e logs
 

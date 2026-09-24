@@ -23,7 +23,7 @@ recursos) e adaptadores contratados.
 Entregaveis ja criados: `Dockerfile` (multi-etapa, usuario nao-root,
 healthcheck), `docker-compose.yml` (banco, migracao, aplicacao, tarefas,
 backup), `.env.exemplo`, `scripts/backup.sh`, `scripts/restaurar.sh`,
-`scripts/banco/criar-usuarios.sql`. Detalhes em
+`scripts/banco/10-criar-usuarios.sh` (antes `criar-usuarios.sql`; as senhas passaram a vir do ambiente). Detalhes em
 `docs/arquitetura/modelos-deploy.md`.
 
 Proibido: pastas ou ramos por cliente. Comportamento por cliente vem de
