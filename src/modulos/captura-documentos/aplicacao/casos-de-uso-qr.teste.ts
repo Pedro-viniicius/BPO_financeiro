@@ -1,51 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
-import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
-
 import { FORMATO_TOKEN_CAPTURA, hashDoTokenDeCaptura } from "../dominio/token-captura";
 import { definirLimiteDeEnvios, gerarQrDeCaptura, revogarQrDeCaptura, situacaoDoQr } from "./casos-de-uso-qr";
-import type { EscopoResolvidoPorToken, RepositorioCaptura, TokenDeCapturaAtivo } from "./repositorio-captura";
+import { escopoDeTeste, RepositorioCapturaEmMemoria } from "./testes/repositorio-captura-em-memoria";
 
-const escopo: EscopoEmpresa = {
-  organizacaoId: comoIdentificador<"Organizacao">("org-1"),
-  empresaId: comoIdentificador<"Empresa">("emp-1"),
-};
-
-/** Repositorio em memoria: guarda o que recebeu, para o teste conferir que so o HASH chegou. */
-class RepositorioEmMemoria implements RepositorioCaptura {
-  ativo: (TokenDeCapturaAtivo & { hash: string }) | null = null;
-  hashesRecebidos: string[] = [];
-
-  async obterTokenAtivo(): Promise<TokenDeCapturaAtivo | null> {
-    return this.ativo;
-  }
-  async gerarToken(_escopo: EscopoEmpresa, dados: { tokenHash: string; autorUsuarioId: string }) {
-    this.hashesRecebidos.push(dados.tokenHash);
-    const substituiuAnterior = this.ativo !== null;
-    this.ativo = { id: `t${this.hashesRecebidos.length}`, criadoEm: new Date(), criadoPor: dados.autorUsuarioId, limiteEnviosHora: 20, hash: dados.tokenHash };
-    return { id: this.ativo.id, substituiuAnterior };
-  }
-  async revogarToken(): Promise<boolean> {
-    const havia = this.ativo !== null;
-    this.ativo = null;
-    return havia;
-  }
-  async resolverEscopoPorToken(tokenHash: string): Promise<EscopoResolvidoPorToken | null> {
-    if (!this.ativo || this.ativo.hash !== tokenHash) return null;
-    return { escopo, tokenId: this.ativo.id, limiteEnviosHora: 20, nomeEmpresa: "Empresa" };
-  }
-  // Fora do assunto deste teste (recebimento de documentos):
-  async procurarArquivoPorImpressao() { return null; }
-  async receberDocumento(): Promise<{ id: string; codigo: string }> { throw new Error("nao usado aqui"); }
-  async contarPendentes() { return 0; }
-  async definirLimiteDeEnvios(_e: EscopoEmpresa, dados: { limite: number }) {
-    if (!this.ativo) return false;
-    this.ativo = { ...this.ativo, limiteEnviosHora: dados.limite };
-    return true;
-  }
-  async registrarTentativa() { return 1; }
-}
+const escopo = escopoDeTeste;
+type RepositorioEmMemoria = RepositorioCapturaEmMemoria;
+const RepositorioEmMemoria = RepositorioCapturaEmMemoria;
 
 describe("casos de uso do QR de captura", () => {
   it("gera token de 22 caracteres, entrega o link e manda SO O HASH para o repositorio", async () => {

@@ -1,0 +1,91 @@
+/* Fila de conferencia e detalhe do documento recebido. */
+.filtros {
+  display: flex;
+  gap: var(--espaco-3);
+  align-items: flex-end;
+  margin-bottom: var(--espaco-5);
+}
+
+.filtros label {
+  display: grid;
+  gap: var(--espaco-1);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+.paginacao {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--espaco-4);
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--espaco-4);
+  margin: 0 0 var(--espaco-6);
+}
+
+.ficha div {
+  display: grid;
+  gap: var(--espaco-1);
+}
+
+.ficha dt {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ficha dd {
+  margin: 0;
+}
+
+.anexos {
+  display: grid;
+  gap: var(--espaco-2);
+  margin: 0 0 var(--espaco-6);
+  padding: 0;
+  list-style: none;
+}
+
+.anexo {
+  display: flex;
+  gap: var(--espaco-3);
+  align-items: center;
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+}
+
+.anexoDetalhe {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.observacao {
+  padding: var(--espaco-4);
+  border-left: 3px solid var(--cor-borda-forte);
+  background: var(--superficie-cartao);
+  white-space: pre-wrap;
+}
+
+.formulario {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+.acoes {
+  display: flex;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+}
+
+.chave {
+  font-family: var(--fonte-mono, monospace);
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}

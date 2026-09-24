@@ -19,3 +19,12 @@ export {
 } from "./dominio/envio";
 export { FORMATO_TOKEN_CAPTURA, hashDoTokenDeCaptura, linkDeEnvio, temFormatoDeToken } from "./dominio/token-captura";
 export { RepositorioCapturaDrizzle } from "./infraestrutura/repositorio-captura-drizzle";
+export {
+  abrirDocumento, aprovarDocumento, reabrirDocumento, rejeitarDocumento,
+  type DependenciasConferencia, type DocumentoParaConferir, type EntradaDeAprovacao,
+} from "./aplicacao/conferir-documento";
+export type { AnexoDoDocumento, DocumentoDetalhado, DocumentoNaFila, FiltroDaFila } from "./aplicacao/repositorio-captura";
+export {
+  ABANDONO_DIAS, AVISO_PENDENTE_DIAS, DocumentoNaoEncontrado, DocumentoNaoPendente, DocumentoNaoReabrivel,
+  MotivoDeRejeicaoInvalido, NOMES_SITUACAO_DOCUMENTO, podeReabrir, TAMANHO_MAXIMO_MOTIVO, type SituacaoDocumento,
+} from "./dominio/conferencia";

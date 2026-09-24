@@ -2,20 +2,13 @@ import { createHash } from "node:crypto";
 
 import { describe, expect, it } from "vitest";
 
-import { comoIdentificador } from "@/compartilhado/tipos/identificadores";
-import type { EscopoEmpresa } from "@/compartilhado/tipos/indice";
 import type { ArmazenamentoArquivos, ArquivoGuardado, ArquivoParaGuardar } from "@/nucleo/arquivos/publico";
 
 import { EnvioRecusado } from "../dominio/envio";
 import { LIMITE_TOKENS_INVALIDOS_POR_IP_HORA, LimiteDeTentativasExcedido } from "../dominio/limite-tentativas";
-import { gerarTokenDeCaptura, hashDoTokenDeCaptura } from "../dominio/token-captura";
+import { gerarTokenDeCaptura } from "../dominio/token-captura";
 import { autorizarEnvio, receberEnvio, resolverEnvio, TokenDeCapturaInvalido, type DependenciasEnvio } from "./receber-envio";
-import type { DadosDoEnvio, EscopoResolvidoPorToken, RepositorioCaptura } from "./repositorio-captura";
-
-const escopo: EscopoEmpresa = {
-  organizacaoId: comoIdentificador<"Organizacao">("org-1"),
-  empresaId: comoIdentificador<"Empresa">("emp-1"),
-};
+import { RepositorioCapturaEmMemoria } from "./testes/repositorio-captura-em-memoria";
 
 class ArmazenamentoEmMemoria implements ArmazenamentoArquivos {
   guardados: ArquivoParaGuardar[] = [];
@@ -31,41 +24,9 @@ class ArmazenamentoEmMemoria implements ArmazenamentoArquivos {
   async remover() {}
 }
 
-class RepositorioEmMemoria implements RepositorioCaptura {
-  readonly tokenValido: string;
-  readonly impressoesConhecidas = new Map<string, string>();
-  readonly tentativas = new Map<string, number>();
-  recebidos: DadosDoEnvio[] = [];
-  limite = 20;
-  constructor(token: string) { this.tokenValido = hashDoTokenDeCaptura(token); }
-  async obterTokenAtivo() { return null; }
-  async gerarToken() { return { id: "t", substituiuAnterior: false }; }
-  async revogarToken() { return false; }
-  async resolverEscopoPorToken(hash: string): Promise<EscopoResolvidoPorToken | null> {
-    return hash === this.tokenValido ? { escopo, tokenId: "tok-1", limiteEnviosHora: this.limite, nomeEmpresa: "Nova Didata" } : null;
-  }
-  async procurarArquivoPorImpressao(_e: EscopoEmpresa, impressao: string) {
-    const id = this.impressoesConhecidas.get(impressao);
-    return id ? { id } : null;
-  }
-  async receberDocumento(_e: EscopoEmpresa, dados: DadosDoEnvio) {
-    this.recebidos.push(dados);
-    return { id: `doc-${this.recebidos.length}`, codigo: `DC-2026-${String(this.recebidos.length).padStart(6, "0")}` };
-  }
-  async contarPendentes() { return this.recebidos.length; }
-  async definirLimiteDeEnvios() { return true; }
-  async registrarTentativa(identificador: string, janela: Date) {
-    const chave = `${identificador}@${janela.toISOString()}`;
-    const total = (this.tentativas.get(chave) ?? 0) + 1;
-    this.tentativas.set(chave, total);
-    return total;
-  }
-}
-
-/** `semSal` em vez de passar `undefined`: um `undefined` explicito acionaria o valor padrao do parametro. */
 function montar(opcoes: { readonly semSal?: boolean } = {}) {
   const token = gerarTokenDeCaptura();
-  const repositorio = new RepositorioEmMemoria(token);
+  const repositorio = new RepositorioCapturaEmMemoria(token);
   const armazenamento = new ArmazenamentoEmMemoria();
   const relogio = { agora: new Date("2026-09-24T13:10:00Z") };
   const dependencias: DependenciasEnvio = {

@@ -10,8 +10,8 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
 
 | Pasta | Conteudo |
 |---|---|
-| `dominio/` | `token-captura.ts` (token, hash, formato, link), `envio.ts` (limites do envio, tipos aceitos, mensagens de recusa, protocolo) e `limite-tentativas.ts` (janela de uma hora, dois limites, identificadores) |
-| `aplicacao/` | `repositorio-captura.ts` (contrato), `casos-de-uso-qr.ts` (gerar, revogar, situacao) e `receber-envio.ts` (resolver token, validar, guardar, criar o documento) |
+| `dominio/` | `token-captura.ts` (token, hash, formato, link), `envio.ts` (limites do envio, tipos aceitos, recusas, protocolo), `limite-tentativas.ts` (janela, dois limites) e `conferencia.ts` (situacoes, marcos de retencao, erros da decisao) |
+| `aplicacao/` | `repositorio-captura.ts` (contrato), `casos-de-uso-qr.ts`, `receber-envio.ts` e `conferir-documento.ts` (abrir com aviso de duplicidade, aprovar, rejeitar, reabrir); `testes/` tem o repositorio em memoria dos testes de caso de uso |
 | `infraestrutura/` | `esquema.ts` (migracao 0010) e `repositorio-captura-drizzle.ts` |
 
 ## Regras que este modulo carrega
@@ -44,6 +44,20 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
 9. **O tipo do arquivo e decidido pelos primeiros bytes** (ADR-032), pelo
    `detectarTipoPorConteudo` de `nucleo/arquivos`. O `Content-Type` declarado
    pelo cliente nem entra no caso de uso. PDF nunca e interpretado no servidor.
+11. **A conta a pagar nasce na aprovacao, na MESMA transacao.** O repositorio
+    de contas a pagar aceita uma transacao pelo construtor (`ExecutorBancoDados`),
+    entao `aprovar` cria o titulo pelo `publico.ts` de la dentro da propria
+    transacao e so depois marca o documento — se a marcacao falhar, o titulo
+    some junto (provado por teste: chave invalida depois da criacao). Nenhuma
+    linha de contas a pagar foi alterada. A conta nasce com UMA parcela, em
+    `aberto`, como uma lancada a mao; `contas_pagar.aprovar` continua sendo
+    etapa separada. Aprovar exige `captura.conferir` E `contas_pagar.criar`,
+    conferidas na acao.
+12. **Visualizar nunca muda estado.** Reabrir e acao explicita (rejeitado ou
+    arquivado), auditada, que reinicia a contagem de abandono. Aprovado nao
+    volta. Duplicidade de chave e AVISO na tela, dentro da empresa.
+13. **Arquivos sao servidos sempre como anexo**, com o tipo detectado, nunca
+    renderizados (ADR-032).
 10. **Dois limites em Postgres** (ADR-031): por token, em envios validos,
     configuravel por empresa (padrao 20/h); por IP, so em tentativas com token
     invalido (10/h). Conferidos antes de ler o corpo. Sem
@@ -68,6 +82,12 @@ contas a pagar, e exige `captura.conferir` **e** `contas_pagar.criar`.
   Ensaiada por HTTP: `.exe` declarado como JPEG recusado, PDF com nome `.jpg`
   gravado como PDF, 21o envio da hora barrado, 11o token invalido do mesmo IP
   em 429.
+- Fatia 5: fila `/captura` (pendentes por padrao, mais antigo primeiro,
+  contador de "ha mais de 30 dias"), detalhe com anexos, aviso de duplicidade
+  e decisao (aprovar cria a conta a pagar; rejeitar com motivo; reabrir).
+  Ensaiada sem JavaScript: aprovacao criou `CP-2026-000001`. A conta a
+  RECEBER nao nasce daqui ainda: documento recebido pelo QR e, por ora,
+  compromisso com fornecedor.
 
-Proximas fatias: fila de conferencia, extracao da chave de acesso, backup e exportacao dos
-anexos.
+Proximas fatias: extracao da chave de acesso; backup e exportacao dos anexos;
+tarefas de retencao (arquivamento por abandono, expurgo, limpeza de tentativas).

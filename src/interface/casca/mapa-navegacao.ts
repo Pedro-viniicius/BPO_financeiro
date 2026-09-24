@@ -90,6 +90,13 @@ export const NAVEGACAO_PRINCIPAL: readonly GrupoDeNavegacao[] = [
         permissao: "contas_receber.visualizar",
         descricao: "Vendas e serviços que você tem a receber",
       },
+      {
+        rotulo: "Documentos recebidos",
+        rota: "/captura",
+        sigla: "DC",
+        permissao: "captura.visualizar",
+        descricao: "Notas, recibos e boletos enviados pelo QR code, à espera de conferência",
+      },
     ],
   },
   {
