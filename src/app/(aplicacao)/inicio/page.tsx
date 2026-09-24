@@ -1,12 +1,27 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { inicioDoMes, fimDoMes, partesDaData } from "@/compartilhado/datas/indice";
 import { Dinheiro } from "@/compartilhado/dinheiro/indice";
+import type { SituacaoDerivada } from "@/compartilhado/financeiro/indice";
 import { Aviso, CabecalhoPagina, CartaoResumo, EstadoVazio, ValorFinanceiro } from "@/interface/componentes/indice";
 
 import { formatarDinheiro } from "../_apoio/apresentacao";
 import { exigirContextoFinanceiro, repositorios } from "../_apoio/contexto-financeiro";
 import estilos from "./inicio.module.css";
+
+export const metadata: Metadata = { title: "Início" };
+
+/**
+ * O painel soma so o que esta EM ABERTO. Antes ele lia as 500 primeiras
+ * parcelas por vencimento, de qualquer situacao, e filtrava depois: com mais
+ * de 500 parcelas no historico — poucos meses de uso — as mais antigas, quase
+ * todas pagas, ocupavam o espaco e as contas em aberto mais recentes ficavam
+ * fora de "Quanto tenho a pagar". Pedindo so as em aberto, o limite so e
+ * atingido por quem tem mais de 500 contas abertas, e ai a tela diz isso.
+ */
+const EM_ABERTO: readonly SituacaoDerivada[] = ["aberta", "parcial", "vencida"];
+const LIMITE_DO_PAINEL = 500;
 
 /**
  * Inicio — a sintese do dia.
@@ -31,8 +46,9 @@ export default async function PaginaInicio() {
   const veResultado = permissoes.has("dre.visualizar");
   const veOrcamento = permissoes.has("orcamento.visualizar");
 
-  const paginacao = { pagina: 1, tamanho: 500 };
+  const paginacao = { pagina: 1, tamanho: LIMITE_DO_PAINEL };
   const vazio = { itens: [], total: 0, pagina: 1, tamanho: paginacao.tamanho };
+  const soExiste = { pagina: 1, tamanho: 1 };
   /*
    * O resultado do mes vem do MODULO DE RESULTADOS, a mesma fonte da tela
    * `/resultados`. Recalcular aqui "so o numerinho do painel" e como dois
@@ -41,22 +57,28 @@ export default async function PaginaInicio() {
    */
   const mes = { de: inicioDoMes(hoje), ate: fimDoMes(hoje), regime: "caixa" as const };
   const { ano: anoCorrente, mes: mesCorrente } = partesDaData(hoje);
-  const [pagar, receber, resultadoDoMes, orcamentoDoMes] = await Promise.all([
-    vePagar ? repositorios.contasPagar().listar(escopo, {}, paginacao, hoje) : vazio,
-    veReceber ? repositorios.contasReceber().listar(escopo, {}, paginacao, hoje) : vazio,
+  const [pagar, receber, algumaPagar, algumaReceber, resultadoDoMes, orcamentoDoMes] = await Promise.all([
+    vePagar ? repositorios.contasPagar().listar(escopo, { situacoes: EM_ABERTO }, paginacao, hoje) : vazio,
+    veReceber ? repositorios.contasReceber().listar(escopo, { situacoes: EM_ABERTO }, paginacao, hoje) : vazio,
+    // So para saber se a empresa ja tem ALGUMA conta (inclusive paga): decide o estado vazio.
+    vePagar ? repositorios.contasPagar().listar(escopo, {}, soExiste, hoje) : vazio,
+    veReceber ? repositorios.contasReceber().listar(escopo, {}, soExiste, hoje) : vazio,
     veResultado ? repositorios.resultados().montar(escopo, mes, hoje) : null,
     veOrcamento ? repositorios.orcamento().acompanhar(escopo, anoCorrente, mesCorrente, "caixa", hoje) : null,
   ]);
   const estouros = orcamentoDoMes?.estouros ?? [];
 
-  const emAberto = <T extends { situacao: string }>(itens: readonly T[]) =>
-    itens.filter((i) => i.situacao !== "liquidada" && i.situacao !== "cancelada");
   const vencidas = <T extends { situacao: string }>(itens: readonly T[]) => itens.filter((i) => i.situacao === "vencida");
 
-  const aPagar = emAberto(pagar.itens);
-  const aReceber = emAberto(receber.itens);
+  const aPagar = pagar.itens;
+  const aReceber = receber.itens;
   const pagarVencido = vencidas(pagar.itens);
   const receberVencido = vencidas(receber.itens);
+  /** Mais contas em aberto do que o painel soma: a tela diz, em vez de mostrar um total parcial como se fosse o todo. */
+  const parcial = (pagina: { total: number; itens: readonly unknown[] }) =>
+    pagina.total > pagina.itens.length
+      ? ` Soma das ${pagina.itens.length} de vencimento mais próximo; ${pagina.total} ao todo — o total está na lista.`
+      : "";
 
   const totalPagar = Dinheiro.somarTodos(aPagar.map((i) => i.saldo));
   const totalReceber = Dinheiro.somarTodos(aReceber.map((i) => i.saldo));
@@ -73,7 +95,7 @@ export default async function PaginaInicio() {
     );
   }
 
-  if (pagar.itens.length === 0 && receber.itens.length === 0 && !resultadoDoMes?.temDados) {
+  if (algumaPagar.total === 0 && algumaReceber.total === 0 && !resultadoDoMes?.temDados) {
     return (
       <>
         <CabecalhoPagina titulo="Início" empresa={nomeEmpresa} descricao="Sua situação de hoje e o que precisa de atenção" />
@@ -118,20 +140,37 @@ export default async function PaginaInicio() {
         <CartaoResumo
           titulo="Quanto tenho a pagar"
           valor={<ValorFinanceiro valor={totalPagar.paraTexto()} tamanho="destaque" comCor={false} />}
-          contagem={`${aPagar.length} ${aPagar.length === 1 ? "conta" : "contas"} em aberto`}
-          explicacao={pagarVencido.length > 0 ? `${pagarVencido.length} já venceram` : "Nada vencido"}
+          contagem={`${pagar.total} ${pagar.total === 1 ? "conta" : "contas"} em aberto`}
+          explicacao={(pagarVencido.length > 0 ? `${pagarVencido.length} já venceram.` : "Nada vencido.") + parcial(pagar)}
           tom={pagarVencido.length > 0 ? "perigo" : "neutro"}
-          rodape={<Link href="/contas-pagar">Ver contas a pagar</Link>}
+          rodape={
+            // Com vencidas, o atalho leva direto a elas: e a decisao que o cartao pede.
+            pagarVencido.length > 0 ? (
+              <Link href="/contas-pagar?situacao=vencida">
+                Ver {pagarVencido.length === 1 ? "a vencida" : `as ${pagarVencido.length} vencidas`}
+              </Link>
+            ) : (
+              <Link href="/contas-pagar">Ver contas a pagar</Link>
+            )
+          }
         />
         ) : null}
         {veReceber ? (
         <CartaoResumo
           titulo="Quanto tenho a receber"
           valor={<ValorFinanceiro valor={totalReceber.paraTexto()} tamanho="destaque" comCor={false} />}
-          contagem={`${aReceber.length} ${aReceber.length === 1 ? "conta" : "contas"} em aberto`}
-          explicacao={receberVencido.length > 0 ? `${receberVencido.length} em atraso` : "Nada em atraso"}
+          contagem={`${receber.total} ${receber.total === 1 ? "conta" : "contas"} em aberto`}
+          explicacao={(receberVencido.length > 0 ? `${receberVencido.length} em atraso.` : "Nada em atraso.") + parcial(receber)}
           tom={receberVencido.length > 0 ? "atencao" : "neutro"}
-          rodape={<Link href="/contas-receber">Ver contas a receber</Link>}
+          rodape={
+            receberVencido.length > 0 ? (
+              <Link href="/contas-receber?situacao=vencida">
+                Ver {receberVencido.length === 1 ? "a atrasada" : `as ${receberVencido.length} atrasadas`}
+              </Link>
+            ) : (
+              <Link href="/contas-receber">Ver contas a receber</Link>
+            )
+          }
         />
         ) : null}
         {vePagar && veReceber ? (
@@ -152,7 +191,13 @@ export default async function PaginaInicio() {
               ? "Sem receita no mês"
               : `Margem de ${resultadoDoMes.indicadores.margem.toLocaleString("pt-BR")}%`
           }
-          tom={resultadoDoMes.indicadores.resultado.ehNegativo() ? "perigo" : "sucesso"}
+          tom={
+            resultadoDoMes.indicadores.resultado.ehNegativo()
+              ? "perigo"
+              : resultadoDoMes.indicadores.resultado.ehZero()
+                ? "neutro"
+                : "sucesso"
+          }
           rodape={<Link href="/resultados">Ver o demonstrativo</Link>}
         />
         ) : null}
