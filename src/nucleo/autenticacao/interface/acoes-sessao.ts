@@ -16,6 +16,7 @@ import {
   TokenRedefinicaoInvalido,
 } from "../dominio/erros";
 import { obterAutenticacao } from "../infraestrutura/better-auth";
+import { tratarRequisicaoAutenticacao } from "./tratar-requisicao";
 
 /**
  * Operacoes de sessao chamadas por server actions.
@@ -27,8 +28,9 @@ import { obterAutenticacao } from "../infraestrutura/better-auth";
  * Entrar e criar conta passam pelo `handler` HTTP da biblioteca, e nao por
  * `api.signInEmail`: so o handler aplica o limite de tentativas (5/min por
  * IP) e a verificacao de Origin. A requisicao e reconstruida com os mesmos
- * cabecalhos do navegador (IP, Origin, User-Agent) e os cookies da resposta
- * sao copiados para a resposta da server action.
+ * cabecalhos do navegador (IP, Origin, User-Agent), passa pelos MESMOS
+ * portoes da rota publica (`tratarRequisicaoAutenticacao`) e os cookies da
+ * resposta sao copiados para a resposta da server action.
  *
  * `headers()` e lido antes de `obterAutenticacao()` de proposito (ver
  * `obter-sessao-atual.ts`): marca a rota como dinamica.
@@ -168,7 +170,7 @@ async function chamarEndpoint(caminho: string, corpo: Record<string, string>): P
     headers: cabecalhos,
     body: JSON.stringify(corpo),
   });
-  const resposta = await obterAutenticacao().handler(requisicao);
+  const resposta = await tratarRequisicaoAutenticacao(requisicao);
   await aplicarCookiesDaResposta(resposta);
 
   let corpoResposta: RespostaAutenticacao["corpo"] = {};

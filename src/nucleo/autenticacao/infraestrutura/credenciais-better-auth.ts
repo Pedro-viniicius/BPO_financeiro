@@ -1,5 +1,6 @@
 import type { Credenciais, UsuarioDeAutenticacao } from "../aplicacao/credenciais";
 import { obterAutenticacao } from "./better-auth";
+import { criacaoAutorizada } from "./criacao-autorizada";
 
 /**
  * Credenciais pelo contexto do proprio Better Auth.
@@ -21,18 +22,21 @@ export class CredenciaisBetterAuth implements Credenciais {
   }
 
   /**
-   * Cria a conta pela API PUBLICA de cadastro da biblioteca.
+   * Cria a conta pela API de cadastro da biblioteca, chamada DIRETO (sem HTTP).
    *
-   * Pela publica, e nao pelo adaptador interno, porque e ela que monta conta e
-   * credencial juntas, do jeito que o login espera. O cadastro publico e
-   * fechado em producao depois do primeiro usuario — mas a regra abre para
-   * quem tem convite valido, que e exatamente o caso aqui.
+   * Pela API de cadastro, e nao pelo adaptador interno, porque e ela que monta
+   * conta e credencial juntas, do jeito que o login espera. Quem chama ja
+   * validou o convite pelo token; a criacao vai MARCADA como autorizada
+   * (`criacaoAutorizada`), e e essa marca — nao o e-mail — que o gancho
+   * `user.create.before` aceita com o cadastro publico fechado.
    */
   async criarUsuarioComSenha(dados: { nome: string; email: string; senha: string }): Promise<UsuarioDeAutenticacao> {
     const email = dados.email.toLowerCase();
-    const resposta = await obterAutenticacao().api.signUpEmail({
-      body: { name: dados.nome, email, password: dados.senha },
-    });
+    const resposta = await criacaoAutorizada.run({ porConvite: true }, () =>
+      obterAutenticacao().api.signUpEmail({
+        body: { name: dados.nome, email, password: dados.senha },
+      }),
+    );
 
     const criado = resposta?.user;
     if (!criado) throw new Error("A criação da conta não devolveu usuário.");

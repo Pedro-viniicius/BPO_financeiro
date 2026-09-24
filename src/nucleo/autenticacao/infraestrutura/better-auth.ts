@@ -5,7 +5,6 @@ import { nextCookies } from "better-auth/next-js";
 import { twoFactor } from "better-auth/plugins";
 
 import { montarEnviadorEmail } from "@/composicao/email";
-import { existeConvitePendentePara } from "./convite-pendente";
 import { obterBancoDados } from "@/nucleo/banco-dados/publico";
 import { obterVariaveisAmbiente } from "@/nucleo/configuracao/publico";
 import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
@@ -13,6 +12,7 @@ import { criarRegistradorLogs } from "@/nucleo/observabilidade/publico";
 import { montarMensagemRedefinicaoSenha } from "../aplicacao/mensagem-redefinicao-senha";
 import { TAMANHO_MAXIMO_SENHA, TAMANHO_MINIMO_SENHA } from "../dominio/regras-senha";
 import { contarUsuarios } from "./contar-usuarios";
+import { criacaoAutorizada, podeCriarUsuario } from "./criacao-autorizada";
 import * as esquemaAutenticacao from "./esquema-better-auth";
 
 /**
@@ -117,15 +117,20 @@ function criarAutenticacao() {
     databaseHooks: {
       user: {
         create: {
-          before: async (usuario) => {
-            if (await cadastroAberto()) return;
-            /*
-             * A porta que sobra e o convite. Sem esta checagem, aceitar um
-             * convite em producao seria recusado pela propria regra que existe
-             * para proteger a instalacao — e a entrada por convite, prometida
-             * na mensagem de erro, nunca funcionaria.
-             */
-            if (typeof usuario?.email === "string" && (await existeConvitePendentePara(usuario.email))) return;
+          /*
+           * Vale para TODA criacao de usuario da biblioteca: e-mail e senha e
+           * tambem "Continuar com Google" (`createOAuthUser` passa pelos
+           * mesmos ganchos).
+           *
+           * A porta que sobra com o cadastro fechado e o convite — e o convite
+           * e validado pelo TOKEN em `aceitarConvite`, que marca a criacao
+           * como autorizada (`criacaoAutorizada`) antes de pedir a conta.
+           * Nao se pergunta mais "existe convite para este e-mail?": essa
+           * pergunta a rota publica respondia a qualquer um, e quem soubesse
+           * um e-mail convidado criava a conta antes do convidado.
+           */
+          before: async () => {
+            if (podeCriarUsuario(criacaoAutorizada.getStore(), await cadastroAberto())) return;
             throw new APIError("FORBIDDEN", { code: "CADASTRO_FECHADO", message: "Cadastro fechado: entrada por convite." });
           },
         },

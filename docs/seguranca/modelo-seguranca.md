@@ -15,8 +15,14 @@
   falhas e bloqueio temporario na tabela `two_factor`.
 - "Continuar com Google" (OAuth/OIDC) opcional; um so conceito de login social.
 - Cadastro publico so para o primeiro usuario da instalacao; depois, em
-  producao, recusado pelo Better Auth (entrada por convite). *Verificado em
-  AMBIENTE=producao: segundo cadastro recebe 403 `CADASTRO_FECHADO`.*
+  producao, recusado ANTES da biblioteca (`tratarRequisicaoAutenticacao`),
+  com a mesma resposta 403 para e-mail existente e inexistente — a rota de
+  cadastro nao confirma quem tem conta. A entrada por convite nao passa por
+  essa rota: `aceitarConvite` valida o TOKEN e marca a criacao como
+  autorizada (`criacaoAutorizada`, `AsyncLocalStorage`); o gancho
+  `user.create.before` so aceita essa marca ou o cadastro aberto. Nunca o
+  e-mail: "existe convite para este e-mail" era pergunta que qualquer um
+  fazia a rota publica (auditoria de seguranca, VULN-03/05).
 - Entrar/criar conta pela interface passam pelo handler HTTP da biblioteca:
   limite de 5 tentativas/min por IP vale tambem para o formulario
   (*verificado: 6a tentativa recebe "Muitas tentativas"*). Mensagem identica

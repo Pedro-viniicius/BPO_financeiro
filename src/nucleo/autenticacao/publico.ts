@@ -20,6 +20,7 @@ export {
   type ResultadoEntrada,
 } from "./interface/acoes-sessao";
 export { ehAtivacaoDeSegundoFator, MOTIVO_ATIVACAO_INDISPONIVEL } from "./interface/portao-segundo-fator";
+export { tratarRequisicaoAutenticacao, type DependenciasTratamento } from "./interface/tratar-requisicao";
 export {
   AtivacaoSegundoFatorIndisponivel,
   CadastroFechado,
